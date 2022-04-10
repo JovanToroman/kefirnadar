@@ -1,0 +1,12 @@
+{:deps true
+ :dev-http {8060 "resources/public"}
+ :builds {:dev {:target :browser
+                :output-dir "resources/public/js"
+                :compiler-options {:warnings {:undeclared-var false}}
+                :asset-path "/js"
+                :modules {:main {:entries [kefirnadar.configuration.core]}}
+                :closure-defines {}
+                :devtools {:after-load kefirnadar.core/re-render
+                           :preloads [devtools.preload
+                                      re-frisk.preload
+                                      kefirnadar.configuration.dev-preload]}}}}
