@@ -1,9 +1,9 @@
-"This namespace was copied over from another project and I am not certain that we need it. We should check this."
-
 (ns kefirnadar.configuration.dev-preload
   (:require
-    [taoensso.timbre :as timbre]
-    [clojure.string :as str]))
+    [clojure.string :as str]
+    [taoensso.timbre :as timbre]))
+
+(comment "This namespace was copied over from another project and I am not certain that we need it. We should check this.")
 
 (defn console-appender
   "Returns a js/console appender for ClojureScript. This appender uses the normal output-fn to generate the main
