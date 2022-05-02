@@ -50,20 +50,24 @@
               :type        "text"
               :placeholder "Mesto..."}]]))
 
-(defn transaction-input [id]                                ;; ovo ne valja, namesticu da se pod transaction kljucem nalazi {:pick-up false :post false} kao default vrednosti
-  (let [value (subscribe [::subs/form id])]                 ;; i da se pri cekiranju prvo pogleda vrednost pa onda rotira na true, i obrnuto
+(defn post-toggle [id]
+  (let [value (subscribe [::subs/form id])]
     [:div
-     "Nacini transakcije:"
-     [:div
-      [:label "Slanje postom "]
-      [:input {:value     "Slanje postom"
-               :on-change #(dispatch [::events/update-form id (-> % .-target .-value)])
-               :type      "checkbox"}]]
-     [:div
-      [:label "Licno preuzimanje"]
-      [:input {:value     "Licno preuzimanje"
-               :on-change #(dispatch [::events/update-form id (-> % .-target .-value)])
-               :type      "checkbox"}]]]))
+     [:label "Slanje postom"]
+     [:input {:value     "Slanje postom"
+              :on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
+              :type      "checkbox"}]]))
+
+
+(defn pick-up-toggle [id]
+  (let [value (subscribe [::subs/form id])]
+    [:div
+     [:label "Licno preuzimanje"]
+     [:input {:value     "Licno preuzimanje"
+              :on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
+              :type      "checkbox"
+              :checked @value}]]))
+
 
 (defn qty-input [id]
   (let [value (subscribe [::subs/form id])]
@@ -76,15 +80,18 @@
 
 
 (defn form []
-  (let [is-valid? @(subscribe [::subs/is-valid? [:first-name :last-name :place :transaction :quantity]])]
+  (let [is-valid? @(subscribe [::subs/is-valid? [:first-name :last-name :place :quantity]])]
     [:div
      [fname-input :first-name "Ime "]
      [lname-input :last-name]
      [place-input :place]
-     [transaction-input :transaction]
+     [:div
+      "Nacini transakcije:"
+      [post-toggle :post]
+      [pick-up-toggle :pick-up]]
      [qty-input :quantity]
      [:div
-      [:button {:disabled (not is-valid?)                   ;; Nije moguce pritisnuti osim ako forma nije popunjena
+      [:button {:disabled (not is-valid?)
                 :on-click #(dispatch [::events/save-form])} "Posalji"]]]))
 
 ;; end form region

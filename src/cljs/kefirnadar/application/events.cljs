@@ -3,10 +3,16 @@
             [kefirnadar.application.localstorage :as localstorage]
             [re-frame.core :refer [reg-event-fx reg-fx trim-v reg-event-db dispatch]]))
 
+;; -route events-
 (reg-fx ::load-route! routes/load-route!)
+;; -end route events-
+
+;; -localstorage events-
 (reg-fx ::set-item! localstorage/set-item!)
 (reg-fx ::get-item localstorage/get-item)
 (reg-fx ::remove-item localstorage/remove-item!)
+;; -end localstorage events-
+
 
 (defn dispatch-load-route!
   "A coeffect to dispatch the load-route! effect."
@@ -15,7 +21,7 @@
 
 (reg-event-fx ::dispatch-load-route! [trim-v] dispatch-load-route!)
 
-;; -moracu da nadjem drugi nacin za cuvanje :vrsta-zrnca, kada smo na form page-u i ako se refreshuje stranica ta vrednost se brise, mozda neki localstorage moze da odradi posao...
+
 (reg-event-fx
   ::slucaj-delim
   (fn [cofx [_ val]]
@@ -45,6 +51,6 @@
           form-data (assoc (:form db) :type type)]
       (-> db
           (assoc :user form-data)
-          (dissoc :form)))))                                ;; Ocistice form-u
+          (dissoc :form)))))
 
 ;; end form events region
