@@ -5,9 +5,9 @@
 
 ; not needed at the moment
 (reg-event-db ::boot
-  (fn [_ _]
-    (routes/init!)
-    db/default-db))
+              (fn [_ _]
+                (routes/init!)
+                db/default-db))
 
 (reg-event-db
   ::set-active-route

@@ -10,16 +10,28 @@
 ; region routes
 (def routes
   ["/" {:coercion reitit.coercion.spec/coercion}
-   ["" {:name :route/home
+   ["" {:name        :route/home
         :controllers [{:identity identity
-                       :start (fn [_match] (js/console.log "Usli smo u home rutu"))
-                       :stop (fn [_match] (js/console.log "Izasli smo iz home rutu"))}]
-        :doc "Home page"}]
-   ["test" {:name :route/test
-            :doc "test page"
-            :controllers [{:identity identity
-                           :start (fn [_match] (js/console.log "Usli smo u test rutu"))
-                           :stop (fn [_match] (js/console.log "Izasli smo iz test rutu"))}]}]])
+                       :start    (fn [_match] (js/console.log "Usli smo u home rutu"))
+                       :stop     (fn [_match] (js/console.log "Izasli smo iz home rute"))}]
+        :doc         "Home page"}]
+   ;; -----
+   ["delim" {:name        :route/delim
+                  :doc         "Delim page"
+                  :controllers [{:identity identity
+                                 :start    (fn [_match] (js/console.log "Usli smo u delim rutu" _match))
+                                 :stop     (fn [_match] (js/console.log "Izasli smo iz delim rute" _match))}]}]
+   ;; -----
+   ["trazim" {:name        :route/trazim
+                  :doc         "Trazim page"
+                  :controllers [{:identity identity
+                                 :start    (fn [_match] (js/console.log "Usli smo u trazim rutu" (:template _match)))
+                                 :stop     (fn [_match] (js/console.log "Izasli smo iz trazim rute" (:template _match)))}]}]
+   ["form" {:name        :route/form
+              :doc         "Form page"
+              :controllers [{:identity identity
+                             :start    (fn [_match] (js/console.log "Usli smo u form rutu" (:template _match)))
+                             :stop     (fn [_match] (js/console.log "Izasli smo iz form rute" (:template _match)))}]}]])
 
 (defonce router (rf/router routes))
 ;endregion
@@ -48,7 +60,7 @@
       (rfe/push-state name path-params))))
 
 (defn load-route! [{:keys [data path-params query-params replace] :as _route}]
-  (redirect! {:name (-> data :name)
-              :path-params path-params
+  (redirect! {:name         (-> data :name)
+              :path-params  path-params
               :query-params query-params
-              :replace replace}))
+              :replace      replace}))

@@ -6,10 +6,19 @@
 (defn- panels [panel-name]
   (case (:name (:data panel-name))
     :route/home [application-views/home]
-    :route/test [application-views/test-view]
+    ;; -----
+    :route/delim [application-views/delim]
+    ;; -----
+    :route/trazim [application-views/trazim]
+    ;; -----
+    :route/form [application-views/form]
     [:div]))
 
 (defn main-panel []
   (let [active-panel @(subscribe [::subscriptions/active-route])]
     [:div
-     [panels active-panel]]))
+     [:header
+      [:h1 "Header"]]
+     [panels active-panel]
+     [:footer
+      [:h3 "Footer"]]]))
