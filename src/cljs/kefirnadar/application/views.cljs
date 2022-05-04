@@ -56,7 +56,8 @@
      [:label "Slanje postom"]
      [:input {:value     "Slanje postom"
               :on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
-              :type      "checkbox"}]]))
+              :type      "checkbox"
+              :checked @value}]]))
 
 
 (defn pick-up-toggle [id]
