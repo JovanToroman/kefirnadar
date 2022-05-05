@@ -7,9 +7,9 @@
   (case (:name (:data panel-name))
     :route/home [application-views/home]
     ;; -----
-    :route/delim [application-views/delim]
+    :route/selling [application-views/selling]
     ;; -----
-    :route/trazim [application-views/trazim]
+    :route/purchasing [application-views/purchasing]
     ;; -----
     :route/form [application-views/form]
     [:div]))

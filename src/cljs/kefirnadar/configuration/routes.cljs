@@ -16,14 +16,14 @@
                        :stop     (fn [_match] (js/console.log "Izasli smo iz home rute"))}]
         :doc         "Home page"}]
    ;; -----
-   ["delim" {:name        :route/delim
-                  :doc         "Delim page"
+   ["selling" {:name        :route/selling
+                  :doc         "Selling page"
                   :controllers [{:identity identity
                                  :start    (fn [_match] (js/console.log "Usli smo u delim rutu" _match))
                                  :stop     (fn [_match] (js/console.log "Izasli smo iz delim rute" _match))}]}]
    ;; -----
-   ["trazim" {:name        :route/trazim
-                  :doc         "Trazim page"
+   ["purchasing" {:name        :route/purchasing
+                  :doc         "Purchasing page"
                   :controllers [{:identity identity
                                  :start    (fn [_match] (js/console.log "Usli smo u trazim rutu" (:template _match)))
                                  :stop     (fn [_match] (js/console.log "Izasli smo iz trazim rute" (:template _match)))}]}]

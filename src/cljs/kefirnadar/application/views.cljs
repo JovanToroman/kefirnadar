@@ -4,96 +4,94 @@
             [re-frame.core :refer [dispatch subscribe]]))
 
 (defn home []
-  [:div [:h1 "Da li trazite ili delite kefir?"]
-   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])} "Delim"]
-   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])} "Trazim"]])
+  [:div [:h1 "Are you purchasing or selling kefir?"]
+   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])} "Selling"]
+   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])} "Purchasing"]])
 
 ;; -----
-(defn delim []
-  [:div [:h1 "Koju vrstu zrnaca delite?"]
-   [:button {:on-click #(dispatch [::events/slucaj-delim (-> % .-target .-value)]) :value "MLEČNA"} "MLEČNA"]
-   [:button {:on-click #(dispatch [::events/slucaj-delim (-> % .-target .-value)]) :value "VODENA"} "VODENA"]
-   [:button {:on-click #(dispatch [::events/slucaj-delim (-> % .-target .-value)]) :value "KOMBUHA"} "KOMBUHA"]])
+(defn selling []
+  [:div [:h1 "Which type are u selling?"]
+   [:button {:on-click #(dispatch [::events/selling (-> % .-target .-value)]) :value :milk-type} "Milk type"]
+   [:button {:on-click #(dispatch [::events/selling (-> % .-target .-value)]) :value :water-type} "Water type"]
+   [:button {:on-click #(dispatch [::events/selling (-> % .-target .-value)]) :value :kombucha} "Kombucha"]])
 
 ;; ----- ovo jos nije uradjeno, ignorisi
-(defn trazim []
-  [:div [:h1 "Koju vrstu zrnaca trazite?"]
-   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value "MLEČNA"} "MLEČNA"]
-   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value "VODENA"} "VODENA"]
-   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value "KOMBUHA"} "KOMBUHA"]])
+(defn purchasing []
+  [:div [:h1 "Which type are u purchasing?"]
+   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value :milk-type} "Milk type"]
+   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value :water-type} "Water type"]
+   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value :kombucha} "Kombucha"]])
 
 ;; form region
 (defn fname-input [id]
   (let [value (subscribe [::subs/form id])]
     [:div
-     [:label "Ime"]
+     [:label "First name"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (-> % .-target .-value)])
               :type        "text"
-              :placeholder "Vase ime..."}]]))
+              :placeholder "Your first name...."}]]))
 
 (defn lname-input [id]
   (let [value (subscribe [::subs/form id])]
     [:div
-     [:label "Prezime"]
+     [:label "Last name"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (-> % .-target .-value)])
               :type        "text"
-              :placeholder "Vase prezime..."}]]))
+              :placeholder "Your last name..."}]]))
 
 (defn place-input [id]
   (let [value (subscribe [::subs/form id])]
     [:div
-     [:label {:for "place"} " Mesto "]
+     [:label " Place "]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (-> % .-target .-value)])
               :type        "text"
-              :placeholder "Mesto..."}]]))
+              :placeholder "Place... "}]]))
 
 (defn post-toggle [id]
   (let [value (subscribe [::subs/form id])]
     [:div
-     [:label "Slanje postom"]
-     [:input {:value     "Slanje postom"
-              :on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
+     [:label "Post Express"]
+     [:input {:on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
               :type      "checkbox"
-              :checked @value}]]))
+              :checked   @value}]]))
 
 
 (defn pick-up-toggle [id]
   (let [value (subscribe [::subs/form id])]
     [:div
-     [:label "Licno preuzimanje"]
-     [:input {:value     "Licno preuzimanje"
-              :on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
+     [:label "Live exchange"]
+     [:input {:on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
               :type      "checkbox"
-              :checked @value}]]))
+              :checked   @value}]]))
 
 
 (defn qty-input [id]
   (let [value (subscribe [::subs/form id])]
     [:div
-     [:label {:for "qty"} "Broj porcija koje delite? "]
+     [:label {:for "qty"} "Quantity for distributing?"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (-> % .-target .-value)])
               :type        "number"
-              :placeholder "Kolicina.."}]]))
+              :placeholder "Quantity.."}]]))
 
 
 (defn form []
   (let [is-valid? @(subscribe [::subs/is-valid? [:first-name :last-name :place :quantity]])]
     [:div
-     [fname-input :first-name "Ime "]
+     [fname-input :first-name]
      [lname-input :last-name]
      [place-input :place]
      [:div
-      "Nacini transakcije:"
+      "Ways of transaction"
       [post-toggle :post]
       [pick-up-toggle :pick-up]]
      [qty-input :quantity]
      [:div
       [:button {:disabled (not is-valid?)
-                :on-click #(dispatch [::events/save-form])} "Posalji"]]]))
+                :on-click #(dispatch [::events/save-form])} "Save form"]]]))
 
 ;; end form region
 

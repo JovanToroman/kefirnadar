@@ -23,7 +23,7 @@
 
 
 (reg-event-fx
-  ::slucaj-delim
+  ::selling
   (fn [cofx [_ val]]
     {::set-item! [:seed-type val]
      ::load-route! {:data {:name :route/form}}}))
