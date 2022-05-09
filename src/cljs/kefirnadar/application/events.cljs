@@ -21,20 +21,19 @@
 
 (reg-event-fx ::dispatch-load-route! [trim-v] dispatch-load-route!)
 
+(reg-event-fx
+  ::ad-type
+  (fn [{db :db} [_ {type :type}]]
+    {:db (assoc-in db [:user :data :ad-type] type)
+     ::set-item!   [:ad-type type]
+     ::load-route! {:data {:name :route/grains-kind}}}))
 
 (reg-event-fx
-  ::selling
-  (fn [cofx [_ val]]
-    {::set-item! [:seed-type val]
-     ::load-route! {:data {:name :route/form}}}))
-
-
-(reg-event-fx
-  ::slucaj-trazim
-  (fn [cofx [_ val]]
-    {:db (assoc (:db cofx) :vrsta-zrnca val)
-     ::load-route! {:data {:name :route/form}}}))
-
+  ::grains-kind
+  (fn [{db :db} [_ type]]
+    {:db (assoc-in db [:user :data :grains-kind] (keyword type))
+     ::set-item!   [:grains-kind (keyword type)]
+     ::load-route! {:data {:name :route/choice}}}))
 
 ;; form events region
 
@@ -47,10 +46,10 @@
 (reg-event-db                                               ;; Kasnije zelim da ovo prebacim u -fx i mozda da se preko ovoga pokrece cuvanje u bazi :user da prosledimo kao tx-data???
   ::save-form
   (fn [db]
-    (let [type (localstorage/get-item :seed-type)
-          form-data (assoc (:form db) :type type)]
+    (let [type (localstorage/get-item :grains-kind)
+          form-data (assoc (:form db) :grains-kind (symbol type))]
       (-> db
-          (assoc :user form-data)
+          (assoc-in [:user :form] form-data)
           (dissoc :form)))))
 
 ;; end form events region

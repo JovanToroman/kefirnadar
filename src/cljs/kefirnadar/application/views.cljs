@@ -3,32 +3,24 @@
             [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :refer [dispatch subscribe]]))
 
-(defn home []
-  [:div [:h1 "Da li delite ili trazite kefir?"]
-   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])} "Delim"]
-   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])} "Trazim"]])
+;; -- helper functions region --
+(defn extract-input-value
+  [event]
+  (-> event .-target .-value))
 
-;; -----
-(defn selling []
-  [:div [:h1 "Koji tip zrnaca delite?"]
-   [:button {:on-click #(dispatch [::events/selling (-> % .-target .-value)]) :value :milk-type} "Mlecni"]
-   [:button {:on-click #(dispatch [::events/selling (-> % .-target .-value)]) :value :water-type} "Vodeni"]
-   [:button {:on-click #(dispatch [::events/selling (-> % .-target .-value)]) :value :kombucha} "Kombuha"]])
+(defn extract-checkbox-state
+  [event]
+  (-> event .-target .-checked))
+;; -- end helper functions region --
 
-;; ----- ovo jos nije uradjeno, ignorisi
-(defn purchasing []
-  [:div [:h1 "Koji tip zrnaca trazite?"]
-   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value :milk-type} "Mlecni"]
-   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value :water-type} "Vodeni"]
-   [:button {:on-click #(dispatch [::events/local-db-builder (-> % .-target .-value)]) :value :kombucha} "Kombuha"]])
 
-;; form region
+;; form region ( case :ad-type :sharing )
 (defn first-name-input [id]
   (let [value (subscribe [::subs/form id])]
     [:div
      [:label "Ime"]
      [:input {:value       @value
-              :on-change   #(dispatch [::events/update-form id (-> % .-target .-value)])
+              :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
               :placeholder "Vase ime..."}]]))
 
@@ -37,7 +29,7 @@
     [:div
      [:label "Prezime"]
      [:input {:value       @value
-              :on-change   #(dispatch [::events/update-form id (-> % .-target .-value)])
+              :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
               :placeholder "Vase prezime..."}]]))
 
@@ -46,7 +38,7 @@
     [:div
      [:label " Mesto "]
      [:input {:value       @value
-              :on-change   #(dispatch [::events/update-form id (-> % .-target .-value)])
+              :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
               :placeholder "Mesto na kom delite..."}]]))
 
@@ -54,7 +46,7 @@
   (let [value (subscribe [::subs/form id])]
     [:div
      [:label "Razmena postom?"]
-     [:input {:on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
+     [:input {:on-change #(dispatch [::events/update-form id (extract-checkbox-state %)])
               :type      "checkbox"
               :checked   @value}]]))
 
@@ -63,7 +55,7 @@
   (let [value (subscribe [::subs/form id])]
     [:div
      [:label "Razmena uzivo?"]
-     [:input {:on-change #(dispatch [::events/update-form id (-> % .-target .-checked)])
+     [:input {:on-change #(dispatch [::events/update-form id (extract-checkbox-state %)])
               :type      "checkbox"
               :checked   @value}]]))
 
@@ -73,10 +65,9 @@
     [:div
      [:label {:for "qty"} "Koju kolicinu delite?"]
      [:input {:value       @value
-              :on-change   #(dispatch [::events/update-form id (-> % .-target .-value)])
+              :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "number"
               :placeholder "Kolicina koju delite..."}]]))
-
 
 (defn form []
   (let [is-valid? @(subscribe [::subs/is-valid? [:first-name :last-name :place :quantity]])]
@@ -94,6 +85,35 @@
                 :on-click #(dispatch [::events/save-form])} "Sacuvaj"]]]))
 
 ;; end form region
+
+;; case :ad-type :looking-for region
+
+(defn NOT-DONE-YET []
+  [:h1 "RANDOM PAGE"])
+
+;; end case :ad-type :looking-for region
+
+(defn home []
+  [:div [:h1 "Da li delite ili trazite kefir?"]
+   [:button {:on-click #(dispatch [::events/ad-type {:type :sharing}])} "Delim"]
+   [:button {:on-click #(dispatch [::events/ad-type {:type :looking-for}])} "Trazim"]])
+
+(defn grains-kind []
+  [:div
+   [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :milk-type} "Mlecni"]
+   [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :water-type} "Vodeni"]
+   [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :kombucha} "Kombuha"]])
+
+
+(defn choice []
+  (let [choice @(subscribe [::subs/choice])]
+    (case choice
+      :sharing [form]
+      :looking-for [NOT-DONE-YET])))
+
+
+
+
 
 
 

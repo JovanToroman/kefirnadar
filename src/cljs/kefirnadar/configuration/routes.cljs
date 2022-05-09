@@ -16,21 +16,15 @@
                        :stop     (fn [_match] (js/console.log "Izasli smo iz home rute"))}]
         :doc         "Home page"}]
    ;; -----
-   ["selling" {:name        :route/selling
-                  :doc         "Selling page"
-                  :controllers [{:identity identity
-                                 :start    (fn [_match] (js/console.log "Usli smo u delim rutu" _match))
-                                 :stop     (fn [_match] (js/console.log "Izasli smo iz delim rute" _match))}]}]
-   ;; -----
-   ["purchasing" {:name        :route/purchasing
-                  :doc         "Purchasing page"
-                  :controllers [{:identity identity
-                                 :start    (fn [_match] (js/console.log "Usli smo u trazim rutu" (:template _match)))
-                                 :stop     (fn [_match] (js/console.log "Izasli smo iz trazim rute" (:template _match)))}]}]
-   ["form" {:name        :route/form
+   ["grains-kind" {:name        :route/grains-kind
+              :doc         "Grains kind page"
+              :controllers [{:identity identity
+                             :start    (fn [_match] (js/console.log "Usli smo u grains-kind rutu" (:template _match)))
+                             :stop     (fn [_match] (js/console.log "Izasli smo iz grains-kind rute" (:template _match)))}]}]
+   ["choice" {:name        :route/choice
               :doc         "Form page"
               :controllers [{:identity identity
-                             :start    (fn [_match] (js/console.log "Usli smo u form rutu" (:template _match)))
+                             :start    (fn [_match] (js/console.log _match))
                              :stop     (fn [_match] (js/console.log "Izasli smo iz form rute" (:template _match)))}]}]])
 
 (defonce router (rf/router routes))

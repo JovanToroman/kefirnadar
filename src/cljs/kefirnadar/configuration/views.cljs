@@ -7,11 +7,9 @@
   (case (:name (:data panel-name))
     :route/home [application-views/home]
     ;; -----
-    :route/selling [application-views/selling]
+    :route/grains-kind [application-views/grains-kind]
     ;; -----
-    :route/purchasing [application-views/purchasing]
-    ;; -----
-    :route/form [application-views/form]
+    :route/choice [application-views/choice]
     [:div]))
 
 (defn main-panel []

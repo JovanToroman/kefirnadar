@@ -14,3 +14,10 @@
     (every? #(get-in db [:form %]) form-ids)))
 ;; end form subs region
 
+;; choice region
+(reg-sub
+  ::choice
+  (fn [db _]
+    (get-in db [:user :data :ad-type])))
+;; end choice region
+
