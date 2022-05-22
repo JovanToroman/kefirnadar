@@ -1,0 +1,7 @@
+/.idea/
+/kefirnadar.iml
+/resources/public/js/
+/package-lock.json
+/.cpcache/
+/.shadow-cljs/
+/node_modules/
