@@ -3,10 +3,10 @@
 
 (def db-name "kefirnadar")
 
-(def cfg {:server-type :peer-server
-          :access-key "kefirnadar"                          ; TODO: change to something more complicated
-          :secret "kefirnadar"                              ; TODO: change to something more complicated
-          :endpoint "localhost:8998"
+(def cfg {:server-type        :peer-server
+          :access-key         "kefirnadar"                  ; TODO: change to something more complicated
+          :secret             "kefirnadar"                  ; TODO: change to something more complicated
+          :endpoint           "localhost:8998"
           :validate-hostnames false})
 
 (defn get-client

@@ -1,6 +1,7 @@
 (ns kefirnadar.configuration.core
   (:require [kefirnadar.configuration.config :as config]
             [kefirnadar.configuration.events :as events]
+            [kefirnadar.application.events :as app-events]
             [kefirnadar.configuration.views :as views]
             [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :as re-frame :refer [dispatch]]
@@ -10,7 +11,7 @@
 (defn mount-root []
   (re-frame/clear-subscription-cache!)
   (reagent-dom/render [views/main-panel]
-    (.getElementById js/document "app"))
+                      (.getElementById js/document "app"))
   (timbre/info "App version:" config/version))
 
 (defn ^:after-load re-render
@@ -25,7 +26,5 @@
 
 (defn ^:export start []
   (dispatch [::events/boot])
-  ;; -- da li ovde da fetchujemo ili kada korisnik ode na seeking rutu????
-  (dispatch [::subs/fetch-users])
   (dev-setup)
   (mount-root))

@@ -17,36 +17,36 @@
     `/cljs/core\\.js$`
   [1] Ref. https://goo.gl/ZejSvR"
   [& [_opts]]
-  {:enabled? true
-   :async? false
-   :min-level nil
+  {:enabled?   true
+   :async?     false
+   :min-level  nil
    :rate-limit nil
-   :output-fn :inherit
-   :fn (if (exists? js/console)
-         (let [;; Don't cache this; some libs dynamically replace js/console
-               level->logger
-               (fn [level]
-                 (or
-                   (case level
-                     :trace js/console.trace
-                     :debug js/console.debug
-                     :info js/console.info
-                     :warn js/console.warn
-                     :error js/console.error
-                     :fatal js/console.error
-                     :report js/console.info)
-                   js/console.log))]
+   :output-fn  :inherit
+   :fn         (if (exists? js/console)
+                 (let [;; Don't cache this; some libs dynamically replace js/console
+                       level->logger
+                       (fn [level]
+                         (or
+                           (case level
+                             :trace js/console.trace
+                             :debug js/console.debug
+                             :info js/console.info
+                             :warn js/console.warn
+                             :error js/console.error
+                             :fatal js/console.error
+                             :report js/console.info)
+                           js/console.log))]
 
-           (fn [{:keys [level vargs ?err output-fn] :as data}]
-             (when-let [logger (level->logger level)]
-               (let [output (when output-fn (output-fn (assoc data :msg_ "" :?err nil)))
-                     args (if-let [err ?err]
-                            (cons output (cons err vargs))
-                            (cons output vargs))]
-                 (.apply logger js/console (into-array args))
-                 (when (instance? ExceptionInfo ?err)
-                   (js/console.log (ex-message ?err)))))))
-         (fn [_data] nil))})
+                   (fn [{:keys [level vargs ?err output-fn] :as data}]
+                     (when-let [logger (level->logger level)]
+                       (let [output (when output-fn (output-fn (assoc data :msg_ "" :?err nil)))
+                             args (if-let [err ?err]
+                                    (cons output (cons err vargs))
+                                    (cons output vargs))]
+                         (.apply logger js/console (into-array args))
+                         (when (instance? ExceptionInfo ?err)
+                           (js/console.log (ex-message ?err)))))))
+                 (fn [_data] nil))})
 
 (defn prefix-output-fn
   "Mostly taken from timbre, but just formats message prefix as output (e.g. only location/line/level). Use with the

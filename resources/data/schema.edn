@@ -40,4 +40,10 @@
   :db/cardinality :db.cardinality/one
   :db/doc "Quantity to sell."
   :db.install/_attribute :db.part/db}
+
+ {:db/ident :user/grains-kind
+  :db/valueType :db.type/keyword
+  :db/cardinality :db.cardinality/one
+  :db/doc "Grains kind"
+  :db.install/_attribute :db.part/db}
  ]

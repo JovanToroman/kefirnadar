@@ -1,6 +1,5 @@
 (ns kefirnadar.application.subscriptions
-  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]
-            [kefirnadar.application.fx :as fx]))
+  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]))
 
 
 (reg-sub
@@ -18,24 +17,12 @@
   (fn [db _]
     (get-in db [:user :data :ad-type])))
 
-;; -- da li ovo treba ovde da bude?
-(defn fetch-users
-  "Fetches all users from the server."
-  [_]
-  {::fx/api {:uri        "/list"
-             :method     :get
-             :on-success [::fetch-users-success]}})
+(reg-sub
+  ::users
+  (fn [db _] (get db :all-users)))
 
-(reg-event-fx ::fetch-users fetch-users)
-
-(defn fetch-users-success
-  "Stores fetched users in the app db."
-  [db [users]]
-  (assoc db :all-users users))
-
-(reg-event-db ::fetch-users-success trim-v fetch-users-success)
-
-
-(reg-sub ::users (fn [db _] (get db :all-users)))
+(reg-sub
+  ::region
+  (fn [db _] (get-in db [:user :data :region-filter] "")))
 
 

@@ -1,7 +1,8 @@
 [{:user/created #inst "2015-09-11T19:44:06.059-00:00"
-  :user/firstname "Thomas"
-  :user/lastname "Smith"
-  :user/region :london
+  :user/firstname "Srdjan"
+  :user/lastname "Bosancic"
+  :user/region :Бачки-Петровац
   :user/post false
   :user/pick-up true
-  :user/quantity 25}]
+  :user/quantity 25
+  :user/grains-kind :kombucha}]

@@ -21,7 +21,7 @@
                   http/post)]
     (go
       (when delay (<! (timeout (max delay 0))))
-      (let [c (http-fn (str "http://localhost:8080" ; hardcoded, should be moved to shadow-cljs.edn
+      (let [c (http-fn (str "http://localhost:8080"         ; hardcoded, should be moved to shadow-cljs.edn
                             uri)
                        (cond-> {:with-credentials? false
                                 :headers           {"Accept" "application/edn"}}

@@ -12,6 +12,12 @@
     :route/choice [application-views/choice]
     ;; -----
     :route/thank-you [application-views/thank-you]
+    ;; -----
+    :route/list [application-views/users-list]
+    ;; -----
+    :route/form [application-views/form]
+    ;; -----
+    :route/error [application-views/error]
     [:div]))
 
 (defn main-panel []

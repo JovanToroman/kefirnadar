@@ -11,26 +11,27 @@
 (def routes
   ["/" {:coercion reitit.coercion.spec/coercion}
    ["" {:name        :route/home
-        :controllers [{:identity identity
-                       :start    (fn [_match] (js/console.log "Usli smo u home rutu"))
-                       :stop     (fn [_match] (js/console.log "Izasli smo iz home rute"))}]
+        :controllers [{:identity identity}]
         :doc         "Home page"}]
    ;; -----
    ["grains-kind" {:name        :route/grains-kind
-              :doc         "Grains kind page"
-              :controllers [{:identity identity
-                             :start    (fn [_match] (js/console.log "Usli smo u grains-kind rutu" (:template _match)))
-                             :stop     (fn [_match] (js/console.log "Izasli smo iz grains-kind rute" (:template _match)))}]}]
+                   :doc         "Grains kind page"
+                   :controllers [{:identity identity}]}]
    ["choice" {:name        :route/choice
               :doc         "Form page"
-              :controllers [{:identity identity
-                             :start    (fn [_match] (js/console.log _match))
-                             :stop     (fn [_match] (js/console.log "Izasli smo iz form rute" (:template _match)))}]}]
+              :controllers [{:identity identity}]}]
+   ["form" {:name        :route/form
+            :doc         "form page"
+            :controllers [{:identity identity}]}]
    ["thank-you" {:name        :route/thank-you
-              :doc         "Thank you page"
-              :controllers [{:identity identity
-                             :start    (fn [_match] (js/console.log _match))
-                             :stop     (fn [_match] (js/console.log "Izasli smo iz form rute" (:template _match)))}]}]])
+                 :doc         "Thank you page"
+                 :controllers [{:identity identity}]}]
+   ["list" {:name        :route/list
+            :doc         "list page"
+            :controllers [{:identity identity}]}]
+   ["error" {:name        :route/error
+             :doc         "error page"
+             :controllers [{:identity identity}]}]])
 
 (defonce router (rf/router routes))
 ;endregion

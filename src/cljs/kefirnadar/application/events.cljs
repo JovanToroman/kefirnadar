@@ -1,11 +1,8 @@
 (ns kefirnadar.application.events
   (:require [kefirnadar.configuration.routes :as routes]
             [kefirnadar.application.localstorage :as localstorage]
-            [re-frame.core :refer [reg-event-fx reg-fx trim-v reg-event-db dispatch]]))
-
-;; -route events-
-(reg-fx ::load-route! routes/load-route!)
-;; -end route events-
+            [re-frame.core :refer [reg-event-fx reg-fx trim-v reg-event-db dispatch]]
+            [kefirnadar.application.fx :as fx]))
 
 ;; -localstorage events-
 (reg-fx ::set-item! localstorage/set-item!)
@@ -14,44 +11,105 @@
 ;; -end localstorage events-
 
 
+;; -- create user business logic
+
+(defn create
+  "Persists a user to the server."
+  [{db :db} [_params]]
+  (let [type (get-in db [:user :data :grains-kind])
+        form-data (assoc (:form db) :grains-kind type)]
+    {:db      (-> db
+                  (assoc-in [:user :form] form-data)
+                  (dissoc :form))
+     ::fx/api {:uri        "/create"
+               :method     :post
+               :params     {:user/firstname   #_"Nedeljko"    (get-in db [:form :firstname])
+                            :user/lastname    #_"Radovanovic" (get-in db [:form :lastname])
+                            :user/region      #_:pancevo      (get-in db [:form :region])
+                            :user/post        #_true          (get-in db [:form :post] false)
+                            :user/pick-up     #_false         (get-in db [:form :pick-up] false)
+                            :user/quantity    #_25            (get-in db [:form :quantity])
+                            :user/grains-kind #_:milk-type    (get-in db [:user :data :grains-kind])}
+               :on-success [::create-success]}}))
+
+(reg-event-fx ::create create)
+
+(defn create-success
+  "Dispatched on successful user creation."
+  [{db :db} [new-user]]
+  {:db           (assoc db :users new-user)
+   ::load-route! {:data {:name :route/thank-you}}})
+
+(reg-event-fx ::create-success trim-v create-success)
+
+;; -- end create business logic
+
+
+;; -route events-
+(reg-fx ::load-route! routes/load-route!)
+
 (defn dispatch-load-route!
   "A coeffect to dispatch the load-route! effect."
   [_ [route]]
   {::load-route! route})
 
-(reg-event-fx ::dispatch-load-route! [trim-v] dispatch-load-route!)
+(reg-event-fx ::dispatch-load-route! trim-v dispatch-load-route!)
+;; -end route events-
+
 
 (reg-event-fx
   ::ad-type
   (fn [{db :db} [_ {type :type}]]
-    {:db (assoc-in db [:user :data :ad-type] type)
+    {:db           (assoc-in db [:user :data :ad-type] type)
      ::set-item!   [:ad-type type]
      ::load-route! {:data {:name :route/grains-kind}}}))
+
 
 (reg-event-fx
   ::grains-kind
   (fn [{db :db} [_ type]]
-    {:db (assoc-in db [:user :data :grains-kind] (keyword type))
-     ::set-item!   [:grains-kind (keyword type)]
+    {:db           (assoc-in db [:user :data :grains-kind] (keyword type))
      ::load-route! {:data {:name :route/choice}}}))
 
-;; form events region
+
+(reg-event-db
+  ::add-filter-region
+  (fn [db [_ region]]
+    (assoc-in db [:user :data :region-filter] region)))
+
 
 (reg-event-db
   ::update-form
   (fn [db [_ id val]]
     (assoc-in db [:form id] val)))
 
-;; *** sta ako korisnik zeli da napravi prodaju za vise vrsta zrnaca? imam resenje za ovo.. razmotriti.
-(reg-event-fx                                               ;; Kasnije zelim da ovo prebacim u -fx.cljs i mozda da se preko ovoga pokrece cuvanje u bazi :user da prosledimo kao tx-data???
-  ::save-form
-  (fn [{db :db}]
-    (let [type (localstorage/get-item :grains-kind)
-          form-data (assoc (:form db) :grains-kind (symbol type))]
-      {:db (-> db
-               (assoc-in [:user :form] form-data)
-               (dissoc :form))
-       ::set-item!   [:user form-data]                      ;; cuvanje user-a u ls nam nije potrebno, na ovom mestu ce stojati reg- koji ce cuvati usera u bazu..
-       ::load-route! {:data {:name :route/thank-you}}})))
 
-;; end form events region
+;; -- fetch business logic
+(defn fetch-users
+  "Fetches all users from the server."
+  [_]
+  {::fx/api {:uri        "/list"
+             :method     :get
+             :on-success [::fetch-users-success]
+             :on-error   [::fetch-users-fail]}})
+
+(reg-event-fx ::fetch-users fetch-users)
+
+(defn fetch-users-success
+  "Stores fetched users in the app db."
+  [{db :db} [users]]
+  {:db           (assoc db :all-users users)
+   ::load-route! {:data {:name :route/list}}})
+
+(defn fetch-users-fail
+  "Failed to fetch user's, render error page"
+  []
+  {::load-route! {:data {:name :route/error}}})
+
+
+(reg-event-fx ::fetch-users-fail trim-v fetch-users-fail)
+(reg-event-fx ::fetch-users-success trim-v fetch-users-success)
+
+;; -- end fetch business logic
+
+

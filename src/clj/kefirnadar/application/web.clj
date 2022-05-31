@@ -19,14 +19,15 @@
     (ring/router
       routes/routes
       {:conflicts identity
-       :data {:coercion reitit.coercion.spec/coercion
-              :muuntaja m/instance
-              :middleware [parameters/parameters-middleware
-                           muuntaja/format-negotiate-middleware
-                           muuntaja/format-response-middleware
-                           muuntaja/format-request-middleware
-                           coercion/coerce-response-middleware
-                           coercion/coerce-request-middleware
-                           [wrap-cors :access-control-allow-origin #".*"
-                            :access-control-allow-methods [:get :put :post :delete]]]}})
+       :data      {:coercion   reitit.coercion.spec/coercion
+                   :muuntaja   m/instance
+                   :middleware [parameters/parameters-middleware
+                                muuntaja/format-negotiate-middleware
+                                muuntaja/format-response-middleware
+                                muuntaja/format-request-middleware
+                                coercion/coerce-response-middleware
+                                coercion/coerce-request-middleware
+                                [wrap-cors :access-control-allow-origin #".*"
+                                 :access-control-allow-methods [:delete :get
+                                                                :patch :post :put]]]}})
     (ring/create-default-handler)))
