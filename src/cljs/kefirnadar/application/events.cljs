@@ -29,7 +29,7 @@
                             :user/post        #_true          (get-in db [:form :post] false)
                             :user/pick-up     #_false         (get-in db [:form :pick-up] false)
                             :user/quantity    #_25            (get-in db [:form :quantity])
-                            :user/grains-kind #_:milk-type    (get-in db [:user :data :grains-kind])}
+                            :user/grains-kind #_:milk-type    (keyword (localstorage/get-item :grains-kind))} ;; js-localstorage sve cuva kao string
                :on-success [::create-success]}}))
 
 (reg-event-fx ::create create)
@@ -50,7 +50,7 @@
 
 (defn dispatch-load-route!
   "A coeffect to dispatch the load-route! effect."
-  [_ [route]]
+  [_ [route _data]]
   {::load-route! route})
 
 (reg-event-fx ::dispatch-load-route! trim-v dispatch-load-route!)
@@ -68,7 +68,8 @@
 (reg-event-fx
   ::grains-kind
   (fn [{db :db} [_ type]]
-    {:db           (assoc-in db [:user :data :grains-kind] (keyword type))
+    {:db           (assoc-in db [:user :data :grains-kind] type)
+     ::set-item!   [:grains-kind type]
      ::load-route! {:data {:name :route/choice}}}))
 
 
@@ -101,7 +102,7 @@
   {:db           (assoc db :all-users users)
    ::load-route! {:data {:name :route/list}}})
 
-(defn fetch-users-fail
+(defn fetch-users-fail                                      ;; radi- testirano
   "Failed to fetch user's, render error page"
   []
   {::load-route! {:data {:name :route/error}}})

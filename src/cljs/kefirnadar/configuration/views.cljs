@@ -15,6 +15,8 @@
     ;; -----
     :route/list [application-views/users-list]
     ;; -----
+    :route/user-detail [application-views/user-detail]
+    ;; -----
     :route/form [application-views/form]
     ;; -----
     :route/error [application-views/error]

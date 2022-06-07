@@ -1,4 +1,6 @@
-(ns kefirnadar.application.localstorage)
+(ns kefirnadar.application.localstorage
+  (:require [reagent.core :as reagent]
+            [alandipert.storage-atom :refer [local-storage]]))
 
 (defn set-item!
   "Set `key' in browser's localStorage to `val`."

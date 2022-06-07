@@ -14,24 +14,34 @@
         :controllers [{:identity identity}]
         :doc         "Home page"}]
    ;; -----
-   ["grains-kind" {:name        :route/grains-kind
-                   :doc         "Grains kind page"
-                   :controllers [{:identity identity}]}]
-   ["choice" {:name        :route/choice
-              :doc         "Form page"
-              :controllers [{:identity identity}]}]
-   ["form" {:name        :route/form
-            :doc         "form page"
-            :controllers [{:identity identity}]}]
-   ["thank-you" {:name        :route/thank-you
-                 :doc         "Thank you page"
-                 :controllers [{:identity identity}]}]
-   ["list" {:name        :route/list
-            :doc         "list page"
-            :controllers [{:identity identity}]}]
-   ["error" {:name        :route/error
-             :doc         "error page"
-             :controllers [{:identity identity}]}]])
+   ["grains-kind"
+    {:name        :route/grains-kind
+     :doc         "Grains kind page"
+     :controllers [{:identity identity}]}]
+   ["choice"
+    {:name        :route/choice
+     :doc         "Form page"
+     :controllers [{:identity identity}]}]
+   ["form"
+    {:name        :route/form
+     :doc         "form page"
+     :controllers [{:identity identity}]}]
+   ["thank-you"
+    {:name        :route/thank-you
+     :doc         "Thank you page"
+     :controllers [{:identity identity}]}]
+   ["list"
+    {:name        :route/list
+     :doc         "list page"
+     :controllers [{:identity identity}]}]
+   ["user-detail"
+    {:name        :route/user-detail
+     :doc         "user detail page"
+     :controllers [{:identity identity}]}]
+   ["error"
+    {:name        :route/error
+     :doc         "error page"
+     :controllers [{:identity identity}]}]])
 
 (defonce router (rf/router routes))
 ;endregion
@@ -59,8 +69,9 @@
       (rfe/replace-state name path-params)
       (rfe/push-state name path-params))))
 
-(defn load-route! [{:keys [data path-params query-params replace] :as _route}]
+(defn load-route! [{:keys [data path-params query-params replace params] :as _route}]
   (redirect! {:name         (-> data :name)
+              :params         params
               :path-params  path-params
               :query-params query-params
               :replace      replace}))

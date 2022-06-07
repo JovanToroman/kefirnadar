@@ -1,182 +1,183 @@
 (ns kefirnadar.application.views
   (:require [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
-            [re-frame.core :refer [dispatch subscribe]]))
+            [re-frame.core :refer [dispatch subscribe]]
+            [goog.string :as gstr]))
 
-(def regions [:Ада
-              :Александровац
-              :Алексинац
-              :Алибунар
-              :Апатин
-              :Аранђеловац
-              :Ариље
-              :Бабушница
-              :Бајина-Башта
-              :Баточина
-              :Бач
-              :Бачка-Паланка
-              :Бачка-Топола
-              :Бачки-Петровац
-              :Београд
-              :Бела-Паланка
-              :Бела-Црква
-              :Беочин
-              :Бечеј
-              :Блаце
-              :Богатић
-              :Бор
-              :Бојник
-              :Бољевац
-              :Босилеград
-              :Брус
-              :Бујановац
-              :Варварин
-              :Ваљево
-              :Врање
-              :Вршац
-              :Велика-Плана
-              :Велико-Градиште
-              :Витина
-              :Владимирци
-              :Владичин-Хан
-              :Власотинце
-              :Врбас
-              :Врњачка-Бања
-              :Вучитрн
-              :Гаџин-Хан
-              :Глоговац
-              :Гњилане
-              :Голубац
-              :Гора
-              :Горњи-Милановац
-              :Деспотовац
-              :Дечани
-              :Димитровград
-              :Дољевац
-              :Ђаковица
-              :Жабаљ
-              :Жабари
-              :Жагубица
-              :Житиште
-              :Житорађа
-              :Звечан
-              :Зајечар
-              :Зрењанин
-              :Зубин-Поток
-              :Ивањица
-              :Инђија
-              :Ириг
-              :Исток
-              :Јагодина
-              :Кикинда
-              :Крагујевац
-              :Краљево
-              :Крушевац
-              :Кањижа
-              :Качаник
-              :Кладово
-              :Клина
-              :Кнић
-              :Књажевац
-              :Ковачица
-              :Ковин
-              :Косјерић
-              :Косово-Поље
-              :Косовска-Каменица
-              :Косовска-Митровица
-              :Коцељева
-              :Крупањ
-              :Кула
-              :Куршумлија
-              :Кучево
-              :Лесковац
-              :Лозница
-              :Лајковац
-              :Лапово
-              :Лебане
-              :Лепосавић
-              :Липљан
-              :Лучани
-              :Љиг
-              :Љубовија
-              :Мајданпек
-              :Мали-Зворник
-              :Мали-Иђош
-              :Мало-Црниће
-              :Медвеђа
-              :Мерошина
-              :Мионица
-              :Неготин
-              :Ниш
-              :Нови-Пазар
-              :Нови-Сад
-              :Нова-Варош
-              :Нова-Црња
-              :Нови-Бечеј
-              :Нови-Кнежевац
-              :Ново-Брдо
-              :Обилић
-              :Опово
-              :Ораховац
-              :Осечина
-              :Оџаци
-              :Параћин
-              :Панчево
-              :Пирот
-              :Пожаревац
-              :Приштина
-              :Петровац-на-Млави
-              :Пећ
-              :Пећинци
-              :Пландиште
-              :Подујево
-              :Прокупље
-              :Пожега
-              :Прешево
-              :Прибој
-              :Призрен
-              :Пријепоље
-              :Ражањ
-              :Рача
-              :Рашка
-              :Рековац
-              :Рума
-              :Свилајнац
-              :Сврљиг
-              :Смедерево
-              :Сомбор
-              :Сента
-              :Сечањ
-              :Сјеница
-              :Смедеревска-Паланка
-              :Сокобања
-              :Србица
-              :Србобран
-              :Сремски-Карловци
-              :Сремска-Митровица
-              :Стара-Пазова
-              :Суботица
-              :Сува-Река
-              :Сурдулица
-              :Темерин
-              :Тител
-              :Топола
-              :Трговиште
-              :Трстеник
-              :Тутин
-              :Ћићевац
-              :Ћуприја
-              :Уб
-              :Ужице
-              :Урошевац
-              :Црна-Трава
-              :Чајетина
-              :Чачак
-              :Чока
-              :Шабац
-              :Шид
-              :Штимље
-              :Штрпце])
+(def regions [:Ada
+              :Aleksandrovac
+              :Aleksinac
+              :Alibunar
+              :Apatin
+              :Aranđelovac
+              :Arilje
+              :Babušnica
+              :Bajina-Bašta
+              :Batočina
+              :Bač
+              :Bačka-Palanka
+              :Bačka-Topola
+              :Bački-Petrovac
+              :Beograd
+              :Bela-Palanka
+              :Bela-Crkva
+              :Beočin
+              :Bečej
+              :Blace
+              :Bogatić
+              :Bor
+              :Bojnik
+              :Boljevac
+              :Bosilegrad
+              :Brus
+              :Bujanovac
+              :Varvarin
+              :Valjevo
+              :Vranje
+              :Vršac
+              :Velika-Plana
+              :Veliko-Gradište
+              :Vitina
+              :Vladimirci
+              :Vladičin-Han
+              :Vlasotince
+              :Vrbas
+              :Vrnjačka-Banja
+              :Vučitrn
+              :Gadžin-Han
+              :Glogovac
+              :Gnjilane
+              :Golubac
+              :Gora
+              :Gornji-Milanovac
+              :Despotovac
+              :Dečani
+              :Dimitrovgrad
+              :Doljevac
+              :Đakovica
+              :Žabalj
+              :Žabari
+              :Žagubica
+              :Žitište
+              :Žitorađa
+              :Zvečan
+              :Zaječar
+              :Zrenjanin
+              :Zubin-Potok
+              :Ivanjica
+              :Inđija
+              :Irig
+              :Istok
+              :Jagodina
+              :Kikinda
+              :Kragujevac
+              :Kraljevo
+              :Kruševac
+              :Kanjiža
+              :Kačanik
+              :Kladovo
+              :Klina
+              :Knić
+              :Knjaževac
+              :Kovačica
+              :Kovin
+              :Kosjerić
+              :Kosovo-Polje
+              :Kosovska-Kamenica
+              :Kosovska-Mitrovica
+              :Koceljeva
+              :Krupanj
+              :Kula
+              :Kuršumlija
+              :Kučevo
+              :Leskovac
+              :Loznica
+              :Lajkovac
+              :Lapovo
+              :Lebane
+              :Leposavić
+              :Lipljan
+              :Lučani
+              :Ljig
+              :Ljubovija
+              :Majdanpek
+              :Mali-Zvornik
+              :Mali-Iđoš
+              :Malo-Crniće
+              :Medveđa
+              :Merošina
+              :Mionica
+              :Negotin
+              :Niš
+              :Novi-Pazar
+              :Novi-Sad
+              :Nova-Varoš
+              :Nova-Crnja
+              :Novi-Bečej
+              :Novi-Kneževac
+              :Novo-Brdo
+              :Obilić
+              :Opovo
+              :Orahovac
+              :Osečina
+              :Odžaci
+              :Paraćin
+              :Pančevo
+              :Pirot
+              :Požarevac
+              :Priština
+              :Petrovac-na-Mlavi
+              :Peć
+              :Pećinci
+              :Plandište
+              :Podujevo
+              :Prokuplje
+              :Požega
+              :Preševo
+              :Priboj
+              :Prizren
+              :Prijepolje
+              :Ražanj
+              :Rača
+              :Raška
+              :Rekovac
+              :Ruma
+              :Svilajnac
+              :Svrljig
+              :Smederevo
+              :Sombor
+              :Senta
+              :Sečanj
+              :Sjenica
+              :Smederevska-Palanka
+              :Sokobanja
+              :Srbica
+              :Srbobran
+              :Sremski-Karlovci
+              :Sremska-Mitrovica
+              :Stara-Pazova
+              :Subotica
+              :Suva-Reka
+              :Surdulica
+              :Temerin
+              :Titel
+              :Topola
+              :Trgovište
+              :Trstenik
+              :Tutin
+              :Ćićevac
+              :Ćuprija
+              :Ub
+              :Užice
+              :Uroševac
+              :Crna-Trava
+              :Čajetina
+              :Čačak
+              :Čoka
+              :Šabac
+              :Šid
+              :Štimlje
+              :Štrpce])
 
 ;; -- helper functions region --
 (defn extract-input-value
@@ -261,30 +262,57 @@
       [:button {:disabled (not is-valid?)
                 :on-click #(dispatch [::events/create])} "Sacuvaj"]]]))
 
+(defn user-detail
+  "User detail view"
+  [_user]
+  (js/console.log _user)
+  [:h1 "USER DETAIL TABLE"])
 
 ;; Ovo cu promeniti, napravio sam ovako samo da bi video da li mi radi..
-(defn single-user
+(defn user-row
   "A single user."
-  [_user]
-  (js/console.log (type _user))
-  [:div [:p {:key (:db/id _user)} (:user/firstname _user)]])
+  [_users _reg-val]
+  ;; Here we want to dispatch detail-user (route where we will display all single user details)
+  (for [user _users
+        :when (or (= (:user/region user) _reg-val) (= :svi _reg-val))]
+    [:tr {:align "left"
+          :style {:border "1px solid black"
+                  :width  "100%"}}
+     [:td {:style {:text-align "center"
+                   :border     "1px solid black"}} (:user/firstname user)]
+     [:td {:style {:text-align "center"
+                   :border     "1px solid black"}} (:user/lastname user)]
+     [:td {:style {:text-align "center"
+                   :border     "1px solid black"}} (:user/region user)]
+     [:td {:style {:text-align "center"
+                   :border     "1px solid black"}} (if (:user/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
+     [:td {:style {:text-align "center"
+                   :border     "1px solid black"}} (if (:user/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]))
+
 
 (defn users-list
   "List of all users."
   []
-  (let [value (subscribe [::subs/region])
+  (let [region-value (subscribe [::subs/region])
         users (subscribe [::subs/users])]
     [:div
      [:div
       [:label " Opstina: "]
       [:div
-       [:select {:value     @value
+       [:select {:value     @region-value
                  :on-change #(dispatch [::events/add-filter-region (keyword (extract-input-value %))])}
         [:option {:value ""} "Izabarite opstinu"]
-        (map (fn [r] [:option {:key r :value r} r]) (assoc regions 0 :svi))]]]
-     [:div (for [user @users
-                 :when (or (= (:user/region user) @value) (= :svi @value))]
-             (single-user user))]]))
+        (map (fn [r] [:option {:key r :value r} r]) regions)]]]
+     [:table {:style {:border          "1px solid black"
+                      :border-collapse "collapse"
+                      :width           "100%"}}
+      [:tr {:style {:width  "100%"}}
+       [:th {:style {:border "1px solid black"}} "Ime"]
+       [:th {:style {:border "1px solid black"}} "Prezime"]
+       [:th {:style {:border "1px solid black"}} "Region"]
+       [:th {:style {:border "1px solid black"}} "Slanje postom"]
+       [:th {:style {:border "1px solid black"}} "Licno preuzimanje"]]
+      (user-row @users @region-value)]]))
 
 
 (defn home []
@@ -302,6 +330,7 @@
   (case @(subscribe [::subs/choice])
     :sharing #(dispatch [::events/dispatch-load-route! {:data {:name :route/form}}])
     :seeking #(dispatch [::events/fetch-users])))
+
 
 (defn thank-you []
   [:div [:h1 "Hvala vam sto delite kefir zrnca"]
