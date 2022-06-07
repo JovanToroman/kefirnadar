@@ -9,7 +9,8 @@
 (defn get-users
   "This handler returns all the users."
   [{:keys [_params]}]
-  (let [users (q/users (client/db))]
+  (let [users (q/users (client/db) #_{:user/region :Ada
+                                    :user/lastname "ASDF"})] ; ??????????????????????????????
     (if (not-empty users)
       (r/ok users)
       (r/bad-request {:status :error}))))

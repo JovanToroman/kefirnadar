@@ -12,11 +12,11 @@
 (defn users                                                 ;;cond kao mapa
   ([db]
    (users db nil))
-  ([db {:keys [cond]}]
+  ([db cond #_{:keys [cond]}]
    (let [q (cond->
              '{:find  [(pull ?eid [*])]
                :where [[?eid :user/created]]}
-             (map? cond) (concat (map (partial cons '?eid) (vec cond))))]
+             (map? cond) (update :where into (map #(into ['?eid] %)) cond))]
      (map first (d/q q db)))))
 
 #_(defn users
@@ -35,14 +35,12 @@
   [conn item]
   (d/transact conn {:tx-data (if (map? item) [item] item)}))
 
-;;test region
 
-(let [cond {:user/firstname "Nedja"}
-      q (cond->
-          '{:find  [(pull ?eid [*])]
-            :where [[?eid :user/created] #_[?eid :user/region :Ada] #_[?eid :user/firstname "Nedja"]]}
-          (map? cond) (concat (map (partial cons '?eid) cond)))]
-  q)
+;; test
 
-;; ([:find [(pull ?eid [*])]] [:where [[?eid :user/created]]] (?eid :user/firstname "Nedja")) LOSA POVRATNA VREDNOST
-;; {:find [(pull ?eid [*])] :where [[?eid :user/created] [?eid :user/firstname "Nedja"]]} DOBRA POVRATNA VREDNOST
+#_(let [test {:keys [{:user/firstname "Nedja"}]}]
+  (let [q (cond->
+            '{:find  [(pull ?eid [*])]
+              :where [[?eid :user/created]]}
+            (map? test) (update :where into (map #(into ['?eid] %)) test))]
+    q))

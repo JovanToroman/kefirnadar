@@ -91,6 +91,8 @@
   [_]
   {::fx/api {:uri        "/list"
              :method     :get
+             #_:params     #_{:user/lastname    "ASDF"
+                          :user/region      :Ada}           ;??????????????????????????????
              :on-success [::fetch-users-success]
              :on-error   [::fetch-users-fail]}})
 
