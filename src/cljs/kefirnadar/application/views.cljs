@@ -262,11 +262,6 @@
       [:button {:disabled (not is-valid?)
                 :on-click #(dispatch [::events/create])} "Sacuvaj"]]]))
 
-(defn user-detail
-  "User detail view"
-  [_user]
-  (js/console.log _user)
-  [:h1 "USER DETAIL TABLE"])
 
 ;; Ovo cu promeniti, napravio sam ovako samo da bi video da li mi radi..
 (defn user-row
@@ -296,6 +291,7 @@
   (let [region-value (subscribe [::subs/region])
         users (subscribe [::subs/users])]
     [:div
+     [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
      [:div
       [:label " Opstina: "]
       [:div

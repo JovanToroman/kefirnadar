@@ -1,7 +1,7 @@
 [{:user/created #inst "2015-09-11T19:44:06.059-00:00"
   :user/firstname "Srdjan"
   :user/lastname "Bosancic"
-  :user/region :Бачки-Петровац
+  :user/region :Beograd
   :user/post false
   :user/pick-up true
   :user/quantity 25

@@ -34,10 +34,6 @@
     {:name        :route/list
      :doc         "list page"
      :controllers [{:identity identity}]}]
-   ["user-detail"
-    {:name        :route/user-detail
-     :doc         "user detail page"
-     :controllers [{:identity identity}]}]
    ["error"
     {:name        :route/error
      :doc         "error page"

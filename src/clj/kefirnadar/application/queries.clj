@@ -44,3 +44,4 @@
               :where [[?eid :user/created]]}
             (map? test) (update :where into (map #(into ['?eid] %)) test))]
     q))
+
