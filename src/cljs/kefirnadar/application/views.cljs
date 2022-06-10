@@ -325,7 +325,7 @@
 (defn choice []
   (case @(subscribe [::subs/choice])
     :sharing #(dispatch [::events/dispatch-load-route! {:data {:name :route/form}}])
-    :seeking #(dispatch [::events/fetch-users])))
+    :seeking #(dispatch [::events/fetch-users :milk-type :Beograd])))
 
 
 (defn thank-you []

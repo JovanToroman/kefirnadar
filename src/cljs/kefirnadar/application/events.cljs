@@ -1,8 +1,8 @@
 (ns kefirnadar.application.events
-  (:require [kefirnadar.configuration.routes :as routes]
+  (:require [kefirnadar.application.fx :as fx]
             [kefirnadar.application.localstorage :as localstorage]
-            [re-frame.core :refer [reg-event-fx reg-fx trim-v reg-event-db dispatch]]
-            [kefirnadar.application.fx :as fx]))
+            [kefirnadar.configuration.routes :as routes]
+            [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx trim-v]]))
 
 ;; -localstorage events-
 (reg-fx ::set-item! localstorage/set-item!)
@@ -88,15 +88,16 @@
 ;; -- fetch business logic
 (defn fetch-users
   "Fetches all users from the server."
-  [_]
-  {::fx/api {:uri        "/list"
+  [_ [grains-kind region]]
+  (js/console.log "grains-kind: " grains-kind " region: " region)
+  {::fx/api {:uri        (str "/list/grains-kind/" grains-kind "/region/" region)
              :method     :get
-             #_:params     #_{:user/lastname    "ASDF"
-                          :user/region      :Ada}           ;??????????????????????????????
              :on-success [::fetch-users-success]
              :on-error   [::fetch-users-fail]}})
 
-(reg-event-fx ::fetch-users fetch-users)
+http://localhost:8080/list/grains-kind/:milk-type/region/:Beograd
+
+(reg-event-fx ::fetch-users trim-v fetch-users)
 
 (defn fetch-users-success
   "Stores fetched users in the app db."

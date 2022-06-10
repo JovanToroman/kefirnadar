@@ -8,7 +8,8 @@
 
 (defn get-users
   "This handler returns all the users."
-  [{:keys [_params]}]
+  [input]
+  (println (:path-params input))
   (let [users (q/users (client/db) #_{:user/region :Ada
                                     :user/lastname "ASDF"})] ; ??????????????????????????????
     (if (not-empty users)
