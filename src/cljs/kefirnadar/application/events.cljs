@@ -10,6 +10,16 @@
 (reg-fx ::remove-item localstorage/remove-item!)
 ;; -end localstorage events-
 
+;; helper functions
+
+(defn add-filter-region! [db region]
+  (assoc-in db [:user :data :region-filter] region))
+
+(reg-fx
+  ::add-filter-region
+  add-filter-region!)
+
+;;end helper functions
 
 ;; -- create user business logic
 
@@ -73,10 +83,6 @@
      ::load-route! {:data {:name :route/choice}}}))
 
 
-(reg-event-db
-  ::add-filter-region
-  (fn [db [_ region]]
-    (assoc-in db [:user :data :region-filter] region)))
 
 
 (reg-event-db
@@ -86,24 +92,24 @@
 
 
 ;; -- fetch business logic
+;;----- FIX: EVERY TIME WE GO TO HOME PAGE WE STILL HAVE FETCHED USERS FROM LAST TIME, WHEN WE GO TO /LIST ROUTE WE NEED A EMPTY LIST
 (defn fetch-users
   "Fetches all users from the server."
-  [_ [grains-kind region]]
-  (js/console.log "grains-kind: " grains-kind " region: " region)
-  {::fx/api {:uri        (str "/list/grains-kind/" grains-kind "/region/" region)
+  [{db :db} [grains-kind region]]
+  {:db (-> db
+           (assoc-in [:user :data :region-filter] region))
+   ::fx/api {:uri        (str "/list/grains-kind/" grains-kind "/region/" region)
              :method     :get
              :on-success [::fetch-users-success]
              :on-error   [::fetch-users-fail]}})
 
-http://localhost:8080/list/grains-kind/:milk-type/region/:Beograd
 
 (reg-event-fx ::fetch-users trim-v fetch-users)
 
 (defn fetch-users-success
   "Stores fetched users in the app db."
   [{db :db} [users]]
-  {:db           (assoc db :all-users users)
-   ::load-route! {:data {:name :route/list}}})
+  {:db           (assoc db :all-users users)})
 
 (defn fetch-users-fail                                      ;; radi- testirano
   "Failed to fetch user's, render error page"

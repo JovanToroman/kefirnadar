@@ -13,6 +13,7 @@
   ([db]
    (users db nil))
   ([db cond #_{:keys [cond]}]
+   (println "COND: " cond)
    (let [q (cond->
              '{:find  [(pull ?eid [*])]
                :where [[?eid :user/created]]}

@@ -2,7 +2,8 @@
   (:require [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :refer [dispatch subscribe]]
-            [goog.string :as gstr]))
+            [goog.string :as gstr]
+            [kefirnadar.application.localstorage :as localstorage]))
 
 (def regions [:Ada
               :Aleksandrovac
@@ -268,9 +269,9 @@
   "A single user."
   [_users _reg-val]
   ;; Here we want to dispatch detail-user (route where we will display all single user details)
-  (for [user _users
-        :when (or (= (:user/region user) _reg-val) (= :svi _reg-val))]
-    [:tr {:align "left"
+  (for [user _users]
+    [:tbody
+     [:tr {:align "left"
           :style {:border "1px solid black"
                   :width  "100%"}}
      [:td {:style {:text-align "center"
@@ -282,7 +283,7 @@
      [:td {:style {:text-align "center"
                    :border     "1px solid black"}} (if (:user/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
      [:td {:style {:text-align "center"
-                   :border     "1px solid black"}} (if (:user/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]))
+                   :border     "1px solid black"}} (if (:user/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]]))
 
 
 (defn users-list
@@ -296,18 +297,19 @@
       [:label " Opstina: "]
       [:div
        [:select {:value     @region-value
-                 :on-change #(dispatch [::events/add-filter-region (keyword (extract-input-value %))])}
+                 :on-change #(dispatch [::events/fetch-users (keyword (localstorage/get-item :grains-kind)) (keyword (extract-input-value %))])}
         [:option {:value ""} "Izabarite opstinu"]
         (map (fn [r] [:option {:key r :value r} r]) regions)]]]
      [:table {:style {:border          "1px solid black"
                       :border-collapse "collapse"
                       :width           "100%"}}
-      [:tr {:style {:width  "100%"}}
+      [:tbody
+       [:tr {:style {:width  "100%"}}
        [:th {:style {:border "1px solid black"}} "Ime"]
        [:th {:style {:border "1px solid black"}} "Prezime"]
        [:th {:style {:border "1px solid black"}} "Region"]
        [:th {:style {:border "1px solid black"}} "Slanje postom"]
-       [:th {:style {:border "1px solid black"}} "Licno preuzimanje"]]
+       [:th {:style {:border "1px solid black"}} "Licno preuzimanje"]]]
       (user-row @users @region-value)]]))
 
 
@@ -325,7 +327,7 @@
 (defn choice []
   (case @(subscribe [::subs/choice])
     :sharing #(dispatch [::events/dispatch-load-route! {:data {:name :route/form}}])
-    :seeking #(dispatch [::events/fetch-users :milk-type :Beograd])))
+    :seeking #(dispatch [::events/dispatch-load-route! {:data {:name :route/list}}])))
 
 
 (defn thank-you []

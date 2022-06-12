@@ -25,11 +25,3 @@
   ::region
   (fn [db _] (get-in db [:user :data :region-filter] "")))
 
-
-;; choice region
-(reg-sub
-  ::choice
-  (fn [db _]
-    (get-in db [:user :data :ad-type])))
-;; end choice region
-
