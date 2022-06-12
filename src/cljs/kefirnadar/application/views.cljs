@@ -292,7 +292,7 @@
   (let [region-value (subscribe [::subs/region])
         users (subscribe [::subs/users])]
     [:div
-     [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
+     [:button {:on-click #(dispatch [::events/clean-db-and-go-home])} "Pocetna stranica"]
      [:div
       [:label " Opstina: "]
       [:div

@@ -82,7 +82,14 @@
      ::set-item!   [:grains-kind type]
      ::load-route! {:data {:name :route/choice}}}))
 
+(defn clean-db-and-go-home
+  [{db :db}]
+  {:db (dissoc db :all-users :user)
+   ::load-route! {:data {:name :route/home}}})
 
+(reg-event-fx
+  ::clean-db-and-go-home
+  clean-db-and-go-home)
 
 
 (reg-event-db
@@ -93,6 +100,7 @@
 
 ;; -- fetch business logic
 ;;----- FIX: EVERY TIME WE GO TO HOME PAGE WE STILL HAVE FETCHED USERS FROM LAST TIME, WHEN WE GO TO /LIST ROUTE WE NEED A EMPTY LIST
+;; fixed
 (defn fetch-users
   "Fetches all users from the server."
   [{db :db} [grains-kind region]]
