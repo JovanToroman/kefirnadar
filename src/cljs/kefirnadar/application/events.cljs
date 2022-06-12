@@ -2,6 +2,7 @@
   (:require [kefirnadar.application.fx :as fx]
             [kefirnadar.application.localstorage :as localstorage]
             [kefirnadar.configuration.routes :as routes]
+            [kefirnadar.application.subscriptions :as subsc]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx trim-v]]))
 
 ;; -localstorage events-
@@ -80,6 +81,7 @@
   (fn [{db :db} [_ type]]
     {:db           (assoc-in db [:user :data :grains-kind] type)
      ::set-item!   [:grains-kind type]
+     ::test-ratom type
      ::load-route! {:data {:name :route/choice}}}))
 
 (defn clean-db-and-go-home
@@ -100,7 +102,7 @@
 
 ;; -- fetch business logic
 ;;----- FIX: EVERY TIME WE GO TO HOME PAGE WE STILL HAVE FETCHED USERS FROM LAST TIME, WHEN WE GO TO /LIST ROUTE WE NEED A EMPTY LIST
-;; fixed
+
 (defn fetch-users
   "Fetches all users from the server."
   [{db :db} [grains-kind region]]

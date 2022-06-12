@@ -1,5 +1,6 @@
 (ns kefirnadar.application.subscriptions
-  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]))
+  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]
+            [reagent.core :as r]))
 
 
 (reg-sub
@@ -16,6 +17,7 @@
   ::choice
   (fn [db _]
     (get-in db [:user :data :ad-type])))
+
 
 (reg-sub
   ::users

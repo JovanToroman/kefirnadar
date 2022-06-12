@@ -341,7 +341,8 @@
 
 
 
-
+;; napraviti rutu seeking/:grains-kind/:region, iz nje nestujemo rutu /list (u njoj kao parametre izvucemo grains-kind i region
+;; svaki put kada se promeni region pozivamo ponovo :seeking rutu)
 
 
 
