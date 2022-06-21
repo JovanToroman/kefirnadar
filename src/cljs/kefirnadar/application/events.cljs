@@ -1,26 +1,16 @@
 (ns kefirnadar.application.events
   (:require [kefirnadar.application.fx :as fx]
-            [kefirnadar.application.localstorage :as localstorage]
             [kefirnadar.configuration.routes :as routes]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx trim-v]]))
 
-;; -localstorage events-
-(reg-fx ::set-item! localstorage/set-item!)
-(reg-fx ::get-item localstorage/get-item)
-(reg-fx ::remove-item localstorage/remove-item!)
-;; -end localstorage events-
-
 
 ;; helper functions
-
 (defn add-filter-region! [db region]
   (assoc-in db [:user :data :region-filter] region))
 
 (reg-fx
   ::add-filter-region
   add-filter-region!)
-
-
 ;;end helper functions
 
 ;; -- create user business logic
@@ -72,7 +62,6 @@
   ::ad-type
   (fn [{db :db} [_ {type :type}]]
     {:db           (assoc-in db [:user :data :ad-type] type)
-     ::set-item!   [:ad-type type]
      ::load-route! {:data        {:name :route/ad-type}
                     :path-params {:ad-type type}}}))
 
@@ -81,7 +70,6 @@
   ::grains-kind
   (fn [{db :db} [_ type]]
     {:db           (assoc-in db [:user :data :grains-kind] type)
-     ::set-item!   [:grains-kind type]
      ::load-route! {:data        {:name :route/ad-type-choice}
                     :path-params {:grains-kind type
                                   :ad-type     (get-in db [:user :data :ad-type])}}}))
@@ -107,13 +95,14 @@
 
 (defn fetch-users
   "Fetches all users from the server."
-  [{db :db} [grains-kind region]]
-  {:db      (-> db
+  [{db :db} [region]]
+  (let [grains-kind (keyword (get-in db [:active-route :parameters :path :grains-kind]))]
+    {:db      (-> db
                 (assoc-in [:user :data :region-filter] region))
    ::fx/api {:uri        (str "/list/grains-kind/" grains-kind "/region/" region)
              :method     :get
              :on-success [::fetch-users-success]
-             :on-error   [::fetch-users-fail]}})
+             :on-error   [::fetch-users-fail]}}))
 
 
 (reg-event-fx ::fetch-users trim-v fetch-users)

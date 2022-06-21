@@ -2,8 +2,7 @@
   (:require [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :refer [dispatch subscribe]]
-            [goog.string :as gstr]
-            [kefirnadar.application.localstorage :as localstorage]))
+            [goog.string :as gstr]))
 
 (def regions [:Ada
               :Aleksandrovac
@@ -298,7 +297,7 @@
       [:label " Opstina: "]
       [:div
        [:select {:value     @region-value
-                 :on-change #(dispatch [::events/fetch-users (keyword (localstorage/get-item :grains-kind)) (keyword (extract-input-value %))])}
+                 :on-change #(dispatch [::events/fetch-users (keyword (extract-input-value %))])}
         [:option {:value ""} "Izabarite opstinu"]
         (map (fn [r] [:option {:key r :value r} r]) regions)]]]
      (when @users
