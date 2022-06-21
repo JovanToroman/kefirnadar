@@ -7,15 +7,11 @@
   (case (:name (:data panel-name))
     :route/home [application-views/home]
     ;; -----
-    :route/grains-kind [application-views/grains-kind]
+    :route/ad-type [application-views/grains-kind]
     ;; -----
-    :route/choice [application-views/choice]
+    :route/ad-type-choice [application-views/ad-type-choice]
     ;; -----
     :route/thank-you [application-views/thank-you]
-    ;; -----
-    :route/list [application-views/users-list]
-    ;; -----
-    :route/form [application-views/form]
     ;; -----
     :route/error [application-views/error]
     [:div]))

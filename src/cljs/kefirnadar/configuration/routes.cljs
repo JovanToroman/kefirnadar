@@ -7,32 +7,29 @@
             [reitit.frontend.controllers :as rfc]
             [reitit.frontend.easy :as rfe]))
 
+
 ; region routes
 (def routes
   ["/" {:coercion reitit.coercion.spec/coercion}
    ["" {:name        :route/home
         :controllers [{:identity identity}]
         :doc         "Home page"}]
-   ;; -----
-   ["grains-kind"
-    {:name        :route/grains-kind
-     :doc         "Grains kind page"
-     :controllers [{:identity identity}]}]
-   ["choice"
-    {:name        :route/choice
-     :doc         "Form page"
-     :controllers [{:identity identity}]}]
-   ["form"
-    {:name        :route/form
-     :doc         "form page"
-     :controllers [{:identity identity}]}]
+   ["ad-type/{ad-type}"
+    {:name        :route/ad-type
+     :path-params {:ad-type keyword?}
+     :doc         "Ad-type page"
+     :controllers [{:start      #(js/console.log "START: " "ad-type/:ad-type/grains-kind")
+                    :stop       #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind")}]}]
+   ["ad-type/{ad-type}/grains-kind/{grains-kind}"
+    {:name        :route/ad-type-choice
+     :path-params {:grains-kind keyword?
+                   :ad-type keyword?}
+     :doc         "Ad-type page"
+     :controllers [{:start      #(js/console.log "START: " "ad-type/:ad-type/grains-kind/:grains-kind")
+                    :stop       #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind/:grains-kind")}]}]
    ["thank-you"
     {:name        :route/thank-you
      :doc         "Thank you page"
-     :controllers [{:identity identity}]}]
-   ["list"
-    {:name        :route/list
-     :doc         "list page"
      :controllers [{:identity identity}]}]
    ["error"
     {:name        :route/error
@@ -55,6 +52,7 @@
 (defn redirect!
   "If `replace` is truthy, previous page will be replaced in history, otherwise added."
   [{:keys [name path-params query-params replace]}]
+  (js/console.log path-params)
   ;; query params returns an empty map {} and replace-state and push-state are multiarity
   ;; this if-let prevents a lonely ? from being appended to the url if there are no query params
   (if-let [query-params (not-empty query-params)]
@@ -67,7 +65,7 @@
 
 (defn load-route! [{:keys [data path-params query-params replace params] :as _route}]
   (redirect! {:name         (-> data :name)
-              :params         params
+              :params       params
               :path-params  path-params
               :query-params query-params
               :replace      replace}))

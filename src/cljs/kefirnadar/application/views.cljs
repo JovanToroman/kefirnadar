@@ -221,6 +221,7 @@
        [:option {:value ""} "Izabarite opstinu"]
        (map (fn [r] [:option {:key r :value r} r]) regions)]]]))
 
+
 (defn post-toggle [id]
   (let [value (subscribe [::subs/form id])]
     [:div
@@ -248,6 +249,7 @@
               :type        "number"
               :placeholder "Kolicina koju delite..."}]]))
 
+
 (defn form []
   (let [is-valid? @(subscribe [::subs/is-valid? [:firstname :lastname :region :quantity]])]
     [:div
@@ -268,22 +270,21 @@
 (defn user-row
   "A single user."
   [_users _reg-val]
-  ;; Here we want to dispatch detail-user (route where we will display all single user details)
   (for [user _users]
     [:tbody
      [:tr {:align "left"
-          :style {:border "1px solid black"
-                  :width  "100%"}}
-     [:td {:style {:text-align "center"
-                   :border     "1px solid black"}} (:user/firstname user)]
-     [:td {:style {:text-align "center"
-                   :border     "1px solid black"}} (:user/lastname user)]
-     [:td {:style {:text-align "center"
-                   :border     "1px solid black"}} (:user/region user)]
-     [:td {:style {:text-align "center"
-                   :border     "1px solid black"}} (if (:user/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
-     [:td {:style {:text-align "center"
-                   :border     "1px solid black"}} (if (:user/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]]))
+           :style {:border "1px solid black"
+                   :width  "100%"}}
+      [:td {:style {:text-align "center"
+                    :border     "1px solid black"}} (:user/firstname user)]
+      [:td {:style {:text-align "center"
+                    :border     "1px solid black"}} (:user/lastname user)]
+      [:td {:style {:text-align "center"
+                    :border     "1px solid black"}} (:user/region user)]
+      [:td {:style {:text-align "center"
+                    :border     "1px solid black"}} (if (:user/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
+      [:td {:style {:text-align "center"
+                    :border     "1px solid black"}} (if (:user/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]]))
 
 
 (defn users-list
@@ -300,17 +301,18 @@
                  :on-change #(dispatch [::events/fetch-users (keyword (localstorage/get-item :grains-kind)) (keyword (extract-input-value %))])}
         [:option {:value ""} "Izabarite opstinu"]
         (map (fn [r] [:option {:key r :value r} r]) regions)]]]
-     [:table {:style {:border          "1px solid black"
-                      :border-collapse "collapse"
-                      :width           "100%"}}
-      [:tbody
-       [:tr {:style {:width  "100%"}}
-       [:th {:style {:border "1px solid black"}} "Ime"]
-       [:th {:style {:border "1px solid black"}} "Prezime"]
-       [:th {:style {:border "1px solid black"}} "Region"]
-       [:th {:style {:border "1px solid black"}} "Slanje postom"]
-       [:th {:style {:border "1px solid black"}} "Licno preuzimanje"]]]
-      (user-row @users @region-value)]]))
+     (when @users
+       [:table {:style {:border          "1px solid black"
+                        :border-collapse "collapse"
+                        :width           "100%"}}
+        [:tbody
+         [:tr {:style {:width "100%"}}
+          [:th {:style {:border "1px solid black"}} "Ime"]
+          [:th {:style {:border "1px solid black"}} "Prezime"]
+          [:th {:style {:border "1px solid black"}} "Region"]
+          [:th {:style {:border "1px solid black"}} "Slanje postom"]
+          [:th {:style {:border "1px solid black"}} "Licno preuzimanje"]]]
+        (user-row @users @region-value)])]))
 
 
 (defn home []
@@ -318,31 +320,29 @@
    [:button {:on-click #(dispatch [::events/ad-type {:type :sharing}])} "Delim"]
    [:button {:on-click #(dispatch [::events/ad-type {:type :seeking}])} "Trazim"]])
 
+
 (defn grains-kind []
   [:div
    [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :milk-type} "Mlecni"]
    [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :water-type} "Vodeni"]
    [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :kombucha} "Kombuha"]])
 
-(defn choice []
-  (case @(subscribe [::subs/choice])
-    :sharing #(dispatch [::events/dispatch-load-route! {:data {:name :route/form}}])
-    :seeking #(dispatch [::events/dispatch-load-route! {:data {:name :route/list}}])))
 
+(defn ad-type-choice []
+  (case @(subscribe [::subs/ad-type-choice])
+    :sharing form
+    :seeking users-list))
 
 (defn thank-you []
   [:div [:h1 "Hvala vam sto delite kefir zrnca"]
-   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
+   [:button {:on-click #(dispatch [::events/clean-db-and-go-home])} "Pocetna stranica"]])
 
 (defn error []
   [:div
    [:h1 "ERROR PAGE"]
-   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
+   [:button {:on-click #(dispatch [::events/clean-db-and-go-home])} "Pocetna stranica"]])
 
 
-
-;; napraviti rutu seeking/:grains-kind/:region, iz nje nestujemo rutu /list (u njoj kao parametre izvucemo grains-kind i region
-;; svaki put kada se promeni region pozivamo ponovo :seeking rutu)
 
 
 
