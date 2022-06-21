@@ -4,6 +4,17 @@
             [re-frame.core :refer [dispatch subscribe]]
             [goog.string :as gstr]))
 
+;; TODO: 1. Add a phone number and email address for a user.
+;; TODO  2. Add a 30 day timer so users that are older then that are deleted.
+;; TODO  3. Seeker needs to press "show phone number" button so we can prevent information fishing.
+;; TODO  4. (MAYBE) Change region vector values to strings, is there need for them to be keywords?
+;; TODO  5. (MAYBE) Create a few helper functions for stuff we use more then few times if possible..
+
+;; TODO-CHECK 1. Why are :path-params values stored as strings when i try to store them as keywords???
+;; TODO-CHECK 2. Maybe we can lower the need of app-db if we store more information in routes???
+
+
+
 (def regions [:Ada
               :Aleksandrovac
               :Aleksinac
