@@ -231,6 +231,23 @@
        [:option {:value ""} "Izabarite opstinu"]
        (map (fn [r] [:option {:key r :value r} r]) regions)]]]))
 
+(defn email-input [id]
+  (let [value (subscribe [::subs/form id])]
+    [:div
+     [:label "E-mail"]
+     [:input {:value       @value
+              :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
+              :type        "text"
+              :placeholder "Vasa elektronska posta..."}]]))
+
+(defn phone-number-input [id]
+  (let [value (subscribe [::subs/form id])]
+    [:div
+     [:label "Telefon"]
+     [:input {:value       @value
+              :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
+              :type        "text"
+              :placeholder "Vas broj telefona..."}]]))
 
 (defn post-toggle [id]
   (let [value (subscribe [::subs/form id])]
@@ -267,6 +284,10 @@
      [last-name-input :lastname]
      [region-select :region regions]
      [:div
+      "Kontakt informacije:"
+      [phone-number-input :phone-number]
+      [email-input :email]]
+     [:div
       "Nacini transakcije:"
       [post-toggle :post]
       [pick-up-toggle :pick-up]]
@@ -291,6 +312,10 @@
                     :border     "1px solid black"}} (:user/lastname user)]
       [:td {:style {:text-align "center"
                     :border     "1px solid black"}} (:user/region user)]
+      [:td {:style {:text-align "center"
+                    :border     "1px solid black"}} (:user/phone-number user)]
+      [:td {:style {:text-align "center"
+                    :border     "1px solid black"}} (:user/email user)]
       [:td {:style {:text-align "center"
                     :border     "1px solid black"}} (if (:user/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
       [:td {:style {:text-align "center"
@@ -320,6 +345,8 @@
           [:th {:style {:border "1px solid black"}} "Ime"]
           [:th {:style {:border "1px solid black"}} "Prezime"]
           [:th {:style {:border "1px solid black"}} "Region"]
+          [:th {:style {:border "1px solid black"}} "Telefon"]
+          [:th {:style {:border "1px solid black"}} "E-mail"]
           [:th {:style {:border "1px solid black"}} "Slanje postom"]
           [:th {:style {:border "1px solid black"}} "Licno preuzimanje"]]]
         (user-row @users @region-value)])]))
@@ -351,9 +378,4 @@
   [:div
    [:h1 "ERROR PAGE"]
    [:button {:on-click #(dispatch [::events/clean-db-and-go-home])} "Pocetna stranica"]])
-
-
-
-
-
 

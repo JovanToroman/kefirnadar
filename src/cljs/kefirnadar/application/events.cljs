@@ -25,13 +25,15 @@
                   (dissoc :form))
      ::fx/api {:uri        "/create"
                :method     :post
-               :params     {:user/firstname   (get-in db [:form :firstname])
-                            :user/lastname    (get-in db [:form :lastname])
-                            :user/region      (get-in db [:form :region])
-                            :user/post        (get-in db [:form :post] false)
-                            :user/pick-up     (get-in db [:form :pick-up] false)
-                            :user/quantity    (get-in db [:form :quantity])
-                            :user/grains-kind (keyword (get-in db [:active-route :parameters :path :grains-kind]))}
+               :params     {:user/firstname    (get-in db [:form :firstname])
+                            :user/lastname     (get-in db [:form :lastname])
+                            :user/region       (get-in db [:form :region])
+                            :user/post         (get-in db [:form :post] false)
+                            :user/pick-up      (get-in db [:form :pick-up] false)
+                            :user/quantity     (get-in db [:form :quantity])
+                            :user/phone-number (get-in db [:form :phone-number] "NOT PROVIDED")
+                            :user/email       (get-in db [:form :email] "NOT PROVIDED")
+                            :user/grains-kind  (keyword (get-in db [:active-route :parameters :path :grains-kind]))}
                :on-success [::create-success]}}))
 
 (reg-event-fx ::create create)
@@ -98,11 +100,11 @@
   [{db :db} [region]]
   (let [grains-kind (keyword (get-in db [:active-route :parameters :path :grains-kind]))]
     {:db      (-> db
-                (assoc-in [:user :data :region-filter] region))
-   ::fx/api {:uri        (str "/list/grains-kind/" grains-kind "/region/" region)
-             :method     :get
-             :on-success [::fetch-users-success]
-             :on-error   [::fetch-users-fail]}}))
+                  (assoc-in [:user :data :region-filter] region))
+     ::fx/api {:uri        (str "/list/grains-kind/" grains-kind "/region/" region)
+               :method     :get
+               :on-success [::fetch-users-success]
+               :on-error   [::fetch-users-fail]}}))
 
 
 (reg-event-fx ::fetch-users trim-v fetch-users)
