@@ -4,8 +4,8 @@
             [re-frame.core :refer [dispatch subscribe]]
             [goog.string :as gstr]))
 
-;; TODO: 1. Add a phone number and email address for a user.
-;; TODO  2. Add a 30 day timer so users that are older then that are deleted.
+;; TODO: 1. Add a phone number and email address for a user. DONE
+;; TODO  2. Add a 30 day timer so users that are older then that are deleted. OUR DB IS CURRENTLY MEM TYPE, POSTPONED
 ;; TODO  3. Seeker needs to press "show phone number" button so we can prevent information fishing.
 ;; TODO  4. (MAYBE) Change region vector values to strings, is there need for them to be keywords?
 ;; TODO  5. (MAYBE) Create a few helper functions for stuff we use more then few times if possible..
@@ -198,6 +198,12 @@
 (defn extract-checkbox-state
   [event]
   (-> event .-target .-checked))
+
+#_(defn hidden?                                             ;;make this work
+  [hidden type user]
+  (case hidden
+    false [:button {:on-click #(hidden? true type user)} "Prikazi " type]
+    true (:user/phone-number user)))
 ;; -- end helper functions region --
 
 
