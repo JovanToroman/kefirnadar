@@ -2,7 +2,8 @@
   (:require [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :refer [dispatch subscribe]]
-            [goog.string :as gstr]))
+            [goog.string :as gstr]
+            [reagent.core :as r]))
 
 ;; TODO: 1. Add a phone number and email address for a user. DONE
 ;; TODO  2. Add a 30 day timer so users that are older then that are deleted. OUR DB IS CURRENTLY MEM TYPE, POSTPONED
@@ -199,11 +200,14 @@
   [event]
   (-> event .-target .-checked))
 
-#_(defn hidden?                                             ;;make this work
-  [hidden type user]
-  (case hidden
-    false [:button {:on-click #(hidden? true type user)} "Prikazi " type]
-    true (:user/phone-number user)))
+#_(defonce phone-number (r/atom ""))
+
+#_(defn hidden?                                               ;; TODO: MAKE THIS WORK!!!!
+  [user]
+  [:button
+   {:on-click #(reset! phone-number (:user/phone-number user)) #_(js/console.log (:user/phone-number user))}
+   "Prikazi broj"])
+
 ;; -- end helper functions region --
 
 
