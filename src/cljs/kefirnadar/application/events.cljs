@@ -78,15 +78,14 @@
 
 
 ;; just a quick-fix
-(defn clean-db-and-go-home
+(defn clean-db-when-homepage
   "Kada se klikne na Pocetna stranica dugme brise se iz local db-a sve neophodno da bi se resili konflikta"
   [{db :db}]
-  {:db           (dissoc db :all-users :user)
-   ::load-route! {:data {:name :route/home}}})
+  {:db           (dissoc db :all-users :user)})
 
 (reg-event-fx
-  ::clean-db-and-go-home
-  clean-db-and-go-home)
+  ::clean-db-when-homepage
+  clean-db-when-homepage)
 
 
 (reg-event-db

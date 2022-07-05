@@ -5,16 +5,6 @@
             [goog.string :as gstr]
             [reagent.core :as r]))
 
-;; TODO: 1. Add a phone number and email address for a user. DONE
-;; TODO  2. Add a 30 day timer so users that are older then that are deleted. OUR DB IS CURRENTLY MEM TYPE, POSTPONED
-;; TODO  3. Seeker needs to press "show phone number" button so we can prevent information fishing.
-;; TODO  4. (MAYBE) Change region vector values to strings, is there need for them to be keywords?
-;; TODO  5. (MAYBE) Create a few helper functions for stuff we use more then few times if possible..
-
-;; TODO-CHECK 1. Why are :path-params values stored as strings when i try to store them as keywords???
-;; TODO-CHECK 2. Maybe we can lower the need of app-db if we store more information in routes???
-
-
 
 (def regions [:Ada
               :Aleksandrovac
@@ -200,13 +190,6 @@
   [event]
   (-> event .-target .-checked))
 
-#_(defonce phone-number (r/atom ""))
-
-#_(defn hidden?                                               ;; TODO: MAKE THIS WORK!!!!
-  [user]
-  [:button
-   {:on-click #(reset! phone-number (:user/phone-number user)) #_(js/console.log (:user/phone-number user))}
-   "Prikazi broj"])
 
 ;; -- end helper functions region --
 
@@ -338,7 +321,7 @@
   (let [region-value (subscribe [::subs/region])
         users (subscribe [::subs/users])]
     [:div
-     [:button {:on-click #(dispatch [::events/clean-db-and-go-home])} "Pocetna stranica"]
+     [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
      [:div
       [:label " Opstina: "]
       [:div
@@ -382,10 +365,10 @@
 
 (defn thank-you []
   [:div [:h1 "Hvala vam sto delite kefir zrnca"]
-   [:button {:on-click #(dispatch [::events/clean-db-and-go-home])} "Pocetna stranica"]])
+   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
 
 (defn error []
   [:div
    [:h1 "ERROR PAGE"]
-   [:button {:on-click #(dispatch [::events/clean-db-and-go-home])} "Pocetna stranica"]])
+   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
 

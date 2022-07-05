@@ -12,7 +12,8 @@
 (def routes
   ["/" {:coercion reitit.coercion.spec/coercion}
    ["" {:name        :route/home
-        :controllers [{:identity identity}]
+        :controllers [{:identity identity
+                       :start    #(dispatch [:kefirnadar.application.events/clean-db-when-homepage])}]
         :doc         "Home page"}]
    ["ad-type/{ad-type}"
     {:name        :route/ad-type
