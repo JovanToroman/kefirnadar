@@ -14,7 +14,6 @@
 ;;end helper functions
 
 ;; -- create user business logic
-;; UPDATED: ovde smo zamenili dobijanje :user/grains-kind, sada vrednost uzimamo iz aktivne rute
 (defn create
   "Persists a user to the server."
   [{db :db} [_params]]
@@ -92,6 +91,11 @@
   ::update-form
   (fn [db [_ id val]]
     (assoc-in db [:form id] val)))
+
+(reg-event-db
+  ::validate-form
+  (fn [db [_ id val]]
+    (assoc-in db [:form-validation id] val)))
 
 
 (defn fetch-users
