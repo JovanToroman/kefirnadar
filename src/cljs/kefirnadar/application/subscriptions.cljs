@@ -9,7 +9,7 @@
 
 
 (reg-sub
-  ::is-valid?
+  ::is-id-required?
   (fn [db [_ form-ids]]
     (every? #(get-in db [:form %]) form-ids)))
 
