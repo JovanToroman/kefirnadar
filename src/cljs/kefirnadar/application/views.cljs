@@ -1,6 +1,7 @@
 (ns kefirnadar.application.views
   (:require [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
+            [kefirnadar.application.validation :as val]
             [re-frame.core :refer [dispatch subscribe]]
             [goog.string :as gstr]
             [cuerdas.core :as str]))
@@ -200,7 +201,7 @@
      [:label "Ime"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
               :type        "text"
               :required    true
               :placeholder "Vase ime..."}]]))
@@ -212,7 +213,7 @@
      [:label "Prezime"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
               :type        "text"
               :placeholder "Vase prezime..."}]]))
 
@@ -233,7 +234,7 @@
      [:label "E-mail"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
               :type        "text"
               :placeholder "xxxx@xxxx.com"}]]))
 
@@ -244,7 +245,7 @@
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
-              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
               :placeholder "06x-xxxx-xxxx"}]]))
 
 (defn post-toggle [id]
@@ -271,7 +272,7 @@
      [:label {:for "qty"} "Koju kolicinu delite?"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (long (extract-input-value %))])
-              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
               :type        "number"
               :min         "1"
               :max         "100"
