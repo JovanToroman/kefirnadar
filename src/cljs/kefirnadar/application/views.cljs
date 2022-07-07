@@ -2,8 +2,7 @@
   (:require [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :refer [dispatch subscribe]]
-            [goog.string :as gstr]
-            [reagent.core :as r]))
+            [goog.string :as gstr]))
 
 
 (def regions [:Ada
@@ -201,6 +200,7 @@
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
+              :required    true
               :placeholder "Vase ime..."}]]))
 
 
@@ -267,26 +267,27 @@
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (long (extract-input-value %))])
               :type        "number"
+              :min         1
               :placeholder "Kolicina koju delite..."}]]))
 
 
 (defn form []
-  (let [is-valid? @(subscribe [::subs/is-valid? [:firstname :lastname :region :quantity]])]
+  (let [is-id-required? @(subscribe [::subs/is-id-required? [:firstname :lastname :region :quantity]])]
     [:div
      [first-name-input :firstname]
      [last-name-input :lastname]
      [region-select :region regions]
      [:div
-      "Kontakt informacije:"
+      "Izaberite makar jedan nacini kontakta:"
       [phone-number-input :phone-number]
       [email-input :email]]
      [:div
-      "Nacini transakcije:"
+      "Izaberite makar jedan nacini transakcije:"
       [post-toggle :post]
       [pick-up-toggle :pick-up]]
      [qty-input :quantity]
      [:div
-      [:button {:disabled (not is-valid?)
+      [:button {:disabled (not is-id-required?)
                 :on-click #(dispatch [::events/create])} "Sacuvaj"]]]))
 
 
@@ -369,6 +370,6 @@
 
 (defn error []
   [:div
-   [:h1 "ERROR PAGE"]
+   [:h1 "Trenutno nema korisnika koji dele zrnca u izabranom regionu."]
    [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
 
