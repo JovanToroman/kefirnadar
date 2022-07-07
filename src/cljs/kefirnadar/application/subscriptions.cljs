@@ -8,11 +8,20 @@
     (get-in db [:form id] "")))
 
 
+;; helper function for ::is-valid?
+
+(defn contains-any? [map & keys]
+  (some #(contains? map %) keys))
+
+
+;; TODO: ADD SPECIAL CASE FOR PHONE-NUMBER AND EMAIL BECAUSE WE DONT WANT TO HAVE TRUE VALUE FOR EMPTY STRING!!!!!
 (reg-sub
   ::is-valid?
   (fn [db [_ form-ids]]
     (and (every? #(get-in db [:form %]) form-ids)
-         (every? #(true? (val %)) (db :form-validation)))))
+         (every? #(true? (val %)) (:form-validation db))
+         (contains-any? (:form db) :post :pick-up)
+         (contains-any? (:form db) :phone-number :email))))
 
 
 (reg-sub
