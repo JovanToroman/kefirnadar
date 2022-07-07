@@ -2,7 +2,8 @@
   (:require [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :refer [dispatch subscribe]]
-            [goog.string :as gstr]))
+            [goog.string :as gstr]
+            [cuerdas.core :as str]))
 
 
 (def regions [:Ada
@@ -199,6 +200,7 @@
      [:label "Ime"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
+              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
               :type        "text"
               :required    true
               :placeholder "Vase ime..."}]]))
@@ -210,6 +212,7 @@
      [:label "Prezime"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
+              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
               :type        "text"
               :placeholder "Vase prezime..."}]]))
 
@@ -230,8 +233,9 @@
      [:label "E-mail"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
+              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
               :type        "text"
-              :placeholder "Vasa elektronska posta..."}]]))
+              :placeholder "xxxx@xxxx.com"}]]))
 
 (defn phone-number-input [id]
   (let [value (subscribe [::subs/form id])]
@@ -240,7 +244,8 @@
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
-              :placeholder "Vas broj telefona..."}]]))
+              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
+              :placeholder "06x-xxxx-xxxx"}]]))
 
 (defn post-toggle [id]
   (let [value (subscribe [::subs/form id])]
@@ -266,13 +271,15 @@
      [:label {:for "qty"} "Koju kolicinu delite?"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (long (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (subs/field-validation id (extract-input-value %))])
               :type        "number"
-              :min         1
-              :placeholder "Kolicina koju delite..."}]]))
+              :min         "1"
+              :max         "100"
+              :placeholder "1-100"}]]))
 
 
 (defn form []
-  (let [is-id-required? @(subscribe [::subs/is-id-required? [:firstname :lastname :region :quantity]])]
+  (let [is-valid? @(subscribe [::subs/is-valid? [:firstname :lastname :region :quantity]])]
     [:div
      [first-name-input :firstname]
      [last-name-input :lastname]
@@ -287,7 +294,7 @@
       [pick-up-toggle :pick-up]]
      [qty-input :quantity]
      [:div
-      [:button {:disabled (not is-id-required?)
+      [:button {:disabled (not is-valid?)
                 :on-click #(dispatch [::events/create])} "Sacuvaj"]]]))
 
 
