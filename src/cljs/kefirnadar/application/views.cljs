@@ -1,186 +1,13 @@
 (ns kefirnadar.application.views
   (:require [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
-            [kefirnadar.application.validation :as val]
+            [kefirnadar.application.validation :as validation]
             [re-frame.core :refer [dispatch subscribe]]
             [goog.string :as gstr]
-            [cuerdas.core :as str]))
+            [kefirnadar.application.regions :as r]))
 
 
-(def regions [:Ada
-              :Aleksandrovac
-              :Aleksinac
-              :Alibunar
-              :Apatin
-              :Aranđelovac
-              :Arilje
-              :Babušnica
-              :Bajina-Bašta
-              :Batočina
-              :Bač
-              :Bačka-Palanka
-              :Bačka-Topola
-              :Bački-Petrovac
-              :Beograd
-              :Bela-Palanka
-              :Bela-Crkva
-              :Beočin
-              :Bečej
-              :Blace
-              :Bogatić
-              :Bor
-              :Bojnik
-              :Boljevac
-              :Bosilegrad
-              :Brus
-              :Bujanovac
-              :Varvarin
-              :Valjevo
-              :Vranje
-              :Vršac
-              :Velika-Plana
-              :Veliko-Gradište
-              :Vitina
-              :Vladimirci
-              :Vladičin-Han
-              :Vlasotince
-              :Vrbas
-              :Vrnjačka-Banja
-              :Vučitrn
-              :Gadžin-Han
-              :Glogovac
-              :Gnjilane
-              :Golubac
-              :Gora
-              :Gornji-Milanovac
-              :Despotovac
-              :Dečani
-              :Dimitrovgrad
-              :Doljevac
-              :Đakovica
-              :Žabalj
-              :Žabari
-              :Žagubica
-              :Žitište
-              :Žitorađa
-              :Zvečan
-              :Zaječar
-              :Zrenjanin
-              :Zubin-Potok
-              :Ivanjica
-              :Inđija
-              :Irig
-              :Istok
-              :Jagodina
-              :Kikinda
-              :Kragujevac
-              :Kraljevo
-              :Kruševac
-              :Kanjiža
-              :Kačanik
-              :Kladovo
-              :Klina
-              :Knić
-              :Knjaževac
-              :Kovačica
-              :Kovin
-              :Kosjerić
-              :Kosovo-Polje
-              :Kosovska-Kamenica
-              :Kosovska-Mitrovica
-              :Koceljeva
-              :Krupanj
-              :Kula
-              :Kuršumlija
-              :Kučevo
-              :Leskovac
-              :Loznica
-              :Lajkovac
-              :Lapovo
-              :Lebane
-              :Leposavić
-              :Lipljan
-              :Lučani
-              :Ljig
-              :Ljubovija
-              :Majdanpek
-              :Mali-Zvornik
-              :Mali-Iđoš
-              :Malo-Crniće
-              :Medveđa
-              :Merošina
-              :Mionica
-              :Negotin
-              :Niš
-              :Novi-Pazar
-              :Novi-Sad
-              :Nova-Varoš
-              :Nova-Crnja
-              :Novi-Bečej
-              :Novi-Kneževac
-              :Novo-Brdo
-              :Obilić
-              :Opovo
-              :Orahovac
-              :Osečina
-              :Odžaci
-              :Paraćin
-              :Pančevo
-              :Pirot
-              :Požarevac
-              :Priština
-              :Petrovac-na-Mlavi
-              :Peć
-              :Pećinci
-              :Plandište
-              :Podujevo
-              :Prokuplje
-              :Požega
-              :Preševo
-              :Priboj
-              :Prizren
-              :Prijepolje
-              :Ražanj
-              :Rača
-              :Raška
-              :Rekovac
-              :Ruma
-              :Svilajnac
-              :Svrljig
-              :Smederevo
-              :Sombor
-              :Senta
-              :Sečanj
-              :Sjenica
-              :Smederevska-Palanka
-              :Sokobanja
-              :Srbica
-              :Srbobran
-              :Sremski-Karlovci
-              :Sremska-Mitrovica
-              :Stara-Pazova
-              :Subotica
-              :Suva-Reka
-              :Surdulica
-              :Temerin
-              :Titel
-              :Topola
-              :Trgovište
-              :Trstenik
-              :Tutin
-              :Ćićevac
-              :Ćuprija
-              :Ub
-              :Užice
-              :Uroševac
-              :Crna-Trava
-              :Čajetina
-              :Čačak
-              :Čoka
-              :Šabac
-              :Šid
-              :Štimlje
-              :Štrpce])
+
 
 ;; -- helper functions region --
 (defn extract-input-value
@@ -197,29 +24,29 @@
 
 (defn first-name-input [id]
   (let [value (subscribe [::subs/form id])
-        valid? (subscribe [::subs/form-validation])]
+        valid? (subscribe [::subs/form-validation id])]
     [:div
      [:label "Ime"]
-     (if (not @valid?) [:span "  Unesite vase ime."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
               :required    true
-              :placeholder "Vase ime..."}]]))
+              :placeholder "Vase ime..."}]
+     (if (not @valid?) [:span "  Unesite vase ime."])]))
 
 
 (defn last-name-input [id]
   (let [value (subscribe [::subs/form id])
-        valid? (subscribe [::subs/form-validation])]
+        valid? @(subscribe [::subs/form-validation id])]
     [:div
      [:label "Prezime"]
-     (if (not @valid?) [:span "  Unesite vase prezime."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
-              :placeholder "Vase prezime..."}]]))
+              :placeholder "Vase prezime..."}]
+     (if (not valid?) [:span "  Unesite vase prezime."])]))
 
 
 (defn region-select [id regions]
@@ -232,29 +59,30 @@
        [:option {:value ""} "Izabarite opstinu"]
        (map (fn [r] [:option {:key r :value r} r]) regions)]]]))
 
+
 (defn email-input [id]
   (let [value (subscribe [::subs/form id])
-        valid? (subscribe [::subs/form-validation id])]
+        valid? @(subscribe [::subs/form-validation id])]
     [:div
      [:label "E-mail"]
-     (if (not @valid?) [:span "  Molimo vas proverite vasu email adresu i pokusajte ponovo."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
-              :placeholder "xxxx@xxxx.com"}]]))
+              :placeholder "xxxx@xxxx.com"}]
+     (if (not valid?) [:span "  Molimo vas proverite vasu email adresu i pokusajte ponovo."])]))
 
 (defn phone-number-input [id]
   (let [value (subscribe [::subs/form id])
-        valid? (subscribe [::subs/form-validation id])]
+        valid? @(subscribe [::subs/form-validation id])]
     [:div
      [:label "Telefon"]
-     (if (not @valid?) [:span "  Molimo vas proverite vas broj telefona i pokusajte ponovo."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
-              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
-              :placeholder "06x-xxxx-xxxx"}]]))
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
+              :placeholder "06x-xxxx-xxxx"}]
+     (if (not valid?) [:span "  Molimo vas proverite vas broj telefona i pokusajte ponovo."] "")]))
 
 (defn post-toggle [id]
   (let [value (subscribe [::subs/form id])]
@@ -276,17 +104,17 @@
 
 (defn qty-input [id]
   (let [value (subscribe [::subs/form id])
-        valid? (subscribe [::subs/form-validation])]
+        valid? (subscribe [::subs/form-validation id])]
     [:div
      [:label {:for "qty"} "Koju kolicinu delite?"]
-     (if (not @valid?) [:span "  Molimo proverite unetu kolicinu, vrednost mora biti izmedju 1 - 100."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (long (extract-input-value %))])
-              :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "number"
               :min         "1"
               :max         "100"
-              :placeholder "1-100"}]]))
+              :placeholder "1-100"}]
+     (if (not @valid?) [:span "  Molimo proverite unetu kolicinu, vrednost mora biti izmedju 1 - 100."])]))
 
 
 (defn form []
@@ -294,7 +122,7 @@
     [:div
      [first-name-input :firstname]
      [last-name-input :lastname]
-     [region-select :region regions]
+     [region-select :region r/regions]
      [:div
       "Izaberite makar jedan nacini kontakta:"
       [phone-number-input :phone-number]
@@ -347,7 +175,7 @@
        [:select {:value     @region-value
                  :on-change #(dispatch [::events/fetch-users (keyword (extract-input-value %))])}
         [:option {:value ""} "Izabarite opstinu"]
-        (map (fn [r] [:option {:key r :value r} r]) regions)]]]
+        (map (fn [r] [:option {:key r :value r} r]) r/regions)]]]
      (when @users
        [:table {:style {:border          "1px solid black"
                         :border-collapse "collapse"
