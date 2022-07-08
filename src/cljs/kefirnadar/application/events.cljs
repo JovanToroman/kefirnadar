@@ -97,6 +97,7 @@
   (fn [db [_ id val]]
     (assoc-in db [:form-validation id] val)))
 
+
 (defn fetch-users
   "Fetches all users from the server."
   [{db :db} [region]]

@@ -10,7 +10,7 @@
 (reg-sub
   ::form-validation
   (fn [db [_ id]]
-    (get-in db [:form-validation id])))
+    (get-in db [:form-validation id] true)))
 
 
 ;; helper function for ::is-valid?
