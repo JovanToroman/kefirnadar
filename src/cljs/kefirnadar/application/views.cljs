@@ -196,9 +196,11 @@
 
 
 (defn first-name-input [id]
-  (let [value (subscribe [::subs/form id])]
+  (let [value (subscribe [::subs/form id])
+        valid? (subscribe [::subs/form-validation])]
     [:div
      [:label "Ime"]
+     (if (not @valid?) [:span "  Unesite vase ime."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
@@ -208,9 +210,11 @@
 
 
 (defn last-name-input [id]
-  (let [value (subscribe [::subs/form id])]
+  (let [value (subscribe [::subs/form id])
+        valid? (subscribe [::subs/form-validation])]
     [:div
      [:label "Prezime"]
+     (if (not @valid?) [:span "  Unesite vase prezime."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
@@ -229,9 +233,11 @@
        (map (fn [r] [:option {:key r :value r} r]) regions)]]]))
 
 (defn email-input [id]
-  (let [value (subscribe [::subs/form id])]
+  (let [value (subscribe [::subs/form id])
+        valid? (subscribe [::subs/form-validation id])]
     [:div
      [:label "E-mail"]
+     (if (not @valid?) [:span "  Molimo vas proverite vasu email adresu i pokusajte ponovo."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
@@ -239,9 +245,11 @@
               :placeholder "xxxx@xxxx.com"}]]))
 
 (defn phone-number-input [id]
-  (let [value (subscribe [::subs/form id])]
+  (let [value (subscribe [::subs/form id])
+        valid? (subscribe [::subs/form-validation id])]
     [:div
      [:label "Telefon"]
+     (if (not @valid?) [:span "  Molimo vas proverite vas broj telefona i pokusajte ponovo."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
@@ -267,9 +275,11 @@
 
 
 (defn qty-input [id]
-  (let [value (subscribe [::subs/form id])]
+  (let [value (subscribe [::subs/form id])
+        valid? (subscribe [::subs/form-validation])]
     [:div
      [:label {:for "qty"} "Koju kolicinu delite?"]
+     (if (not @valid?) [:span "  Molimo proverite unetu kolicinu, vrednost mora biti izmedju 1 - 100."])
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (long (extract-input-value %))])
               :on-blur     #(dispatch [::events/validate-form id (val/field-validation id (extract-input-value %))])
