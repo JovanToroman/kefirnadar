@@ -7,6 +7,11 @@
   (fn [db [_ id]]
     (get-in db [:form id] "")))
 
+(reg-sub
+  ::form-validation
+  (fn [db [_ id]]
+    (get-in db [:form-validation id])))
+
 
 ;; helper function for ::is-valid?
 
