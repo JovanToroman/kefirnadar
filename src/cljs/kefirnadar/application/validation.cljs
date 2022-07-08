@@ -22,5 +22,4 @@
     :lastname (and (not (str/blank? input)) (> (count input) 1) (str/alpha? input))
     :email (or (str/empty? input) (reg-matcher email-regex-str input))
     :phone-number (or (str/empty? input) (reg-matcher phone-number-regex-str input))
-    :quantity (and (< input 101) (> input 0))
-    ))
+    :quantity (and (< input 101) (> input 0))))

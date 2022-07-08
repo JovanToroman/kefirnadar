@@ -31,7 +31,7 @@
                             :user/pick-up      (get-in db [:form :pick-up] false)
                             :user/quantity     (get-in db [:form :quantity])
                             :user/phone-number (get-in db [:form :phone-number] "NOT PROVIDED")
-                            :user/email       (get-in db [:form :email] "NOT PROVIDED")
+                            :user/email        (get-in db [:form :email] "NOT PROVIDED")
                             :user/grains-kind  (keyword (get-in db [:active-route :parameters :path :grains-kind]))}
                :on-success [::create-success]}}))
 
@@ -80,7 +80,7 @@
 (defn clean-db-when-homepage
   "Kada se klikne na Pocetna stranica dugme brise se iz local db-a sve neophodno da bi se resili konflikta"
   [{db :db}]
-  {:db           (dissoc db :all-users :user)})
+  {:db (dissoc db :all-users :user)})
 
 (reg-event-fx
   ::clean-db-when-homepage
