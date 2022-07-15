@@ -1,10 +1,10 @@
 (ns kefirnadar.application.views
-  (:require [kefirnadar.application.events :as events]
+  (:require [goog.string :as gstr]
+            [kefirnadar.application.events :as events]
+            [kefirnadar.application.regions :as r]
             [kefirnadar.application.subscriptions :as subs]
             [kefirnadar.application.validation :as validation]
-            [re-frame.core :refer [dispatch subscribe]]
-            [goog.string :as gstr]
-            [kefirnadar.application.regions :as r]))
+            [re-frame.core :refer [dispatch subscribe]]))
 
 
 
@@ -193,9 +193,10 @@
 
 
 (defn home []
-  [:div [:h1 "Da li delite ili trazite kefir?"]
-   [:button {:on-click #(dispatch [::events/ad-type {:type :sharing}])} "Delim"]
-   [:button {:on-click #(dispatch [::events/ad-type {:type :seeking}])} "Trazim"]])
+  [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
+   [:h1 "Da li delite ili trazite kefir?"]
+   [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/ad-type {:type :sharing}])} "Delim"]
+   [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/ad-type {:type :seeking}])} "Trazim"]])
 
 
 (defn grains-kind []
