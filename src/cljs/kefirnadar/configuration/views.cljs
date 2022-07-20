@@ -20,7 +20,7 @@
   (let [active-panel @(subscribe [::subscriptions/active-route])]
     [:div
      [:header
-      [:h1 "Header"]]
+      [:h1.d-flex.justify-content-center.align-items-center "Kefirnadar"]]
      [panels active-panel]
      [:footer
       [:h3 "Footer"]]]))

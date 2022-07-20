@@ -25,68 +25,67 @@
 (defn first-name-input [id]
   (let [value (subscribe [::subs/form id])
         valid? (subscribe [::subs/form-validation id])]
-    [:div
-     [:label "Ime"]
+    [:div.d-flex.flex-column.justify-content-center.align-items-center.mb-3
+     [:label "Ime: "]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
               :required    true
               :placeholder "Vase ime..."}]
-     (if (not @valid?) [:span "  Unesite vase ime."])]))
+     (if (not @valid?) [:p.text-danger "  Unesite vase ime."])]))
 
 
 (defn last-name-input [id]
   (let [value (subscribe [::subs/form id])
         valid? @(subscribe [::subs/form-validation id])]
-    [:div
-     [:label "Prezime"]
+    [:div.d-flex.flex-column.justify-content-center.align-items-center.mb-3
+     [:label "Prezime: "]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
               :placeholder "Vase prezime..."}]
-     (if (not valid?) [:span "  Unesite vase prezime."])]))
+     (if (not valid?) [:p.text-danger "  Unesite vase prezime."])]))
 
 
 (defn region-select [id regions]
   (let [value (subscribe [::subs/form id])]
-    [:div
-     [:label " Opstina: "]
-     [:div
-      [:select {:value     @value
-                :on-change #(dispatch [::events/update-form id (keyword (extract-input-value %))])}
-       [:option {:value ""} "Izabarite opstinu"]
-       (map (fn [r] [:option {:key r :value r} r]) regions)]]]))
+    [:div.d-flex.flex-column.justify-content-center.align-items-center.mb-3
+     [:label "Opstina:"]
+     [:select {:value     @value
+               :on-change #(dispatch [::events/update-form id (keyword (extract-input-value %))])}
+      [:option {:value ""} "Izabarite opstinu"]
+      (map (fn [r] [:option {:key r :value r} r]) regions)]]))
 
 
 (defn email-input [id]
   (let [value (subscribe [::subs/form id])
         valid? @(subscribe [::subs/form-validation id])]
-    [:div
-     [:label "E-mail"]
+    [:div.d-flex.flex-column.justify-content-center.align-items-center.mb-3
+     [:label "E-mail: "]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
               :placeholder "xxxx@xxxx.com"}]
-     (if (not valid?) [:span "  Molimo vas proverite vasu email adresu i pokusajte ponovo."])]))
+     (if (not valid?) [:p.text-danger "  Molimo vas proverite vasu email adresu i pokusajte ponovo."])]))
 
 (defn phone-number-input [id]
   (let [value (subscribe [::subs/form id])
         valid? @(subscribe [::subs/form-validation id])]
-    [:div
-     [:label "Telefon"]
+    [:div.d-flex.flex-column.justify-content-center.align-items-center.mt-3
+     [:label "Telefon:"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
               :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :placeholder "06x-xxxx-xxxx"}]
-     (if (not valid?) [:span "  Molimo vas proverite vas broj telefona i pokusajte ponovo."] "")]))
+     (if (not valid?) [:p.text-danger "  Molimo vas proverite vas broj telefona i pokusajte ponovo."] "")]))
 
 (defn post-toggle [id]
   (let [value (subscribe [::subs/form id])]
-    [:div
+    [:div.mt-3
      [:label "Razmena postom?"]
      [:input {:on-change #(dispatch [::events/update-form id (extract-checkbox-state %)])
               :type      "checkbox"
@@ -105,7 +104,7 @@
 (defn qty-input [id]
   (let [value (subscribe [::subs/form id])
         valid? (subscribe [::subs/form-validation id])]
-    [:div
+    [:div:div.d-flex.flex-column.justify-content-center.align-items-center.mt-3.mb-2
      [:label {:for "qty"} "Koju kolicinu delite?"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (long (extract-input-value %))])
@@ -114,27 +113,28 @@
               :min         "1"
               :max         "100"
               :placeholder "1-100"}]
-     (if (not @valid?) [:span "  Molimo proverite unetu kolicinu, vrednost mora biti izmedju 1 - 100."])]))
+     (if (not @valid?) [:p.text-danger "  Molimo proverite unetu kolicinu, vrednost mora biti izmedju 1 - 100."])]))
 
 
 (defn form []
   (let [is-valid? @(subscribe [::subs/is-valid? [:firstname :lastname :region :quantity]])]
-    [:div
-     [first-name-input :firstname]
-     [last-name-input :lastname]
-     [region-select :region r/regions]
-     [:div
-      "Izaberite makar jedan nacini kontakta:"
-      [phone-number-input :phone-number]
-      [email-input :email]]
-     [:div
-      "Izaberite makar jedan nacini transakcije:"
-      [post-toggle :post]
-      [pick-up-toggle :pick-up]]
-     [qty-input :quantity]
-     [:div
-      [:button {:disabled (not is-valid?)
-                :on-click #(dispatch [::events/create])} "Sacuvaj"]]]))
+    [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center.border
+     [:div.border-left.border-right.pl-3.pr-3
+      [first-name-input :firstname]
+      [last-name-input :lastname]
+      [region-select :region r/regions]
+      [:div.d-flex.flex-column.justify-content-center.align-items-center.mb-3
+       "Izaberite makar jedan nacini kontakta:"
+       [phone-number-input :phone-number]
+       [email-input :email]]
+      [:div.d-flex.flex-column.justify-content-center.align-items-center.mb-3
+       "Izaberite makar jedan nacini transakcije:"
+       [post-toggle :post]
+       [pick-up-toggle :pick-up]]
+      [qty-input :quantity]]
+     [:div.border-bottom
+      [:button.btn.btn-outline-primary {:disabled (not is-valid?)
+                                        :on-click #(dispatch [::events/create])} "Sacuvaj"]]]))
 
 
 ;; Ovo cu promeniti, napravio sam ovako samo da bi video da li mi radi..
@@ -167,8 +167,8 @@
   []
   (let [region-value (subscribe [::subs/region])
         users (subscribe [::subs/users])]
-    [:div
-     [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
+    [:div:div.d-flex.flex-column.min-vh-100.align-items-center
+     [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
      [:div
       [:label " Opstina: "]
       [:div
@@ -177,9 +177,9 @@
         [:option {:value ""} "Izabarite opstinu"]
         (map (fn [r] [:option {:key r :value r} r]) r/regions)]]]
      (when @users
-       [:table {:style {:border          "1px solid black"
-                        :border-collapse "collapse"
-                        :width           "100%"}}
+       [:table.mt-5 {:style {:border          "1px solid black"
+                             :border-collapse "collapse"
+                             :width           "100%"}}
         [:tbody
          [:tr {:style {:width "100%"}}
           [:th {:style {:border "1px solid black"}} "Ime"]
@@ -200,10 +200,10 @@
 
 
 (defn grains-kind []
-  [:div
-   [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :milk-type} "Mlecni"]
-   [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :water-type} "Vodeni"]
-   [:button {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :kombucha} "Kombuha"]])
+  [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
+   [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :milk-type} "Mlecni"]
+   [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :water-type} "Vodeni"]
+   [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :kombucha} "Kombuha"]])
 
 
 (defn ad-type-choice []
@@ -212,11 +212,11 @@
     :seeking users-list))
 
 (defn thank-you []
-  [:div [:h1 "Hvala vam sto delite kefir zrnca"]
-   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
+  [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center [:h1.mb-5 "Hvala vam sto delite kefir zrnca"]
+   [:button.btn.btn-outline-success.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
 
 (defn error []
-  [:div
+  [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
    [:h1 "Trenutno nema korisnika koji dele zrnca u izabranom regionu."]
-   [:button {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
+   [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
 
