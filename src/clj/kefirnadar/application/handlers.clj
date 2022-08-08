@@ -2,7 +2,8 @@
   (:require [kefirnadar.configuration.client :as client]
             [kefirnadar.application.queries :as q]
             [ring.util.http-response :as r]
-            [taoensso.timbre :refer [infof]]))
+            [taoensso.timbre :refer [infof]])
+  (:import (java.util Date)))
 
 (def conn (client/get-conn))
 
@@ -29,7 +30,7 @@
                                :user/quantity     (get-in parameters [:body :user/quantity])
                                :user/phone-number (get-in parameters [:body :user/phone-number] "NOT PROVIDED")
                                :user/email        (get-in parameters [:body :user/email] "NOT PROVIDED")
-                               :user/created      (java.util.Date.)})
+                               :user/created      (new Date)})
         new-user-id (-> result :tempids vals first)
         db-after (:db-after result)
         new-user (q/user db-after new-user-id)]
