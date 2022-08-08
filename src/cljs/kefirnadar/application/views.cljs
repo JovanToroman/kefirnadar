@@ -104,7 +104,7 @@
 (defn qty-input [id]
   (let [value (subscribe [::subs/form id])
         valid? (subscribe [::subs/form-validation id])]
-    [:div:div.d-flex.flex-column.justify-content-center.align-items-center.mt-3.mb-2
+    [:div.d-flex.flex-column.justify-content-center.align-items-center.mt-3.mb-2
      [:label {:for "qty"} "Koju kolicinu delite?"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (long (extract-input-value %))])
@@ -143,6 +143,7 @@
   [_users _reg-val]
   (for [user _users]
     [:tbody
+     (js/console.log (:user/created user))
      [:tr {:align "left"
            :style {:border "1px solid black"
                    :width  "100%"}}
@@ -167,7 +168,7 @@
   []
   (let [region-value (subscribe [::subs/region])
         users (subscribe [::subs/users])]
-    [:div:div.d-flex.flex-column.min-vh-100.align-items-center
+    [:div.d-flex.flex-column.min-vh-100.align-items-center
      [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
      [:div
       [:label " Opstina: "]

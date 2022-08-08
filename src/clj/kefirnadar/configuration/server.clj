@@ -2,6 +2,7 @@
   (:require [kefirnadar.application.web :as web]
             [kefirnadar.configuration.client :as client]
             [kefirnadar.configuration.start :as start]
+            [kefirnadar.application.async :as asy]
             [org.httpkit.server :as kit]
             [ring.middleware.reload :as reload]
             [taoensso.timbre :refer [infof]]))
@@ -24,4 +25,5 @@
   (infof "Db name: %s" (:db-name (client/db)))
   (infof "Starting local server")
   (start-server)
-  (infof "Local server started on port 8080"))
+  (infof "Local server started on port 8080")
+  (asy/db-clean-up-thread true))
