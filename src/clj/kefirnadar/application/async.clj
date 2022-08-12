@@ -34,12 +34,17 @@
               db (client/db)
               last-month (Date/from (.minus (Instant/now) (Duration/ofDays 30)))
               test (Date/from (.minus (Instant/now) (Duration/ofMinutes 1)))
-              ids (d/q '{:find  [(pull ?e [:db/id])]
-                         :in    [$ ?last-month]
-                         :where [[?e :user/created _ ?tx]
-                                 [?tx :db/txInstant ?created]
-                                 [(< ?created ?last-month)]]}
-                       db test)]
+              ids #_(d/q '{:find  [(pull ?e [:db/id])]
+                           :in    [$ ?last-month]
+                           :where [[?e :user/created _ ?tx]
+                                   [?tx :db/txInstant ?created]
+                                   [(< ?created ?last-month)]]}
+                         db test)
+                    (d/q '{:find  [(pull ?e [:db/id])]
+                           :in    [$ ?last-month]
+                           :where [[?e :user/created ?created]
+                                   [(< ?created ?last-month)]]}
+                         db test)]
           (let [collection (into [] (cred/flatten ids))]
             (cond
               (> (count collection) 0) (tx-retraction-operation conn collection)
