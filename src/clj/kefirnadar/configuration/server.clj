@@ -26,4 +26,4 @@
   (infof "Starting local server")
   (start-server)
   (infof "Local server started on port 8080")
-  (asy/db-clean-up-thread true))
+  (asy/Periodically-Cleaning-Database-thread true))
