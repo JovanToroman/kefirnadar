@@ -11,7 +11,6 @@
 (defn tx-retract-ad-component [id]
   [:db/retractEntity (first id)])
 
-;; Pretrci svaki element i pored svakog elementa stavi element.
 (defn tx-retract-ad-vector [collection]
   (let [a (mapv #(tx-retract-ad-component (vals %)) collection)]
     (loop [x (first a)
@@ -27,8 +26,7 @@
     conn
     {:tx-data (tx-retract-ad-vector data)}))
 
-
-(defn db-clean-up-thread [running?]
+(defn Periodically-Cleaning-Database-thread [running?]
   (Thread.
     (while running?
       (try
