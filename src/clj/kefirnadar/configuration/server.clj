@@ -2,10 +2,11 @@
   (:require [kefirnadar.application.web :as web]
             [kefirnadar.configuration.client :as client]
             [kefirnadar.configuration.start :as start]
-            [kefirnadar.application.async :as asy]
+            [kefirnadar.application.async :as async]
             [org.httpkit.server :as kit]
             [ring.middleware.reload :as reload]
-            [taoensso.timbre :refer [infof]]))
+            [taoensso.timbre :as log]))
+
 
 (def server (atom nil))
 
@@ -20,10 +21,10 @@
           (kit/run-server (reload/wrap-reload #'web/app) {:port 8080})))
 
 (defn -main [& _args]
-  (infof "Establishing DB connection")
+  (log/info "Establishing DB connection")
   (start/dev-start)
-  (infof "Db name: %s" (:db-name (client/db)))
-  (infof "Starting local server")
+  (log/info "Db name: %s" (:db-name (client/db)))
+  (log/info "Starting local server")
   (start-server)
-  (infof "Local server started on port 8080")
-  (asy/Periodically-Cleaning-Database-thread true))
+  (log/info "Local server started on port 8080")
+  (async/retract-old-ads-thread true))
