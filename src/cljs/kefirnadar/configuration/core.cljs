@@ -1,6 +1,7 @@
 (ns kefirnadar.configuration.core
   (:require [kefirnadar.configuration.config :as config]
             [kefirnadar.configuration.events :as events]
+            [kefirnadar.application.styles :as styles]
             [kefirnadar.configuration.views :as views]
             [re-frame.core :as re-frame :refer [dispatch]]
             [reagent.dom :as reagent-dom]
@@ -8,8 +9,9 @@
 
 (defn mount-root []
   (re-frame/clear-subscription-cache!)
-  (reagent-dom/render [views/main-panel]
-                      (.getElementById js/document "app"))
+  (reagent-dom/render
+    (styles/provider {:main-view views/main-panel})
+    (.getElementById js/document "app"))
   (timbre/info "App version:" config/version))
 
 (defn ^:after-load re-render

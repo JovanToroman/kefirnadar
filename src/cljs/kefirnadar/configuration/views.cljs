@@ -1,7 +1,9 @@
 (ns kefirnadar.configuration.views
-  (:require [kefirnadar.application.views :as application-views]
-            [kefirnadar.configuration.subscriptions :as subscriptions]
-            [re-frame.core :refer [subscribe]]))
+  (:require
+    [kefirnadar.application.styles :as styles]
+    [kefirnadar.application.views :as application-views]
+    [kefirnadar.configuration.subscriptions :as subscriptions]
+    [re-frame.core :refer [subscribe]]))
 
 (defn- panels [panel-name]
   (case (:name (:data panel-name))
@@ -17,10 +19,11 @@
     [:div]))
 
 (defn main-panel []
-  (let [active-panel @(subscribe [::subscriptions/active-route])]
+  (let [active-panel @(subscribe [::subscriptions/active-route])
+        [css] (styles/use-styletron)]
     [:div
      [:header
-      [:h1.d-flex.justify-content-center.align-items-center "Kefirnadar"]]
+      [:h1.d-flex.justify-content-center.align-items-center {:className (css {:color "blue"})} "Kefirnadar"]]
      [panels active-panel]
      [:footer
       [:h3 "Footer"]]]))
