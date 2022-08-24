@@ -19,7 +19,6 @@
   (some #(contains? map %) keys))
 
 
-;; TODO: ADD SPECIAL CASE FOR PHONE-NUMBER AND EMAIL BECAUSE WE DONT WANT TO HAVE TRUE VALUE FOR EMPTY STRING!!!!!
 (reg-sub
   ::is-valid?
   (fn [db [_ form-ids]]
