@@ -6,8 +6,8 @@
 
 
 (def cfg {:server-type        :peer-server
-          :access-key         "kefirnadar"
-          :secret             "kefirnadar"
+          :access-key         "kefirnadar"                  ; TODO: change to something more complicated
+          :secret             "kefirnadar"                  ; TODO: change to something more complicated
           :endpoint           "localhost:8998"
           :validate-hostnames false})
 
