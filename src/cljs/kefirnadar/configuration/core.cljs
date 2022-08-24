@@ -1,12 +1,11 @@
 (ns kefirnadar.configuration.core
-  (:require
-    [kefirnadar.application.styles :as styles]
-    [kefirnadar.configuration.config :as config]
-    [kefirnadar.configuration.events :as events]
-    [kefirnadar.configuration.views :as views]
-    [re-frame.core :as re-frame :refer [dispatch]]
-    [reagent.dom :as reagent-dom]
-    [taoensso.timbre :as timbre]))
+  (:require [kefirnadar.configuration.config :as config]
+            [kefirnadar.configuration.events :as events]
+            [kefirnadar.application.styles :as styles]
+            [kefirnadar.configuration.views :as views]
+            [re-frame.core :as re-frame :refer [dispatch]]
+            [reagent.dom :as reagent-dom]
+            [taoensso.timbre :as timbre]))
 
 (defn mount-root []
   (re-frame/clear-subscription-cache!)
@@ -29,3 +28,4 @@
   (dispatch [::events/boot])
   (dev-setup)
   (mount-root))
+
