@@ -29,7 +29,7 @@
      [:label "Ime: "]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/store-validation-results id (validation/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
               :required    true
               :placeholder "Vase ime..."}]
@@ -43,7 +43,7 @@
      [:label "Prezime: "]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/store-validation-results id (validation/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
               :placeholder "Vase prezime..."}]
      (if (not valid?) [:p.text-danger "  Unesite vase prezime."])]))
@@ -66,9 +66,9 @@
      [:label "E-mail: "]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
-              :on-blur     #(dispatch [::events/store-validation-results id (validation/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "text"
-              :placeholder "xxxx@xxxx.xxx"}]
+              :placeholder "xxxx@xxxx.com"}]
      (if (not valid?) [:p.text-danger "  Molimo vas proverite vasu email adresu i pokusajte ponovo."])]))
 
 (defn phone-number-input [id]
@@ -79,7 +79,7 @@
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (extract-input-value %)])
               :type        "text"
-              :on-blur     #(dispatch [::events/store-validation-results id (validation/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :placeholder "06x-xxxx-xxxx"}]
      (if (not valid?) [:p.text-danger "  Molimo vas proverite vas broj telefona i pokusajte ponovo."] "")]))
 
@@ -108,7 +108,7 @@
      [:label {:for "qty"} "Koju kolicinu delite?"]
      [:input {:value       @value
               :on-change   #(dispatch [::events/update-form id (long (extract-input-value %))])
-              :on-blur     #(dispatch [::events/store-validation-results id (validation/field-validation id (extract-input-value %))])
+              :on-blur     #(dispatch [::events/validate-form id (validation/field-validation id (extract-input-value %))])
               :type        "number"
               :min         "1"
               :max         "100"
@@ -143,23 +143,24 @@
   [_users _reg-val]
   (for [user _users]
     [:tbody
+     (js/console.log (:user/created user))
      [:tr {:align "left"
            :style {:border "1px solid black"
                    :width  "100%"}}
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (:ad/firstname user)]
+                    :border     "1px solid black"}} (:user/firstname user)]
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (:ad/lastname user)]
+                    :border     "1px solid black"}} (:user/lastname user)]
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (:ad/region user)]
+                    :border     "1px solid black"}} (:user/region user)]
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (:ad/phone-number user)]
+                    :border     "1px solid black"}} (:user/phone-number user)]
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (:ad/email user)]
+                    :border     "1px solid black"}} (:user/email user)]
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (if (:ad/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
+                    :border     "1px solid black"}} (if (:user/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (if (:ad/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]]))
+                    :border     "1px solid black"}} (if (:user/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]]))
 
 
 (defn users-list

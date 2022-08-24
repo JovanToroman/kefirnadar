@@ -24,15 +24,15 @@
                   (dissoc :form))
      ::fx/api {:uri        "/create"
                :method     :post
-               :params     {:ad/firstname    (get-in db [:form :firstname])
-                            :ad/lastname     (get-in db [:form :lastname])
-                            :ad/region       (get-in db [:form :region])
-                            :ad/post         (get-in db [:form :post] false)
-                            :ad/pick-up      (get-in db [:form :pick-up] false)
-                            :ad/quantity     (get-in db [:form :quantity])
-                            :ad/phone-number (get-in db [:form :phone-number] "NOT PROVIDED")
-                            :ad/email        (get-in db [:form :email] "NOT PROVIDED")
-                            :ad/grains-kind  (keyword (get-in db [:active-route :parameters :path :grains-kind]))}
+               :params     {:user/firstname    (get-in db [:form :firstname])
+                            :user/lastname     (get-in db [:form :lastname])
+                            :user/region       (get-in db [:form :region])
+                            :user/post         (get-in db [:form :post] false)
+                            :user/pick-up      (get-in db [:form :pick-up] false)
+                            :user/quantity     (get-in db [:form :quantity])
+                            :user/phone-number (get-in db [:form :phone-number] "NOT PROVIDED")
+                            :user/email        (get-in db [:form :email] "NOT PROVIDED")
+                            :user/grains-kind  (keyword (get-in db [:active-route :parameters :path :grains-kind]))}
                :on-success [::create-success]}}))
 
 (reg-event-fx ::create create)
@@ -93,7 +93,7 @@
     (assoc-in db [:form id] val)))
 
 (reg-event-db
-  ::store-validation-results
+  ::validate-form
   (fn [db [_ id val]]
     (assoc-in db [:form-validation id] val)))
 
