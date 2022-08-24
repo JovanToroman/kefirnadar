@@ -23,7 +23,7 @@
         [css] (styles/use-styletron)]
     [:div
      [:header
-      [:h1.d-flex.justify-content-center.align-items-center {:className (css #js {:color "blue"})} "Kefirnadar"]]
+      [:h1.d-flex.justify-content-center.align-items-center {:className (css {:color "blue"})} "Kefirnadar"]]
      [panels active-panel]
      [:footer
       [:h3 "Footer"]]]))
