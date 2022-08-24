@@ -1,55 +1,46 @@
 (ns kefirnadar.application.async
   (:require [kefirnadar.configuration.client :as client]
-            [clj-time.core :as t]
             [datomic.client.api :as d]
-            [taoensso.timbre :refer [infof]]
-            [clojure.core.reducers :as cred])
+            [taoensso.timbre :as log])
   (:import (java.util Date)
            (java.time Instant Duration)))
 
 
-(defn tx-retract-ad-component [id]
-  [:db/retractEntity (first id)])
+(defn assemble-data-for-retraction [ids]
+  "Assemble required data structure from ids for 'tx-retract-old-ids' .
+    [[:db/retractEntity id] [:db/add 'datomic.tx' :db/doc 'remove old ad']]"
+  (let [retract-entity-ids (mapv (fn [id]
+                                   [:db/retractEntity (:db/id id)]) ids)]
+    (vec
+      (interleave
+        retract-entity-ids
+        (repeat (count retract-entity-ids) [:db/add "datomic.tx" :db/doc "remove old ad"])))))
 
-(defn tx-retract-ad-vector [collection]
-  (let [a (mapv #(tx-retract-ad-component (vals %)) collection)]
-    (loop [x (first a)
-           y [:db/add "datomic.tx" :db/doc "remove old ad"]
-           rem (rest a)
-           final-vec []]
-      (if (empty? rem)
-        (conj final-vec x y)
-        (recur (second (rest a)) y (rest rem) (conj final-vec x y))))))
 
-(defn tx-retraction-operation [conn data]
+(defn tx-retract-old-ads [conn data]
+  "Transact function for retracting ads from database."
   (d/transact
     conn
-    {:tx-data (tx-retract-ad-vector data)}))
+    {:tx-data (assemble-data-for-retraction data)}))
 
-(defn Periodically-Cleaning-Database-thread [running?]
+(defn retract-old-ads-thread [running?]
+  "Check for ads older then predefined time, retrieve ids and feed them to a tx-retract-old-ads function."
   (Thread.
+    ^Runnable
     (while running?
       (try
         (let [conn (client/get-conn)
               db (client/db)
               last-month (Date/from (.minus (Instant/now) (Duration/ofDays 30)))
-              test (Date/from (.minus (Instant/now) (Duration/ofMinutes 1)))
-              ids #_(d/q '{:find  [(pull ?e [:db/id])]
-                           :in    [$ ?last-month]
-                           :where [[?e :user/created _ ?tx]
-                                   [?tx :db/txInstant ?created]
-                                   [(< ?created ?last-month)]]}
-                         db test)
-                    (d/q '{:find  [(pull ?e [:db/id])]
-                           :in    [$ ?last-month]
-                           :where [[?e :user/created ?created]
-                                   [(< ?created ?last-month)]]}
-                         db test)]
-          (let [collection (into [] (cred/flatten ids))]
-            (cond
-              (> (count collection) 0) (tx-retraction-operation conn collection)
-              (= (count collection) 0) (println "Collection is empty"))))
+              last-minute (Date/from (.minus (Instant/now) (Duration/ofMinutes 1)))
+              old-ad-ids (into [] (flatten (d/q '{:find  [(pull ?e [:db/id])]
+                                                  :in    [$ ?last-month]
+                                                  :where [[?e :ad/created ?created]
+                                                          [(< ?created ?last-month)]]}
+                                                db last-minute)))]
+          (if (empty? old-ad-ids)
+            (log/info "No ads older then 30 days to retract.")
+            (tx-retract-old-ads conn old-ad-ids)))
         (catch Exception e
-          (println "Exception in Periodically Cleaning Database:" e)))
-      (Thread/sleep 10000))))
-
+          (log/info "Exception in retract-old-ads-thread:" e)))
+      (Thread/sleep 15000))))

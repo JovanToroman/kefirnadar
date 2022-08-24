@@ -16,7 +16,7 @@
    (println "COND: " cond)
    (let [q (cond->
              '{:find  [(pull ?eid [*])]
-               :where [[?eid :user/created]]}
+               :where [[?eid :ad/created]]}
              (map? cond) (update :where into (map #(into ['?eid] %)) cond))]
      (map first (d/q q db)))))
 
