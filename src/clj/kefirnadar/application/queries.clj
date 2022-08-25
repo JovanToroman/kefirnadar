@@ -3,23 +3,21 @@
     [datomic.client.api :as d]))
 
 
-(defn user                                                  ;; currently, not used, maybe in future
+(defn ad                                                  ;; currently, not used, maybe in future
   "Find a user based on its id."
   [db user-id]
   (d/pull db [:*] user-id))
 
-
-(defn users
+(defn ads
   ([db]
-   (users db nil))
+   (ads db nil))
   ([db cond]
    (println "COND: " cond)
-   (let [q (cond->
-             '{:find  [(pull ?eid [*])]
-               :where [[?eid :ad/created]]}
-             (map? cond) (update :where into (map #(into ['?eid] %)) cond))]
+   (let [condition-vector (mapv (fn [cond-pair]
+                                  ['?eid (key cond-pair) (val cond-pair)]) cond)
+         q (reduce conj '[:find (pull ?eid [*])
+                          :where [?eid :ad/created]] condition-vector)]
      (map first (d/q q db)))))
-
 
 (defn add-entity!
   "Transact one item if it is a map, or many items otherwise."
