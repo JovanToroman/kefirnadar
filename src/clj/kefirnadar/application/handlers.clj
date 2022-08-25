@@ -7,17 +7,17 @@
 
 (def conn (client/get-conn))
 
-(defn get-users
-  "This handler returns all the users."
+(defn get-ads
+  "This handler returns all active ads."
   [input]
   (println (:path-params input))
-  (let [users (q/ads (client/db) (:path-params input))]
-    (if (not-empty users)
-      (r/ok users)
+  (let [ads (q/ads (client/db) (:path-params input))]
+    (if (not-empty ads)
+      (r/ok ads)
       (r/bad-request {:status :error}))))
 
 (defn create-user
-  "Creates a user."
+  "Creates ad."
   [{:keys [parameters]}]
   (infof "Parameters: %s" parameters)
   (let [result (q/add-entity! conn
@@ -31,10 +31,10 @@
                                :ad/phone-number (get-in parameters [:body :ad/phone-number] "NOT PROVIDED")
                                :ad/email        (get-in parameters [:body :ad/email] "NOT PROVIDED")
                                :ad/created      (Date.)})
-        new-user-id (-> result :tempids vals first)
+        new-ad-id (-> result :tempids vals first)
         db-after (:db-after result)
-        new-user (q/ad db-after new-user-id)]
+        new-ad (q/ad db-after new-ad-id)]
     (if (:db-after result)
-      (r/ok new-user)
+      (r/ok new-ad)
       (r/bad-request))))
 
