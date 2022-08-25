@@ -4,9 +4,9 @@
 
 
 (defn ad                                                  ;; currently, not used, maybe in future
-  "Find a user based on its id."
-  [db user-id]
-  (d/pull db [:*] user-id))
+  "Find an ad based on its id."
+  [db ad-id]
+  (d/pull db [:*] ad-id))
 
 (defn ads
   ([db]
