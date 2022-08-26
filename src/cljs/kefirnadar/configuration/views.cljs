@@ -21,9 +21,15 @@
 (defn main-panel []
   (let [active-panel @(subscribe [::subscriptions/active-route])
         [css] (styles/use-styletron)]
-    [:div
+    [:div {:className (css {:margin 0
+                            :padding [0 10]
+                            :box-sizing "border-box"
+                            :font-family "sans-serif"})}
      [:header
-      [:h1.d-flex.justify-content-center.align-items-center {:className (css {:color "blue"})} "Kefirnadar"]]
+      [:h1.d-flex.justify-content-center.align-items-center {:className (css {:color "#000fff"})} "Kefirnadar"]]
      [panels active-panel]
      [:footer
       [:h3 "Footer"]]]))
+
+
+
