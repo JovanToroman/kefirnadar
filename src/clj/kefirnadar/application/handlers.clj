@@ -10,8 +10,7 @@
 (defn get-ads
   "This handler returns all active ads."
   [input]
-  (println (:path-params input))
-  (let [ads (q/ads (client/db) (:path-params input))]
+  (let [ads (q/get-ads-by-kind-and-region (client/db) (:path-params input))]
     (if (not-empty ads)
       (r/ok ads)
       (r/bad-request {:status :error}))))

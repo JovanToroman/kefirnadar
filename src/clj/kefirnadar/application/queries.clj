@@ -3,21 +3,34 @@
     [datomic.client.api :as d]))
 
 
-(defn ad                                                  ;; currently, not used, maybe in future
+(def query-by-kind-and-region
+  '[:find (pull ?eid [*])
+    :in $ ?grains-kind ?region
+    :where
+    [?eid :ad/region ?region]
+    [?eid :ad/grains-kind ?grains-kind]])
+
+
+(def query-old-ad-ids
+  '[:find (pull ?e [:db/id])
+    :in $ ?last-month
+    :where [?e :ad/created ?created]
+    [(< ?created ?last-month)]])
+
+
+(defn ad
   "Find an ad based on its id."
   [db ad-id]
   (d/pull db [:*] ad-id))
 
-(defn ads
+
+(defn get-ads-by-kind-and-region
   ([db]
-   (ads db nil))
-  ([db cond]
-   (println "COND: " cond)
-   (let [condition-vector (mapv (fn [cond-pair]
-                                  ['?eid (key cond-pair) (val cond-pair)]) cond)
-         q (reduce conj '[:find (pull ?eid [*])
-                          :where [?eid :ad/created]] condition-vector)]
-     (map first (d/q q db)))))
+   (get-ads-by-kind-and-region db nil))
+  ([db {:ad/keys [grains-kind region]}]
+   "This function accepts a condition and retrieves ads based on the condition values."
+   (map first (d/q query-by-kind-and-region db grains-kind region))))
+
 
 (defn add-entity!
   "Transact one item if it is a map, or many items otherwise."
