@@ -16,8 +16,12 @@
   (let [[css] (styletron-react/useStyletron)]
     [(comp css clj->js)]))
 
-(def styles-map {:wrapper       {:max-width  "500px"
-                                 :width      "100%"
+(def styles-map {:wrapper       {:max-width "90%"
+                                 :width      "fit-content"
+                                 :background "#fff"
+                                 :margin     "20px auto"}
+                 :form-wrapper   {:max-width "100%"
+                                 :width      "70%"
                                  :background "#fff"
                                  :margin     "20px auto"
                                  :box-shadow "1px 1px 2px rgba(0,0,0,0.125)"

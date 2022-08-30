@@ -36,10 +36,10 @@
                                                       :in    [$ ?last-month]
                                                       :where [[?e :ad/created ?created]
                                                               [(< ?created ?last-month)]]}
-                                                    db last-minute)))]
+                                                    db last-month)))]
           (if (empty? old-ad-ids)
             (log/info "No ads older then 30 days to retract.")
             (tx-retract-old-ads conn old-ad-ids)))
         (catch Exception e
           (log/info "Exception in retract-old-ads-thread:" e)))
-      (Thread/sleep 15000))))
+      (Thread/sleep 10000000))))
