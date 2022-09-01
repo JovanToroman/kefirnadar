@@ -1,26 +1,26 @@
-{:paths   ["src/clj" "src/cljs" "src/cljc" "resources"]
- :deps    {org.clojure/clojure         {:mvn/version "1.11.1"}
-           org.clojure/clojurescript   {:mvn/version "1.11.4"}
-           re-frame/re-frame           {:mvn/version "1.2.0"}
-           reagent/reagent             {:mvn/version "1.1.1"}
-           com.taoensso/timbre         {:mvn/version "5.2.1"}
-           thheller/shadow-cljs        {:mvn/version "2.18.0"}
-           binaryage/devtools          {:mvn/version "1.0.6"}
-           re-frisk/re-frisk           {:mvn/version "1.5.2"}
-           metosin/reitit              {:mvn/version "0.5.17"}
-           metosin/ring-http-response  {:mvn/version "0.9.3"}
-           com.datomic/client-pro      {:mvn/version "1.0.75"}
-           ring-cors/ring-cors         {:mvn/version "0.1.13"}
-           http-kit/http-kit           {:mvn/version "2.5.3"}
-           ring/ring                   {:mvn/version "1.4.0"}
-           cljs-http/cljs-http         {:mvn/version "0.1.46"}
-           funcool/cuerdas             {:mvn/version "2022.06.16-403"}
-           clj-time/clj-time           {:mvn/version "0.15.2"}
-           com.andrewmcveigh/cljs-time {:mvn/version "0.5.2"}
-           }
+{:paths ["src/clj" "src/cljs" "src/cljc" "resources"]
+ :deps {org.clojure/clojure {:mvn/version "1.11.1"}
+        org.clojure/clojurescript {:mvn/version "1.11.4"}
+        re-frame/re-frame {:mvn/version "1.2.0"}
+        reagent/reagent {:mvn/version "1.1.1"}
+        com.taoensso/timbre {:mvn/version "5.2.1"}
+        thheller/shadow-cljs {:mvn/version "2.18.0"}
+        binaryage/devtools {:mvn/version "1.0.6"}
+        re-frisk/re-frisk {:mvn/version "1.5.2"}
+        metosin/reitit {:mvn/version "0.5.17"}
+        metosin/ring-http-response {:mvn/version "0.9.3"}
+        com.datomic/dev-local {:mvn/version "1.0.243"}
+        ring-cors/ring-cors {:mvn/version "0.1.13"}
+        http-kit/http-kit {:mvn/version "2.5.3"}
+        ring/ring {:mvn/version "1.4.0"}
+        cljs-http/cljs-http {:mvn/version "0.1.46"}
+        funcool/cuerdas {:mvn/version "2022.06.16-403"}
+        clj-time/clj-time {:mvn/version "0.15.2"}
+        com.andrewmcveigh/cljs-time {:mvn/version "0.5.2"}
+        }
  :aliases {; serve the project locally using clj -Adev:local
-           :local {:main-opts   ["-m" "kefirnadar.configuration.server"]
+           :local {:main-opts ["-m" "kefirnadar.configuration.server"]
                    :extra-paths ["test" "local"]
-                   :extra-deps  {http-kit/http-kit       {:mvn/version "2.5.3"}
-                                 ring/ring-devel         {:mvn/version "1.9.5"}
-                                 ring-logger/ring-logger {:mvn/version "1.1.1"}}}}}
+                   :extra-deps {http-kit/http-kit {:mvn/version "2.5.3"}
+                                ring/ring-devel {:mvn/version "1.9.5"}
+                                ring-logger/ring-logger {:mvn/version "1.1.1"}}}}}

@@ -5,11 +5,8 @@
 (def db-name "kefirnadar")
 
 
-(def cfg {:server-type        :peer-server
-          :access-key         "kefirnadar"
-          :secret             "kefirnadar"
-          :endpoint           "localhost:8998"
-          :validate-hostnames false})
+(def cfg {:server-type :dev-local
+          :system "kefirnadar"})
 
 
 (defn get-client
