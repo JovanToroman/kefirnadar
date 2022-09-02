@@ -9,7 +9,7 @@
     {:get {:handler    h/get-ads
            :parameters {:path {:ad/region      keyword?
                                :ad/grains-kind keyword?}}}}]
-   ["/create" {:post {:handler    h/create-user
+   ["/create" {:post {:handler    h/create-ad
                       :parameters {:body {:ad/firstname             string?
                                           :ad/lastname              string?
                                           :ad/region                keyword?

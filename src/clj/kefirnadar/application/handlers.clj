@@ -16,7 +16,7 @@
       (r/ok ads)
       (r/bad-request {:status :error}))))
 
-(defn create-user
+(defn create-ad
   "Creates ad."
   [{:keys [parameters]}]
   (infof "Parameters: %s" parameters)
