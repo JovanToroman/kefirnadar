@@ -101,13 +101,13 @@
 (defn fetch-users
   "Fetches all users from the server."
   [{db :db} [region]]
-  (let [grains-kind (keyword (get-in db [:active-route :parameters :path :grains-kind]))]
-    {:db      (-> db
-                  (assoc-in [:user :data :region-filter] region))
-     ::fx/api {:uri        (str "/list/grains-kind/" grains-kind "/region/" region)
-               :method     :get
+  (let [grains-kind (get-in db [:active-route :parameters :path :grains-kind])]
+    {:db (-> db
+           (assoc-in [:user :data :region-filter] region))
+     ::fx/api {:uri (str "/list/grains-kind/" grains-kind "/region/" region)
+               :method :get
                :on-success [::fetch-users-success]
-               :on-error   [::fetch-users-fail]}}))
+               :on-error [::fetch-users-fail]}}))
 
 
 (reg-event-fx ::fetch-users trim-v fetch-users)

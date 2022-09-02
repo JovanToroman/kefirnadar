@@ -172,9 +172,9 @@
      [:div
       [:label " Opstina: "]
       [:div
-       [:select {:value     @region-value
-                 :on-change #(dispatch [::events/fetch-users (keyword (extract-input-value %))])}
-        [:option {:value ""} "Izabarite opstinu"]
+       [:select {:value @region-value
+                 :on-change #(dispatch [::events/fetch-users (extract-input-value %)])}
+        [:option {:value ""} "Izaberite opštinu"]
         (map (fn [r] [:option {:key r :value r} r]) r/regions)]]]
      (when @users
        [:table.mt-5 {:style {:border          "1px solid black"

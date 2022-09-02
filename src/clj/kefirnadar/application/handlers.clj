@@ -8,11 +8,9 @@
 (defn get-users
   "This handler returns all the users."
   [input]
-  (println (:path-params input))
-  (let [users (q/users (client/db) (:path-params input))]
-    (if (not-empty users)
-      (r/ok users)
-      (r/bad-request {:status :error}))))
+  (println (:params input))
+  (let [users (q/users (client/db) (:params input))]
+    (r/ok users)))
 
 (defn create-user
   "Creates a user."

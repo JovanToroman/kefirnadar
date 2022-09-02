@@ -1,8 +1,8 @@
 (ns kefirnadar.configuration.server
-  (:require [kefirnadar.application.web :as web]
+  (:require [kefirnadar.application.async :as async]
+            [kefirnadar.application.web :as web]
             [kefirnadar.configuration.client :as client]
             [kefirnadar.configuration.start :as start]
-            [kefirnadar.application.async :as async]
             [org.httpkit.server :as kit]
             [ring.middleware.reload :as reload]
             [taoensso.timbre :as log]))
