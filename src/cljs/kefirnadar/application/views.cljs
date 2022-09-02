@@ -172,8 +172,8 @@
      [:td (:ad/firstname user)]
      [:td (:ad/lastname user)]
      [:td (:ad/region user)]
-     [:td (:ad/phone-number user)]
-     [:td (:ad/email user)]
+     [:td (if (:ad/phone-number user) (:ad/phone-number user) (gstr/unescapeEntities "&#10007"))]
+     [:td (if (:ad/email user) (:ad/email user) (gstr/unescapeEntities "&#10007"))]
      [:td (if (:ad/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
      [:td (if (:ad/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]))
 
