@@ -153,9 +153,9 @@
       [:td {:style {:text-align "center"
                     :border     "1px solid black"}} (:ad/region user)]
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (:ad/phone-number user)]
+                    :border     "1px solid black"}} (if (:ad/phone-number user) (:ad/phone-number user) (gstr/unescapeEntities "&#10007"))]
       [:td {:style {:text-align "center"
-                    :border     "1px solid black"}} (:ad/email user)]
+                    :border     "1px solid black"}} (if (:ad/email user) (:ad/email user) (gstr/unescapeEntities "&#10007"))]
       [:td {:style {:text-align "center"
                     :border     "1px solid black"}} (if (:ad/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
       [:td {:style {:text-align "center"
