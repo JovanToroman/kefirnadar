@@ -18,12 +18,6 @@
     [(< ?created ?last-month)]])
 
 
-(defn ad
-  "Find an ad based on its id."
-  [db ad-id]
-  (d/pull db [:*] ad-id))
-
-
 (defn get-ads-by-kind-and-region
   ([db]
    (get-ads-by-kind-and-region db nil))

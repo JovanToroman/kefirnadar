@@ -2,7 +2,8 @@
   (:require [kefirnadar.configuration.client :as client]
             [kefirnadar.application.queries :as q]
             [ring.util.http-response :as r]
-            [taoensso.timbre :refer [infof]])
+            [taoensso.timbre :refer [infof]]
+            [datomic.client.api :as d])
   (:import (java.util Date)))
 
 (def conn (client/get-conn))
@@ -39,7 +40,7 @@
         result (q/add-entity! conn assembled-entity-body)
         new-ad-id (-> result :tempids vals first)
         db-after (:db-after result)
-        new-ad (q/ad db-after new-ad-id)]
+        new-ad (d/pull db-after [:*] new-ad-id)]
     (if (:db-after result)
       (r/ok new-ad)
       (r/bad-request))))
