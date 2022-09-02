@@ -1,6 +1,6 @@
 (ns kefirnadar.application.async
   (:require [kefirnadar.configuration.client :as client]
-            [kefirnadar.application.queries :as query]
+            [kefirnadar.application.queries :as q]
             [datomic.client.api :as d]
             [taoensso.timbre :as log])
   (:import (java.util Date)
@@ -32,7 +32,7 @@
                 db (client/db)
                 last-month (Date/from (.minus (Instant/now) (Duration/ofDays 30)))
                 last-minute (Date/from (.minus (Instant/now) (Duration/ofMinutes 1)))
-                old-ad-ids (d/q query/query-old-ad-ids
+                old-ad-ids (d/q q/query-old-ad-ids
                                            db last-minute)]
             (if (empty? old-ad-ids)
               (log/info "No ads older then 30 days to retract.")
