@@ -7,6 +7,8 @@
            (java.time Instant Duration)))
 
 
+(def day-in-milliseconds (* 1000 60 60 24))
+
 (defn assemble-data-for-retraction [ids]
   "Assemble required data structure from ids for 'tx-retract-old-ids' .
     [[:db/retractEntity id] [:db/add 'datomic.tx' :db/doc 'remove old ad']]"
@@ -33,10 +35,10 @@
                 last-month (Date/from (.minus (Instant/now) (Duration/ofDays 30)))
                 last-minute (Date/from (.minus (Instant/now) (Duration/ofMinutes 1)))
                 old-ad-ids (d/q q/query-old-ad-ids
-                                           db last-minute)]
+                                           db last-month)]
             (if (empty? old-ad-ids)
               (log/info "No ads older then 30 days to retract.")
               (tx-retract-old-ads conn old-ad-ids)))
           (catch Exception e
             (log/info "Exception in retract-old-ads-thread:" e)))
-        (Thread/sleep 30000))))
+        (Thread/sleep day-in-milliseconds))))
