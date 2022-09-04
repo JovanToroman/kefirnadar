@@ -18,22 +18,28 @@
   "Persists a user to the server."
   [{db :db} [_params]]
   (let [type (get-in db [:user :data :grains-kind])
-        form-data (assoc (:form db) :grains-kind type)]
+        form-data (assoc (:form db) :grains-kind type)
+        body {:uri        "/create"
+              :method     :post
+              :params     {:ad/firstname   (get-in db [:form :firstname])
+                           :ad/lastname    (get-in db [:form :lastname])
+                           :ad/region      (get-in db [:form :region])
+                           :ad/post        (get-in db [:form :post] false)
+                           :ad/pick-up     (get-in db [:form :pick-up] false)
+                           :ad/quantity    (get-in db [:form :quantity])
+                           :ad/grains-kind (keyword (get-in db [:active-route :parameters :path :grains-kind]))}
+              :on-success [::create-success]}
+        assembled-fx-api-body (cond
+                                (and (get-in db [:form :phone-number])
+                                     (get-in db [:form :email])) (-> body
+                                                                     (assoc-in [:params :ad/email] (get-in db [:form :email]))
+                                                                     (assoc-in [:params :ad/phone-number] (get-in db [:form :phone-number])))
+                                (get-in db [:form :phone-number]) (assoc-in body [:params :ad/phone-number] (get-in db [:form :phone-number]))
+                                (get-in db [:form :email]) (assoc-in body [:params :ad/email] (get-in db [:form :email])))]
     {:db      (-> db
                   (assoc-in [:user :form] form-data)
                   (dissoc :form))
-     ::fx/api {:uri        "/create"
-               :method     :post
-               :params     {:ad/firstname    (get-in db [:form :firstname])
-                            :ad/lastname     (get-in db [:form :lastname])
-                            :ad/region       (get-in db [:form :region])
-                            :ad/post         (get-in db [:form :post] false)
-                            :ad/pick-up      (get-in db [:form :pick-up] false)
-                            :ad/quantity     (get-in db [:form :quantity])
-                            :ad/phone-number (get-in db [:form :phone-number] "NOT PROVIDED")
-                            :ad/email        (get-in db [:form :email] "NOT PROVIDED")
-                            :ad/grains-kind  (keyword (get-in db [:active-route :parameters :path :grains-kind]))}
-               :on-success [::create-success]}}))
+     ::fx/api assembled-fx-api-body}))
 
 (reg-event-fx ::create create)
 

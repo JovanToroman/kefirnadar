@@ -3,22 +3,27 @@
     [datomic.client.api :as d]))
 
 
-(defn user                                                  ;; currently, not used, maybe in future
-  "Find a user based on its id."
-  [db user-id]
-  (d/pull db [:*] user-id))
+(def query-by-kind-and-region
+  '[:find (pull ?eid [*])
+    :in $ ?grains-kind ?region
+    :where
+    [?eid :ad/region ?region]
+    [?eid :ad/grains-kind ?grains-kind]])
 
 
-(defn users
+(def query-old-ad-ids
+  '[:find (pull ?e [:db/id])
+    :in $ ?last-month
+    :where [?e :ad/created ?created]
+    [(< ?created ?last-month)]])
+
+
+(defn get-ads-by-kind-and-region
   ([db]
-   (users db nil))
-  ([db cond]
-   (println "COND: " cond)
-   (let [q (cond->
-             '{:find  [(pull ?eid [*])]
-               :where [[?eid :ad/created]]}
-             (map? cond) (update :where into (map #(into ['?eid] %)) cond))]
-     (map first (d/q q db)))))
+   (get-ads-by-kind-and-region db nil))
+  ([db {:ad/keys [grains-kind region]}]
+   "This function accepts a condition and retrieves ads based on the condition values."
+   (map first (d/q query-by-kind-and-region db grains-kind region))))
 
 
 (defn add-entity!
