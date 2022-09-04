@@ -14,9 +14,9 @@ instalirati komandom `npm install` pokrenutom iz korena projekta.
 
 ### Bekend
 
-Pre pokretanja servera, moramo pokrenuti lokalnu Datomic bazu podataka. Neophodno je da preuzmemo Datomic softver
-`datomic-starter-pro` sa verzijom `1.0.6397` ili većom. Onda je neophodno da navigiramo u direktorijum gde smo softver
-smestili i da pokrenemo sledeću komandu:
+Pre pokretanja servera, moramo pokrenuti dev-local Datomic bazu podataka. Neophodno je da preuzmemo i podesimo
+dev-local. Uputstva možemo naći [ovde](https://docs.datomic.com/cloud/dev-local.html). Nakon toga možemo pokrenuti
+aplikaciju.
 
 ```bash
 bin/run -m datomic.peer-server -h localhost -p 8998 -a kefirnadar,kefirnadar -d kefirnadar,datomic:mem://kefirnadar
