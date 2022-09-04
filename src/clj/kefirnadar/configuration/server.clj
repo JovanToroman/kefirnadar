@@ -23,7 +23,7 @@
 (defn -main [& _args]
   (log/info "Establishing DB connection")
   (start/dev-start)
-  (log/info "Db name: %s" (:db-name (client/db)))
+  (log/info "Db name: %s" client/db-name)
   (log/info "Starting local server")
   (start-server)
   (log/info "Local server started on port 8080")
