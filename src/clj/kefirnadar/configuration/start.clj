@@ -7,7 +7,7 @@
 (def initial-values (read-string (slurp (io/reader (io/resource "data/initial.edn")))))
 
 (defn dev-start []
-  (d/create-database (client/get-client) client/db-name)
+  (d/create-database (client/get-client) {:db-name client/db-name})
   (let [conn (client/get-conn)]
     (d/transact conn {:tx-data schema})
     (d/transact conn {:tx-data initial-values})
