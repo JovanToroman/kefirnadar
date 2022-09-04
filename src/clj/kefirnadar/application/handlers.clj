@@ -1,20 +1,17 @@
 (ns kefirnadar.application.handlers
-  (:require [kefirnadar.configuration.client :as client]
-            [kefirnadar.application.queries :as q]
+  (:require [kefirnadar.application.queries :as q]
+            [kefirnadar.configuration.client :as client]
             [ring.util.http-response :as r]
-            [taoensso.timbre :refer [infof]]
-            [datomic.client.api :as d])
-  (:import (java.util Date)))
-
-(def conn (client/get-conn))
+            [datomic.client.api :as d]
+            [taoensso.timbre :refer [infof]])
+  (:import [java.util Date]))
 
 (defn get-ads
   "This handler returns all active ads."
   [input]
+  (println (:params input))
   (let [ads (q/get-ads-by-kind-and-region (client/db) (:path-params input))]
-    (if (not-empty ads)
-      (r/ok ads)
-      (r/bad-request {:status :error}))))
+    (r/ok ads)))
 
 (defn create-ad
   "Creates ad."
@@ -37,7 +34,7 @@
                                                                                :ad/phone-number (get-in parameters [:body :ad/phone-number]))
                                 (get-in parameters [:body :ad/email]) (assoc entity-body
                                                                         :ad/email (get-in parameters [:body :ad/email])))
-        result (q/add-entity! conn assembled-entity-body)
+        result (q/add-entity! (client/get-conn) assembled-entity-body)
         new-ad-id (-> result :tempids vals first)
         db-after (:db-after result)
         new-ad (d/pull db-after [:*] new-ad-id)]
