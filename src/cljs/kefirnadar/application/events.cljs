@@ -5,12 +5,12 @@
 
 
 ;; helper functions
-(defn add-filter-region! [db region]
+(defn dropdown-filtering-value [db [_ region]]
   (assoc-in db [:user :data :region-filter] region))
 
-(reg-fx
-  ::add-filter-region
-  add-filter-region!)
+(reg-event-db
+  ::dropdown-filtering-value
+  dropdown-filtering-value)
 ;;end helper functions
 
 ;; -- create user business logic
@@ -82,7 +82,6 @@
                                   :ad-type     (get-in db [:user :data :ad-type])}}}))
 
 
-;; just a quick-fix
 (defn clean-db-when-homepage
   "Kada se klikne na Pocetna stranica dugme brise se iz local db-a sve neophodno da bi se resili konflikta"
   [{db :db}]
@@ -91,7 +90,6 @@
 (reg-event-fx
   ::clean-db-when-homepage
   clean-db-when-homepage)
-
 
 (reg-event-db
   ::update-form
@@ -102,7 +100,6 @@
   ::store-validation-results
   (fn [db [_ id val]]
     (assoc-in db [:form-validation id] val)))
-
 
 (defn fetch-users
   "Fetches all users from the server."

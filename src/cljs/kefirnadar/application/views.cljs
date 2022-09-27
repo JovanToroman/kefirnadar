@@ -1,7 +1,6 @@
 (ns kefirnadar.application.views
   (:require [goog.string :as gstr]
             [kefirnadar.application.events :as events]
-            [kefirnadar.application.regions :as r]
             [kefirnadar.application.subscriptions :as subs]
             [kefirnadar.application.validation :as validation]
             [kefirnadar.application.styles :as styles]
@@ -52,17 +51,22 @@
      (if (not valid?) [:p.text-danger {:className (css (:error styles/styles-map))} "Unesite vase prezime."])]))
 
 
-(defn region-select [id regions]
+(defn region-select [id]
   (let [value (subscribe [::subs/form id])
+        filtered-regions-coll (subscribe [::subs/filtered-regions-coll])
         [css] (styles/use-styletron)]
     [:div.form-group
      [:label {:className (css (:label styles/styles-map))} "Opstina:"]
      [:div {:className (css (:custom-select styles/styles-map))}
+      [:input {:className   (css (:input-field styles/styles-map))
+               :on-change   #(dispatch [::events/dropdown-filtering-value (extract-input-value %)])
+               :type        "text"
+               :placeholder "Filtrirajte regione..."}]
       [:select {:className (css (:select styles/styles-map))
                 :value     @value
                 :on-change #(dispatch [::events/update-form id (keyword (extract-input-value %))])}
        [:option {:value ""} "Izabarite opstinu"]
-       (map (fn [r] [:option {:key r :value r} r]) regions)]]]))
+       (map (fn [r] [:option {:key r :value r} r]) @filtered-regions-coll)]]]))
 
 
 (defn email-input [id]
@@ -143,7 +147,7 @@
       [:div.form-group
        [first-name-input :firstname]
        [last-name-input :lastname]
-       [region-select :region r/regions]
+       [region-select :region]
        [:div
         [:p {:className (css (:p styles/styles-map))} "Izaberite makar jedan nacini kontakta:"]
         [phone-number-input :phone-number]
@@ -182,16 +186,20 @@
   "List of all users."
   []
   (let [region-value (subscribe [::subs/region])
+        filtered-region-coll (subscribe [::subs/filtered-regions-coll])
         users (subscribe [::subs/users])]
     [:div.d-flex.flex-column.min-vh-100.align-items-center
      [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
      [:div
       [:label " Opstina: "]
       [:div
+       [:input {:on-change   #(dispatch [::events/dropdown-filtering-value (extract-input-value %)])
+                :type        "text"
+                :placeholder "Filtrirajte regione..."}]
        [:select {:value @region-value
                  :on-change #(dispatch [::events/fetch-users (extract-input-value %)])}
         [:option {:value ""} "Izaberite opštinu"]
-        (map (fn [r] [:option {:key r :value r} r]) r/regions)]]]
+        (map (fn [r] [:option {:key r :value r} r]) @filtered-region-coll)]]]
      (when @users
        [:div.table-responsive
         [:table.table.table-striped.table-bordered

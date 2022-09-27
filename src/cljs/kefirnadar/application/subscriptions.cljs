@@ -1,6 +1,17 @@
 (ns kefirnadar.application.subscriptions
-  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]))
+  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]
+            [kefirnadar.application.regions :as r]))
 
+
+
+
+(reg-sub
+  ::filtered-regions-coll
+  (fn [db]
+    (let [regions-filter-param (get-in db [:user :data :region-filter])
+          keywords-to-strings-coll (map #(name %) r/regions)
+          filtered-regions (filter #(clojure.string/includes? % regions-filter-param) keywords-to-strings-coll)] ;; TODO: Da li mozda zelimo da nam po defaultu r/regions bude lista sa stringovima??
+      (map #(keyword %) filtered-regions))))
 
 (reg-sub
   ::form
