@@ -8,9 +8,9 @@
 (reg-sub
   ::filtered-regions-coll
   (fn [db]
-    (let [regions-filter-param (get-in db [:user :data :region-filter])
-          keywords-to-strings-coll (map #(name %) r/regions)
-          filtered-regions (filter #(clojure.string/includes? % regions-filter-param) keywords-to-strings-coll)] ;; TODO: Da li mozda zelimo da nam po defaultu r/regions bude lista sa stringovima??
+    (let [regions-filter-string (get-in db [:user :data :region-filter])
+          regions-convert-keywords-to-strings (map #(name %) r/regions)
+          filtered-regions (filter #(clojure.string/includes? % regions-filter-string) regions-convert-keywords-to-strings)] ;; TODO: Da li mozda zelimo da nam po defaultu r/regions bude lista sa stringovima??
       (cond
         (seq? filtered-regions) (map #(keyword %) filtered-regions)
         :else r/regions))))
