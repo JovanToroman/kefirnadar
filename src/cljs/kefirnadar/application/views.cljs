@@ -53,17 +53,15 @@
 
 
 (defn region-select [id regions]
-  (let [[css] (styles/use-styletron)]
+  (let [value (subscribe [::subs/form id])
+        [css] (styles/use-styletron)]
     [:div.form-group
      [:label {:className (css (:label styles/styles-map))} "Opstina:"]
      [:div {:className (css (:custom-select styles/styles-map))}
-      [:input {:className   (css (:input-field styles/styles-map))
-               :list "regions"
-               :placeholder "Izabarite opstinu"
-               :on-change #(dispatch [::events/update-form id (keyword (extract-input-value %))])}]
-      [:datalist
-       {:className (css (:select styles/styles-map))
-        :id        "regions"}
+      [:select {:className (css (:select styles/styles-map))
+                :value     @value
+                :on-change #(dispatch [::events/update-form id (keyword (extract-input-value %))])}
+       [:option {:value ""} "Izabarite opstinu"]
        (map (fn [r] [:option {:key r :value r} r]) regions)]]]))
 
 
@@ -184,24 +182,17 @@
   "List of all users."
   []
   (let [region-value (subscribe [::subs/region])
-        users (subscribe [::subs/users])
-        [css] (styles/use-styletron)]
+        users (subscribe [::subs/users])]
     [:div.d-flex.flex-column.min-vh-100.align-items-center
      [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
      [:div
       [:label " Opstina: "]
       [:div
-       [:input {:className   (css (:input-field styles/styles-map))
-                :list "regions"
-                :placeholder "Izabarite opstinu"
-                :on-blur #(dispatch [::events/fetch-users (extract-input-value %)])}]
-       [:datalist {:className (css (:select styles/styles-map))
-                   :id        "regions"}
+       [:select {:value @region-value
+                 :on-change #(dispatch [::events/fetch-users (extract-input-value %)])}
         [:option {:value ""} "Izaberite opštinu"]
         (map (fn [r] [:option {:key r :value r} r]) r/regions)]]]
      (when @users
-       (if (= (count @users) 0)
-         (dispatch [::events/fetch-users-fail]))
        [:div.table-responsive
         [:table.table.table-striped.table-bordered
          [:thead.thead-dark
@@ -213,7 +204,20 @@
            [:th {:scope "col"} "Slanje postom"]
            [:th {:scope "col"} "Licno preuzimanje"]]]
          [:tbody
-          (user-row @users @region-value)]]])]))
+          (user-row @users @region-value)]]]
+       #_[:table.mt-5 {:style {:border          "1px solid black"
+                               :border-collapse "collapse"
+                               :width           "100%"}}
+          [:tbody
+           [:tr {:style {:width "100%"}}
+            [:th {:style {:border "1px solid black"}} "Ime"]
+            [:th {:style {:border "1px solid black"}} "Prezime"]
+            [:th {:style {:border "1px solid black"}} "Region"]
+            [:th {:style {:border "1px solid black"}} "Telefon"]
+            [:th {:style {:border "1px solid black"}} "E-mail"]
+            [:th {:style {:border "1px solid black"}} "Slanje postom"]
+            [:th {:style {:border "1px solid black"}} "Licno preuzimanje"]]]
+          (user-row @users @region-value)])]))
 
 
 (defn home []

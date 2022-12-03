@@ -23,7 +23,7 @@
    (get-ads-by-kind-and-region db nil))
   ([db {:ad/keys [grains-kind region]}]
    "This function accepts a condition and retrieves ads based on the condition values."
-   (map first (d/q query-by-kind-and-region db (keyword grains-kind) (keyword region)))))
+   (map first (d/q query-by-kind-and-region db grains-kind region))))
 
 
 (defn add-entity!
