@@ -1,5 +1,4 @@
-(ns kefirnadar.configuration.db
-  (:require [reagent.core :as r]))
+(ns kefirnadar.configuration.db)
 
 (def default-db
   {})

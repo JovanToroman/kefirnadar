@@ -1,5 +1,5 @@
 (ns kefirnadar.configuration.routes
-  (:require [kefirnadar.configuration.subscriptions :as subscriptions]
+  (:require [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :refer [dispatch subscribe]]
             [reitit.coercion.schema]
             [reitit.coercion.spec]
@@ -11,10 +11,10 @@
 ; region routes
 (def routes
   ["/" {:coercion reitit.coercion.spec/coercion}
-   ["" {:name        :route/home
+   ["" {:name :route/home
         :controllers [{:identity identity
-                       :start    #(dispatch [:kefirnadar.application.events/clean-db-when-homepage])}]
-        :doc         "Home page"}]
+                       :start #(dispatch [:kefirnadar.application.events/clean-db])}]
+        :doc "Home page"}]
    ["ad-type/{ad-type}"
     {:name        :route/ad-type
      :path-params {:ad-type keyword?}
@@ -45,7 +45,7 @@
   (rfe/start!
     router
     (fn [route]
-      (let [old-route @(subscribe [::subscriptions/active-route])]
+      (let [old-route @(subscribe [::subs/active-route])]
         (dispatch [:kefirnadar.configuration.events/set-active-route
                    (assoc route :controllers (rfc/apply-controllers (:controllers old-route) route))])))
     {:use-fragment false}))

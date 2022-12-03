@@ -2,8 +2,10 @@
   (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]
             [kefirnadar.application.regions :as r]))
 
-
-
+(reg-sub
+  ::active-route
+  (fn [db _]
+    (:active-route db)))
 
 (reg-sub
   ::filtered-regions-coll

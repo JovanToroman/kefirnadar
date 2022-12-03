@@ -4,17 +4,20 @@
             [kefirnadar.application.subscriptions :as subs]
             [kefirnadar.application.validation :as validation]
             [kefirnadar.application.styles :as styles]
-            [re-frame.core :refer [dispatch subscribe]]))
+            [kefirnadar.application.inputs :as inputs]
+            [re-frame.core :refer [dispatch subscribe]]
+            [kefirnadar.application.regions :as r]
+            [applied-science.js-interop :as j]))
 
 
 ;; -- helper functions region --
 (defn extract-input-value
   [event]
-  (-> event .-target .-value))
+  (j/get-in event [:target :value]))
 
 (defn extract-checkbox-state
   [event]
-  (-> event .-target .-checked))
+  (j/get-in event [:target :checked]))
 
 
 ;; -- end helper functions region --
@@ -52,21 +55,18 @@
 
 
 (defn region-select [id]
-  (let [value (subscribe [::subs/form id])
+  (let [selected-region (subscribe [::subs/form id])
         filtered-regions-coll (subscribe [::subs/filtered-regions-coll])
         [css] (styles/use-styletron)]
     [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} "Opstina:"]
+     [:label {:className (css (:label styles/styles-map))} "Opština:"]
      [:div {:className (css (:custom-select styles/styles-map))}
-      [:input {:className   (css (:input-field styles/styles-map))
-               :on-change   #(dispatch [::events/dropdown-filtering-value (extract-input-value %)])
-               :type        "text"
-               :placeholder "Filtrirajte regione..."}]
-      [:select {:className (css (:select styles/styles-map))
-                :value     @value
-                :on-change #(dispatch [::events/update-form id (keyword (extract-input-value %))])}
-       [:option {:value ""} "Izabarite opstinu"]
-       (map (fn [r] [:option {:key r :value r} r]) @filtered-regions-coll)]]]))
+      [inputs/search-selector {:placeholder "Pretražite regione"
+                               :options (map (fn [r] {:title (name r) :value r})
+                                          r/regions)
+                               :active-value @selected-region
+                               :aria-labelledby "learning-spaces"
+                               :placeholder-disabled? true}]]]))
 
 
 (defn email-input [id]
@@ -149,11 +149,11 @@
        [last-name-input :lastname]
        [region-select :region]
        [:div
-        [:p {:className (css (:p styles/styles-map))} "Izaberite makar jedan nacini kontakta:"]
+        [:p {:className (css (:p styles/styles-map))} "Izaberite makar jedan način kontakta:"]
         [phone-number-input :phone-number]
         [email-input :email]]
        [:div
-        [:p {:className (css (:p styles/styles-map))} "Izaberite makar jedan nacini transakcije:"]
+        [:p {:className (css (:p styles/styles-map))} "Izaberite makar jedan način transakcije:"]
         [post-toggle :post]
         [pick-up-toggle :pick-up]]
        [qty-input :quantity]]]
@@ -161,10 +161,10 @@
       [:button.btn.btn-outline-primary
        {:className (css (:btn styles/styles-map))
         :disabled  (not is-valid?)
-        :on-click  #(dispatch [::events/create])} "Sacuvaj"]
+        :on-click  #(dispatch [::events/create])} "Sačuvaj"]
       [:button.btn.btn-outline-primary
        {:className (css (:btn styles/styles-map))
-        :on-click  #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]]]))
+        :on-click  #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]]]))
 
 
 ;; Ovo cu promeniti, napravio sam ovako samo da bi video da li mi radi..
@@ -185,21 +185,26 @@
 (defn users-list
   "List of all users."
   []
-  (let [region-value (subscribe [::subs/region])
-        filtered-region-coll (subscribe [::subs/filtered-regions-coll])
+  (let [selected-region (subscribe [::subs/region])
         users (subscribe [::subs/users])]
     [:div.d-flex.flex-column.min-vh-100.align-items-center
-     [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]
+     [:button.btn.btn-outline-primary.col-md-5.mb-5
+      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]
      [:div
-      [:label " Opstina: "]
+      [:label " Opština: "]
       [:div
+       [inputs/search-selector {:placeholder "Pretražite regione"
+                                :options (map (fn [r] {:title r :value r})
+                                           r/regions)
+                                :active-value selected-region
+                                :aria-labelledby "learning-spaces"
+                                :placeholder-disabled? true}]
        [:input {:on-change   #(dispatch [::events/dropdown-filtering-value (extract-input-value %)])
                 :type        "text"
                 :placeholder "Filtrirajte regione..."}]
-       [:select {:value @region-value
+       [:select {:value @selected-region
                  :on-change #(dispatch [::events/fetch-users (extract-input-value %)])}
-        [:option {:value ""} "Izaberite opštinu"]
-        (map (fn [r] [:option {:key r :value r} r]) @filtered-region-coll)]]]
+        [:option {:value ""} "Izaberite opštinu"]]]]
      (when @users
        [:div.table-responsive
         [:table.table.table-striped.table-bordered
@@ -209,35 +214,22 @@
            [:th {:scope "col"} "Region"]
            [:th {:scope "col"} "Telefon"]
            [:th {:scope "col"} "E-mail"]
-           [:th {:scope "col"} "Slanje postom"]
-           [:th {:scope "col"} "Licno preuzimanje"]]]
+           [:th {:scope "col"} "Slanje poštom"]
+           [:th {:scope "col"} "Lično preuzimanje"]]]
          [:tbody
-          (user-row @users @region-value)]]]
-       #_[:table.mt-5 {:style {:border          "1px solid black"
-                               :border-collapse "collapse"
-                               :width           "100%"}}
-          [:tbody
-           [:tr {:style {:width "100%"}}
-            [:th {:style {:border "1px solid black"}} "Ime"]
-            [:th {:style {:border "1px solid black"}} "Prezime"]
-            [:th {:style {:border "1px solid black"}} "Region"]
-            [:th {:style {:border "1px solid black"}} "Telefon"]
-            [:th {:style {:border "1px solid black"}} "E-mail"]
-            [:th {:style {:border "1px solid black"}} "Slanje postom"]
-            [:th {:style {:border "1px solid black"}} "Licno preuzimanje"]]]
-          (user-row @users @region-value)])]))
+          (user-row @users @selected-region)]]])]))
 
 
 (defn home []
   [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
-   [:h1 "Da li delite ili trazite kefir?"]
+   [:h1 "Da li delite ili tražite kefir?"]
    [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/ad-type {:type :sharing}])} "Delim"]
-   [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/ad-type {:type :seeking}])} "Trazim"]])
+   [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/ad-type {:type :seeking}])} "Tražim"]])
 
 
 (defn grains-kind []
   [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
-   [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :milk-type} "Mlecni"]
+   [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :milk-type} "Mlečni"]
    [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :water-type} "Vodeni"]
    [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :kombucha} "Kombuha"]])
 
@@ -249,30 +241,39 @@
 
 (defn thank-you []
   [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center [:h1.mb-5 "Hvala vam sto delite kefir zrnca"]
-   [:button.btn.btn-outline-success.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
+   [:button.btn.btn-outline-success.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]])
 
 (defn error []
   [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
    [:h1 "Trenutno nema korisnika koji dele zrnca u izabranom regionu."]
-   [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Pocetna stranica"]])
+   [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]])
 
 ;; FORM
 
+(defn- panels [panel-name]
+  (case (:name (:data panel-name))
+    :route/home [home]
+    ;; -----
+    :route/ad-type [grains-kind]
+    ;; -----
+    :route/ad-type-choice [ad-type-choice]
+    ;; -----
+    :route/thank-you [thank-you]
+    ;; -----
+    :route/error [error]
+    [:div]))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+(defn main-panel []
+  (let [active-panel @(subscribe [::subs/active-route])]
+    [:div.container
+     ;; NAVBAR
+     [:nav.navbar.navbar-expand-lg.navbar-light.bg-light
+      [:a.navbar-brand {:href "/"} "Kefir na Dar"]
+      [:ul.navbar-nav
+       ; more menu items can be added here
+       [:li.nav-item.active
+        [:a.nav-link {:href "/"} "Početna"]]]]
+     ;; CONTENT
+     [panels active-panel]
+     ;; FOOTER
+     [:p.copyright-text "Copyright © 2022 All Rights Reserved by Do Brave Software"]]))

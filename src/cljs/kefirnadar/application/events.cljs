@@ -74,22 +74,23 @@
 
 
 (reg-event-fx
-  ::grains-kind
-  (fn [{db :db} [_ type]]
+  ::grains-kind trim-v
+  (fn [{db :db} [type]]
+    (js/console.log "Type: " type)
     {:db           (assoc-in db [:user :data :grains-kind] type)
      ::load-route! {:data        {:name :route/ad-type-choice}
                     :path-params {:grains-kind type
                                   :ad-type     (get-in db [:user :data :ad-type])}}}))
 
 
-(defn clean-db-when-homepage
+(defn clean-db
   "Kada se klikne na Pocetna stranica dugme brise se iz local db-a sve neophodno da bi se resili konflikta"
   [{db :db}]
   {:db (dissoc db :all-users :user)})
 
 (reg-event-fx
-  ::clean-db-when-homepage
-  clean-db-when-homepage)
+  ::clean-db
+  clean-db)
 
 (reg-event-db
   ::update-form
