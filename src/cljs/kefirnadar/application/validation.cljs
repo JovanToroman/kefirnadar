@@ -17,11 +17,9 @@
 
 
 (defn field-validation [id input]
-  (js/console.log "ID: " id ", input: " input)
-  ;; TODO: ispraviti greske pri validaciji iz konzole
   (case id
-    :firstname (and (not (str/blank? input)) (> (count input) 1) (str/alpha? input))
-    :lastname (and (not (str/blank? input)) (> (count input) 1) (str/alpha? input))
+    :firstname (and (not (str/blank? input)) (seq input) (str/alpha? input))
+    :lastname (and (not (str/blank? input)) (seq input) (str/alpha? input))
     :email (or (str/empty? input) (reg-matcher email-regex-str input))
     :phone-number (or (str/empty? input) (reg-matcher phone-number-regex-str input))
     :quantity (and (< input 101) (> input 0))))

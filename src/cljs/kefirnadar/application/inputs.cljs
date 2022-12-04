@@ -3,7 +3,8 @@
   (:require [reagent.core :as r]
             [kefirnadar.application.utils :as utils]
             [applied-science.js-interop :as j]
-            [kefirnadar.application.styles :as styles]))
+            [kefirnadar.application.styles :as styles]
+            [clojure.string :as str]))
 
 (defn- render-options
   [filtered-options active-value ^atom show-options?]
@@ -20,6 +21,27 @@
                               :type "button"}
        title])))
 
+(defn search-selector-dropdown
+  [{:keys [search-input-id search-text id css filtered-options active-value show-options?]}]
+  (r/create-class
+    {:component-did-mount (fn [_] (j/call (j/call js/document :getElementById search-input-id) :focus))
+     :reagent-render
+     (fn [_]
+       [:<>
+        [:div
+         [:input.col-md-12.form-control
+          {:id search-input-id
+           :placeholder "Unesite vrednost pomoću tastature"
+           :type "text"
+           :on-change (fn [event] (reset! search-text (j/get-in event [:target :value])))
+           :value @search-text
+           :aria-label "Search"}]
+         [:i.fa.fa-keyboard {:aria-hidden "true"}]]
+        [:div.dropdown-menu {:aria-labelledby id :className (css {:display "block"})}
+         (if (seq filtered-options)
+           (render-options filtered-options active-value show-options?)
+           [:p "Nema rezultata"])]])}))
+
 (defn search-selector [_]
   (let [search-text (r/atom "")
         show-options? (r/atom false)]
@@ -32,7 +54,7 @@
           :or {id "dropdownMenuButton1"
                placeholder-disabled? false}}]
       (let [[css] (styles/use-styletron)
-            filtered-options (if (empty? @search-text)
+            filtered-options (if (str/blank? @search-text)
                                options
                                (filter (fn [{:keys [title]}]
                                          (re-find
@@ -44,7 +66,8 @@
              :as _active-option} (some (fn [{:keys [value] :as option}]
                                          (when (= value active-value)
                                            option))
-                                   options)]
+                                   options)
+            search-input-id (str "search-input" (random-uuid))]
         [:div.dropdown
          [:button.btn.btn-secondary.dropdown-toggle
           (cond-> {:id id
@@ -52,8 +75,12 @@
                    :aria-haspopup "true"
                    :type "button"
                    :on-click (fn [_]
+                               #_(js/console.log "Element: " (j/call js/document :getElementById search-input-id)
+                                 ", id: " search-input-id)
                                (reset! search-text "")
-                               (swap! show-options? not))
+                               (swap! show-options? not)
+                               #_(js/document.getElementById search-input-id)
+                               #_(j/call (j/call js/document :getElementById search-input-id) :focus))
                    :className (css {:position "relative"
                                     :display "flex"
                                     :align-items "center"
@@ -70,15 +97,10 @@
             [:span placeholder])]
 
          (when @show-options?
-           [:<>
-            [:div
-             [:input.col-md-12
-              {:placeholder "Unesite vrednost pomoću tastature"
-               :type "text"
-               :on-change (fn [event] (reset! search-text (j/get-in event [:target :value])))
-               :value @search-text
-               :aria-label "Search"}]
-             [:i.fa.fa-keyboard {:aria-hidden "true"}]]
-            [:div.dropdown-menu {:aria-labelledby id :className (css {:display "block"})}
-             [:button.dropdown-item {:type "button"} placeholder]
-             (render-options filtered-options active-value show-options?)]])]))))
+           [search-selector-dropdown {:search-input-id search-input-id
+                                      :search-text search-text
+                                      :id id
+                                      :css css
+                                      :filtered-options filtered-options
+                                      :active-value active-value
+                                      :show-options? show-options?}])]))))

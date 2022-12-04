@@ -61,7 +61,7 @@
     [:div.form-group
      [:label {:className (css (:label styles/styles-map))} "Opština:"]
      [:div {:className (css (:custom-select styles/styles-map))}
-      [inputs/search-selector {:placeholder "Pretražite regione"
+      [inputs/search-selector {:placeholder "Izaberite mesto"
                                :options (map (fn [r] {:title (name r)
                                                       :value r
                                                       :on-click (fn [event]
@@ -152,12 +152,13 @@
        [first-name-input :firstname]
        [last-name-input :lastname]
        [region-select :region]
-       [:div
-        [:p {:className (css (:p styles/styles-map))} "Izaberite makar jedan način kontakta:"]
+       [:div.mt-5
+        [:p {:className (css (:p styles/styles-map))}
+         "Kako da vas zainteresovani kontaktiraju? (telefon ili imejl adresa je obavezna)"]
         [phone-number-input :phone-number]
         [email-input :email]]
-       [:div
-        [:p {:className (css (:p styles/styles-map))} "Izaberite makar jedan način transakcije:"]
+       [:div.mt-5
+        [:p {:className (css (:p styles/styles-map))} "Kako ćete deliti zrnca? (jedan način deljenja je obavezan)"]
         [post-toggle :post]
         [pick-up-toggle :pick-up]]
        [qty-input :quantity]]]
@@ -189,27 +190,26 @@
 (defn users-list
   "List of all users."
   []
-  (let [selected-region (subscribe [::subs/region])
-        users (subscribe [::subs/users])]
+  (let [selected-region @(subscribe [::subs/region])
+        users @(subscribe [::subs/users])]
     [:div.d-flex.flex-column.min-vh-100.align-items-center
      [:button.btn.btn-outline-primary.col-md-5.mb-5
       {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]
      [:div
       [:label " Opština: "]
-      [:div
-       [inputs/search-selector {:placeholder "Pretražite regione"
-                                :options (map (fn [r] {:title r :value r})
+      [:div.col-md-12
+       [inputs/search-selector {:placeholder "Izaberite mesto"
+                                :options (map (fn [r]
+                                                {:title (name r)
+                                                 :value r
+                                                 :on-click (fn [event]
+                                                             (dispatch [::events/dropdown-filtering-value
+                                                                        (keyword (extract-input-value event))]))})
                                            r/regions)
                                 :active-value selected-region
                                 :aria-labelledby "learning-spaces"
-                                :placeholder-disabled? true}]
-       [:input {:on-change   #(dispatch [::events/dropdown-filtering-value (extract-input-value %)])
-                :type        "text"
-                :placeholder "Filtrirajte regione..."}]
-       [:select {:value @selected-region
-                 :on-change #(dispatch [::events/fetch-users (extract-input-value %)])}
-        [:option {:value ""} "Izaberite opštinu"]]]]
-     (when @users
+                                :placeholder-disabled? true}]]]
+     (when (seq users)
        [:div.table-responsive
         [:table.table.table-striped.table-bordered
          [:thead.thead-dark
