@@ -6,16 +6,19 @@
             [kefirnadar.application.styles :as styles]))
 
 (defn- render-options
-  [filtered-options active-value]
+  [filtered-options active-value ^atom show-options?]
   (doall
     (for [{:keys [value title on-click]} filtered-options
           :let [is-active? (= active-value value)]]
       ^{:key value}
-      [:li
-       [:button {:class (when is-active? "active")
-                                               :title title
-                                               :on-click on-click}
-        title]])))
+      [:button.dropdown-item {:class (when is-active? "active")
+                              :title title
+                              :value (keyword value)
+                              :on-click (fn [event]
+                                          (on-click event)
+                                          (swap! show-options? not))
+                              :type "button"}
+       title])))
 
 (defn search-selector [_]
   (let [search-text (r/atom "")
@@ -27,9 +30,7 @@
                  id
                  placeholder-disabled?]
           :or {id "dropdownMenuButton1"
-               placeholder-disabled? false}
-          :as params}]
-      (js/console.log "Params to search: " params)
+               placeholder-disabled? false}}]
       (let [[css] (styles/use-styletron)
             filtered-options (if (empty? @search-text)
                                options
@@ -44,13 +45,15 @@
                                          (when (= value active-value)
                                            option))
                                    options)]
-        [:div
-         [:button
+        [:div.dropdown
+         [:button.btn.btn-secondary.dropdown-toggle
           (cond-> {:id id
                    :aria-expanded (str @show-options?)
                    :aria-haspopup "true"
                    :type "button"
-                   :on-click (fn [_] (swap! show-options? not))
+                   :on-click (fn [_]
+                               (reset! search-text "")
+                               (swap! show-options? not))
                    :className (css {:position "relative"
                                     :display "flex"
                                     :align-items "center"
@@ -64,23 +67,18 @@
 
           (if title
             title
-            [:span placeholder])
-
-          [:span {:className (css {    :display "flex"
-                                   :font-size "28px"})}
-           [:i.fa.fa-angle-down {:aria-hidden "true"}]]]
+            [:span placeholder])]
 
          (when @show-options?
-           [:div
+           [:<>
             [:div
-             [:input.dd-select__input.form-control
+             [:input.col-md-12
               {:placeholder "Unesite vrednost pomoću tastature"
                :type "text"
                :on-change (fn [event] (reset! search-text (j/get-in event [:target :value])))
                :value @search-text
                :aria-label "Search"}]
-             [:i.fal.fa-keyboard {:aria-hidden "true"}]]
-            [:ul {:style {:list-style-type "none" :padding 0 :margin 0}}
-             [:li placeholder]
-             ;; TODO: namestiti on-click funkciju za dropdown iteme
-             (render-options filtered-options active-value)]])]))))
+             [:i.fa.fa-keyboard {:aria-hidden "true"}]]
+            [:div.dropdown-menu {:aria-labelledby id :className (css {:display "block"})}
+             [:button.dropdown-item {:type "button"} placeholder]
+             (render-options filtered-options active-value show-options?)]])]))))

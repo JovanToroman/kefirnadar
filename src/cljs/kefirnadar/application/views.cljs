@@ -13,6 +13,7 @@
 ;; -- helper functions region --
 (defn extract-input-value
   [event]
+  (js/console.log "Event: " (j/get-in event [:target :value]))
   (j/get-in event [:target :value]))
 
 (defn extract-checkbox-state
@@ -56,13 +57,16 @@
 
 (defn region-select [id]
   (let [selected-region (subscribe [::subs/form id])
-        filtered-regions-coll (subscribe [::subs/filtered-regions-coll])
         [css] (styles/use-styletron)]
     [:div.form-group
      [:label {:className (css (:label styles/styles-map))} "Opština:"]
      [:div {:className (css (:custom-select styles/styles-map))}
       [inputs/search-selector {:placeholder "Pretražite regione"
-                               :options (map (fn [r] {:title (name r) :value r})
+                               :options (map (fn [r] {:title (name r)
+                                                      :value r
+                                                      :on-click (fn [event]
+                                                                  (dispatch [::events/update-form id
+                                                                             (keyword (extract-input-value event))]))})
                                           r/regions)
                                :active-value @selected-region
                                :aria-labelledby "learning-spaces"
