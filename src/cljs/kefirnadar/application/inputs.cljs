@@ -22,11 +22,11 @@
        title])))
 
 (defn search-selector-dropdown
-  [{:keys [search-input-id search-text id css filtered-options active-value show-options?]}]
+  [{:keys [search-input-id]}]
   (r/create-class
     {:component-did-mount (fn [_] (j/call (j/call js/document :getElementById search-input-id) :focus))
      :reagent-render
-     (fn [_]
+     (fn [{:keys [search-input-id search-text id css filtered-options active-value show-options?]}]
        [:<>
         [:div
          [:input.col-md-12.form-control
@@ -75,12 +75,8 @@
                    :aria-haspopup "true"
                    :type "button"
                    :on-click (fn [_]
-                               #_(js/console.log "Element: " (j/call js/document :getElementById search-input-id)
-                                 ", id: " search-input-id)
                                (reset! search-text "")
-                               (swap! show-options? not)
-                               #_(js/document.getElementById search-input-id)
-                               #_(j/call (j/call js/document :getElementById search-input-id) :focus))
+                               (swap! show-options? not))
                    :className (css {:position "relative"
                                     :display "flex"
                                     :align-items "center"

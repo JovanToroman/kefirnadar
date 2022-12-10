@@ -7,15 +7,17 @@
   (fn [db _]
     (:active-route db)))
 
+(reg-sub ::form-data (fn [db _] (get-in db [:ads :sharing :form-data])))
+
 (reg-sub
-  ::form
+  ::form-field
   (fn [db [_ id]]
-    (get-in db [:form id] "")))
+    (get-in db [:ads :sharing :form-data id] "")))
 
 (reg-sub
   ::form-validation
   (fn [db [_ id]]
-    (get-in db [:form-validation id] true)))
+    (get-in db [:ads :sharing :form-data-validation id] false)))
 
 
 ;; helper function for ::is-valid?
@@ -27,10 +29,10 @@
 (reg-sub
   ::is-valid?
   (fn [db [_ form-ids]]
-    (and (every? #(get-in db [:form %]) form-ids)
-         (every? #(true? (val %)) (:form-validation db))
-         (contains-any? (:form db) :post :pick-up)
-         (contains-any? (:form db) :phone-number :email))))
+    (and (every? #(get-in db [:ads :sharing :form-data %]) form-ids)
+         (every? #(true? (val %)) (get-in db [:ads :sharing :form-data-validation]))
+         (contains-any? (get-in db [:ads :sharing :form-data]) :post :pick-up)
+         (contains-any? (get-in db [:ads :sharing :form-data]) :phone-number :email))))
 
 
 (reg-sub
@@ -38,14 +40,11 @@
   (fn [db _]
     (keyword (get-in db [:active-route :parameters :path :ad-type]))))
 
-
 (reg-sub
-  ::users
-  (fn [db _] (get db :all-users)))
+  ::seeking-region
+  (fn [db _] (get-in db [:ads :seeking :region-filter])))
 
+(reg-sub ::filtered-ads
+  (fn [db _] (get-in db [:ads :seeking :filtered-ads])))
 
-(reg-sub
-  ::region
-  (fn [db _] (get-in db [:user :data :region-filter] "")))
-
-
+(reg-sub ::grains-kind (fn [db _] (get-in db [:active-route :parameters :path :grains-kind])))
