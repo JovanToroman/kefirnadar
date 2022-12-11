@@ -7,7 +7,8 @@
             [kefirnadar.application.inputs :as inputs]
             [re-frame.core :refer [dispatch subscribe]]
             [kefirnadar.application.regions :as r]
-            [applied-science.js-interop :as j]))
+            [applied-science.js-interop :as j]
+            [kefirnadar.application.utils :as utils]))
 
 
 ;; -- helper functions region --
@@ -63,6 +64,7 @@
       [inputs/search-selector {:placeholder "Izaberite mesto"
                                :options (map (fn [r] {:title (name r)
                                                       :value r
+                                                      :title-cleaned (utils/replace-serbian-characters (name r))
                                                       :on-click (fn [event]
                                                                   (dispatch [::events/update-sharing-form id
                                                                              (keyword (extract-input-value event))]))})
@@ -204,6 +206,7 @@
        [inputs/search-selector {:placeholder "Izaberite mesto"
                                 :options (map (fn [r]
                                                 {:title (name r)
+                                                 :title-cleaned (utils/replace-serbian-characters (name r))
                                                  :value r
                                                  :on-click (fn [event]
                                                              (dispatch [::events/set-seeking-region

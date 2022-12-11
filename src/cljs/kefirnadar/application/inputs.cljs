@@ -56,11 +56,15 @@
       (let [[css] (styles/use-styletron)
             filtered-options (if (str/blank? @search-text)
                                options
-                               (filter (fn [{:keys [title]}]
-                                         (re-find
-                                           (re-pattern
-                                             (str "(?i)" (utils/remove-reserved-characters @search-text)))
-                                           title))
+                               (filter (fn [{:keys [title title-cleaned]}]
+                                         (or (re-find
+                                               (re-pattern
+                                                 (str "(?i)" (utils/remove-reserved-characters @search-text)))
+                                               title)
+                                           (re-find
+                                             (re-pattern
+                                               (str "(?i)" (utils/remove-reserved-characters @search-text)))
+                                             title-cleaned)))
                                  options))
             {:keys [title]
              :as _active-option} (some (fn [{:keys [value] :as option}]
