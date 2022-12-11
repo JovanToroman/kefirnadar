@@ -217,7 +217,7 @@
          :disabled (nil? selected-region)}
         "Pretraži"]]]
      (when (seq ads)
-       [:div.table-responsive
+       [:div.table-responsive.mt-5
         [:table.table.table-striped.table-bordered
          [:thead.thead-dark
           [:tr [:th {:scope "col"} "Ime"]
