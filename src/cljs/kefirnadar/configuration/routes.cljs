@@ -53,7 +53,6 @@
 (defn redirect!
   "If `replace` is truthy, previous page will be replaced in history, otherwise added."
   [{:keys [name path-params query-params replace]}]
-  (js/console.log path-params)
   ;; query params returns an empty map {} and replace-state and push-state are multiarity
   ;; this if-let prevents a lonely ? from being appended to the url if there are no query params
   (if-let [query-params (not-empty query-params)]

@@ -3,7 +3,8 @@
             [kefirnadar.configuration.routes :as routes]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx trim-v]]
             [cuerdas.core :as str]
-            [kefirnadar.configuration.db :as db]))
+            [kefirnadar.configuration.db :as db]
+            [kefirnadar.application.validation :as validation]))
 
 
 (defn set-dropdown-filtering-value [db [region]]
@@ -12,28 +13,31 @@
 (reg-event-db ::set-seeking-region trim-v set-dropdown-filtering-value)
 
 ;; -- create ad business logic
-(defn create-ad
-  [_ [grains-kind form-data]]
-  (let [{:keys [firstname lastname region post pick-up quantity phone-number email]} form-data
-        body {:uri "/create"
-              :method :post
-              :params {:ad/firstname firstname
-                       :ad/lastname lastname
-                       :ad/region region
-                       :ad/post (or post false)
-                       :ad/pick-up (or pick-up false)
-                       :ad/quantity quantity
-                       :ad/grains-kind (keyword grains-kind)}
-              :on-success [::create-success]}
-        assembled-fx-api-body (cond
-                                (and phone-number email) (-> body
-                                                           (assoc-in [:params :ad/email] email)
-                                                           (assoc-in [:params :ad/phone-number] phone-number))
-                                phone-number (assoc-in body [:params :ad/phone-number] phone-number)
-                                email (assoc-in body [:params :ad/email] email))]
-    {::fx/api assembled-fx-api-body}))
+(defn validate-and-create-ad
+  [{db :db} [grains-kind form-info]]
+  (let [validation-info (validation/validate-form-info form-info)]
+    (if (validation/form-valid? validation-info :firstname :lastname :region :quantity)
+      (let [{:keys [firstname lastname region post pick-up quantity phone-number email]} form-info
+            body {:uri "/create"
+                  :method :post
+                  :params {:ad/firstname firstname
+                           :ad/lastname lastname
+                           :ad/region region
+                           :ad/post (or post false)
+                           :ad/pick-up (or pick-up false)
+                           :ad/quantity quantity
+                           :ad/grains-kind (keyword grains-kind)}
+                  :on-success [::create-success]}
+            assembled-fx-api-body (cond
+                                    (and phone-number email) (-> body
+                                                               (assoc-in [:params :ad/email] email)
+                                                               (assoc-in [:params :ad/phone-number] phone-number))
+                                    phone-number (assoc-in body [:params :ad/phone-number] phone-number)
+                                    email (assoc-in body [:params :ad/email] email))]
+        {::fx/api assembled-fx-api-body})
+      {:db (assoc-in db [:ads :sharing :form-data-validation] validation-info)})))
 
-(reg-event-fx ::create-ad trim-v create-ad)
+(reg-event-fx ::validate-and-create-ad trim-v validate-and-create-ad)
 
 (defn create-success
   "Dispatched on successful ad creation."
@@ -59,18 +63,18 @@
 (reg-event-fx
   ::ad-type
   (fn [{db :db} [_ {type :type}]]
-    {:db           (assoc-in db [:ads :sharing :ad-type] type)
-     ::load-route! {:data        {:name :route/ad-type}
+    {:db (assoc-in db [:ads :sharing :ad-type] type)
+     ::load-route! {:data {:name :route/ad-type}
                     :path-params {:ad-type type}}}))
 
 
 (reg-event-fx
   ::grains-kind trim-v
   (fn [{db :db} [type]]
-    {:db           (assoc-in db [:ads :sharing :grains-kind] type)
-     ::load-route! {:data        {:name :route/ad-type-choice}
+    {:db (assoc-in db [:ads :sharing :grains-kind] type)
+     ::load-route! {:data {:name :route/ad-type-choice}
                     :path-params {:grains-kind type
-                                  :ad-type     (get-in db [:ads :sharing :ad-type])}}}))
+                                  :ad-type (get-in db [:ads :sharing :ad-type])}}}))
 
 
 (defn clean-db
