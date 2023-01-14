@@ -1,5 +1,5 @@
 (ns kefirnadar.configuration.routes
-  (:require [kefirnadar.configuration.subscriptions :as subscriptions]
+  (:require [kefirnadar.application.subscriptions :as subs]
             [re-frame.core :refer [dispatch subscribe]]
             [reitit.coercion.schema]
             [reitit.coercion.spec]
@@ -11,10 +11,10 @@
 ; region routes
 (def routes
   ["/" {:coercion reitit.coercion.spec/coercion}
-   ["" {:name        :route/home
+   ["" {:name :route/home
         :controllers [{:identity identity
-                       :start    #(dispatch [:kefirnadar.application.events/clean-db-when-homepage])}]
-        :doc         "Home page"}]
+                       :start #(dispatch [:kefirnadar.application.events/clean-db])}]
+        :doc "Home page"}]
    ["ad-type/{ad-type}"
     {:name        :route/ad-type
      :path-params {:ad-type keyword?}
@@ -45,7 +45,7 @@
   (rfe/start!
     router
     (fn [route]
-      (let [old-route @(subscribe [::subscriptions/active-route])]
+      (let [old-route @(subscribe [::subs/active-route])]
         (dispatch [:kefirnadar.configuration.events/set-active-route
                    (assoc route :controllers (rfc/apply-controllers (:controllers old-route) route))])))
     {:use-fragment false}))
@@ -53,7 +53,6 @@
 (defn redirect!
   "If `replace` is truthy, previous page will be replaced in history, otherwise added."
   [{:keys [name path-params query-params replace]}]
-  (js/console.log path-params)
   ;; query params returns an empty map {} and replace-state and push-state are multiarity
   ;; this if-let prevents a lonely ? from being appended to the url if there are no query params
   (if-let [query-params (not-empty query-params)]
