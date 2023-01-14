@@ -53,8 +53,7 @@
                                             :position       "absolute"
                                             :top            "12px"
                                             :right          "10px"
-                                            :border         "8px solid"
-                                            :border-color   "#d5dbd9 transparent transparent transparent"
+                                            :border         "8px solid #d5dbd9 transparent transparent transparent"
                                             :pointer-events "none"}}
                  :select        {:-webkit-appearance "none"
                                  :-moz-appearance    "none"

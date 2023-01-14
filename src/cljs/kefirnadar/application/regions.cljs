@@ -15,6 +15,23 @@
               :Bačka-Topola
               :Bački-Petrovac
               :Beograd
+              :Beograd-Čukarica
+              (keyword "Beograd-Novi Beograd")
+              :Beograd-Palilula
+              :Beograd-Rakovica
+              (keyword "Beograd-Savski venac")
+              (keyword "Beograd-Stari grad")
+              :Beograd-Voždovac
+              :Beograd-Vračar
+              :Beograd-Zemun
+              :Beograd-Zvezdara
+              :Beograd-Barajevo
+              :Beograd-Grocka
+              :Beograd-Lazarevac
+              :Beograd-Mladenovac
+              :Beograd-Obrenovac
+              :Beograd-Sopot
+              :Beograd-Surčin
               :Bela-Palanka
               :Bela-Crkva
               :Beočin
