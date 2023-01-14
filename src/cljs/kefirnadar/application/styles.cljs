@@ -83,4 +83,5 @@
                                  :outline    "none"
                                  :font-size  "15px"
                                  :padding    "8px 10px"
-                                 :transition "all 0.3s ease"}})
+                                 :transition "all 0.3s ease"}
+                 :main-panel {:min-height "80vh"}})
