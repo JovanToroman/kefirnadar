@@ -5,7 +5,8 @@
             [kefirnadar.configuration.start :as start]
             [org.httpkit.server :as kit]
             [ring.middleware.reload :as reload]
-            [taoensso.timbre :as log]))
+            [taoensso.timbre :as log])
+  (:gen-class))
 
 
 (def server (atom nil))
