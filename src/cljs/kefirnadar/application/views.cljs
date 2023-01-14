@@ -235,14 +235,14 @@
 
 
 (defn home []
-  [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
+  [:<>
    [:h1 "Da li delite ili tražite kefir?"]
    [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/ad-type {:type :sharing}])} "Delim"]
    [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/ad-type {:type :seeking}])} "Tražim"]])
 
 
 (defn grains-kind []
-  [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
+  [:<>
    [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :milk-type} "Mlečni"]
    [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :water-type} "Vodeni"]
    [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :kombucha} "Kombuha"]])
@@ -254,11 +254,14 @@
     :seeking ads-list))
 
 (defn thank-you []
-  [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center [:h1.mb-5 "Hvala vam sto delite kefir zrnca"]
-   [:button.btn.btn-outline-success.mb-5 {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]])
+  [:<>
+   [:h1.mb-5 "Hvala vam sto delite kefir zrnca"]
+   [:button.btn.btn-outline-success.mb-5
+    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])}
+    "Početna stranica"]])
 
 (defn error []
-  [:div.d-flex.flex-column.min-vh-100.justify-content-center.align-items-center
+  [:<>
    [:h1 "Trenutno nema korisnika koji dele zrnca u izabranom regionu."]
    [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]])
 
@@ -278,7 +281,8 @@
     [:div]))
 
 (defn main-panel []
-  (let [active-panel @(subscribe [::subs/active-route])]
+  (let [active-panel @(subscribe [::subs/active-route])
+        [css] (styles/use-styletron)]
     [:div.container
      ;; NAVBAR
      [:nav.navbar.navbar-expand-lg.navbar-light.bg-light
@@ -288,6 +292,8 @@
        [:li.nav-item.active
         [:a.nav-link {:href "/"} "Početna"]]]]
      ;; CONTENT
-     [panels active-panel]
+     [:div.d-flex.flex-column.justify-content-center.align-items-center
+      {:className (css (:main-panel styles/styles-map))}
+      [panels active-panel]]
      ;; FOOTER
      [:p.copyright-text "Copyright © 2022 All Rights Reserved by Do Brave Software"]]))
