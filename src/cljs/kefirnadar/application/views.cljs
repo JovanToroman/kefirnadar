@@ -2,14 +2,13 @@
   (:require [goog.string :as gstr]
             [kefirnadar.application.events :as events]
             [kefirnadar.application.subscriptions :as subs]
-            [kefirnadar.application.validation :as validation]
             [kefirnadar.application.styles :as styles]
             [kefirnadar.application.inputs :as inputs]
             [re-frame.core :refer [dispatch subscribe]]
-            [kefirnadar.application.regions :as r]
+            [kefirnadar.application.regions :as regions]
             [applied-science.js-interop :as j]
-            [kefirnadar.application.utils :as utils]))
-
+            [kefirnadar.application.utils :as utils]
+            [kefirnadar.application.specs :as specs]))
 
 ;; -- helper functions region --
 (defn extract-input-value
@@ -69,7 +68,7 @@
                                                       :on-click (fn [event]
                                                                   (dispatch [::events/update-sharing-form id
                                                                              (keyword (extract-input-value event))]))})
-                                          r/regions)
+                                          regions/regions)
                                :active-value @selected-region
                                :placeholder-disabled? true}]]
      (when (false? valid?)
@@ -146,9 +145,9 @@
 
 
 
-(defn form []
+(defn share-grains-form []
   (let [form-info @(subscribe [::subs/form-data])
-        grains-kind @(subscribe [::subs/grains-kind])
+        grains-kind @(subscribe [::subs/grains-kind :sharing])
         [css] (styles/use-styletron)]
     [:div {:className (css (:form-wrapper styles/styles-map))}
      [:div {:className (css (:wrapper-title styles/styles-map))} "Kreirajte vas oglas"]
@@ -196,7 +195,7 @@
   []
   (let [selected-region @(subscribe [::subs/seeking-region])
         ads @(subscribe [::subs/filtered-ads])
-        grains-kind @(subscribe [::subs/grains-kind])
+        grains-kind @(subscribe [::subs/grains-kind :seeking])
         [css] (styles/use-styletron)]
     [:div.d-flex.flex-column.min-vh-100.align-items-center
      [:button.btn.btn-outline-primary.col-md-5.mb-5
@@ -212,7 +211,7 @@
                                                  :on-click (fn [event]
                                                              (dispatch [::events/set-seeking-region
                                                                         (keyword (extract-input-value event))]))})
-                                           r/regions)
+                                           regions/regions)
                                 :active-value selected-region
                                 :placeholder-disabled? true}]
        [:button.btn.btn-outline-primary.mt-5.col-12
@@ -237,21 +236,34 @@
 (defn home []
   [:<>
    [:h1 "Da li delite ili tražite kefir?"]
-   [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/ad-type {:type :sharing}])} "Delim"]
-   [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/ad-type {:type :seeking}])} "Tražim"]])
+   [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
+    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/sharing}}])}
+    "Delim"]
+   [:button.btn.btn-outline-primary.col-md-5
+    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/seeking}}])}
+    "Tražim"]])
 
 
-(defn grains-kind []
-  [:<>
-   [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :milk-type} "Mlečni"]
-   [:button.btn.btn-outline-primary.col-md-5.mb-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :water-type} "Vodeni"]
-   [:button.btn.btn-outline-primary.col-md-5 {:on-click #(dispatch [::events/grains-kind (extract-input-value %)]) :value :kombucha} "Kombuha"]])
-
-
-(defn ad-type-choice []
-  (case @(subscribe [::subs/ad-type-choice])
-    :sharing form
-    :seeking ads-list))
+(defn grains-kind [^::specs/user-action user-action]
+  (let [route-to-load (case user-action
+                        :sharing :route/share-grains-form
+                        :seeking :route/search-for-grains)]
+    [:<>
+     [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
+      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
+                                                            :path-params {:grains-kind :milk-type}}])
+       :value :milk-type}
+      "Mlečni"]
+     [:button.btn.btn-outline-primary.col-md-5.mb-5
+      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
+                                                            :path-params {:grains-kind :water-type}}])
+       :value :water-type}
+      "Vodeni"]
+     [:button.btn.btn-outline-primary.col-md-5
+      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
+                                                            :path-params {:grains-kind :kombucha}}])
+       :value :kombucha}
+      "Kombuha"]]))
 
 (defn thank-you []
   [:<>
@@ -271,9 +283,11 @@
   (case (:name (:data panel-name))
     :route/home [home]
     ;; -----
-    :route/ad-type [grains-kind]
+    :route/sharing [grains-kind :sharing]
+    :route/seeking [grains-kind :seeking]
     ;; -----
-    :route/ad-type-choice [ad-type-choice]
+    :route/share-grains-form [share-grains-form]
+    :route/search-for-grains [ads-list]
     ;; -----
     :route/thank-you [thank-you]
     ;; -----

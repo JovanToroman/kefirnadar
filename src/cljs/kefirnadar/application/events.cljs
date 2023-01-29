@@ -4,7 +4,8 @@
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx trim-v]]
             [cuerdas.core :as str]
             [kefirnadar.configuration.db :as db]
-            [kefirnadar.application.validation :as validation]))
+            [kefirnadar.application.validation :as validation]
+            [kefirnadar.application.specs :as specs]))
 
 
 (defn set-dropdown-filtering-value [db [region]]
@@ -59,22 +60,10 @@
 (reg-event-fx ::dispatch-load-route! trim-v dispatch-load-route!)
 ;; -end route events-
 
-
-(reg-event-fx
-  ::ad-type
-  (fn [{db :db} [_ {type :type}]]
-    {:db (assoc-in db [:ads :sharing :ad-type] type)
-     ::load-route! {:data {:name :route/ad-type}
-                    :path-params {:ad-type type}}}))
-
-
-(reg-event-fx
-  ::grains-kind trim-v
-  (fn [{db :db} [type]]
-    {:db (assoc-in db [:ads :sharing :grains-kind] type)
-     ::load-route! {:data {:name :route/ad-type-choice}
-                    :path-params {:grains-kind type
-                                  :ad-type (get-in db [:ads :sharing :ad-type])}}}))
+(reg-event-db
+  ::store-grains-kind trim-v
+  (fn [db [grains-kind ^::specs/user-action user-action]]
+    (assoc-in db [:ads user-action :grains-kind] grains-kind)))
 
 
 (defn clean-db
