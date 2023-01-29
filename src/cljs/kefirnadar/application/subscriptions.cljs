@@ -1,5 +1,6 @@
 (ns kefirnadar.application.subscriptions
-  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]))
+  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]
+            [kefirnadar.application.specs :as specs]))
 
 (reg-sub
   ::active-route
@@ -19,15 +20,12 @@
     (get-in db [:ads :sharing :form-data-validation id])))
 
 (reg-sub
-  ::ad-type-choice
-  (fn [db _]
-    (keyword (get-in db [:active-route :parameters :path :ad-type]))))
-
-(reg-sub
   ::seeking-region
   (fn [db _] (get-in db [:ads :seeking :region-filter])))
 
 (reg-sub ::filtered-ads
   (fn [db _] (get-in db [:ads :seeking :filtered-ads])))
 
-(reg-sub ::grains-kind (fn [db _] (get-in db [:active-route :parameters :path :grains-kind])))
+(reg-sub ::grains-kind
+  (fn [db [_ ^::specs/user-action user-action]]
+    (get-in db [:ads user-action :grains-kind])))

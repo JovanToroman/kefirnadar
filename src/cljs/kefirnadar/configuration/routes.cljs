@@ -15,26 +15,37 @@
         :controllers [{:identity identity
                        :start #(dispatch [:kefirnadar.application.events/clean-db])}]
         :doc "Home page"}]
-   ["ad-type/{ad-type}"
-    {:name        :route/ad-type
-     :path-params {:ad-type keyword?}
-     :doc         "Ad-type page"
-     :controllers [{:start      #(js/console.log "START: " "ad-type/:ad-type/grains-kind")
-                    :stop       #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind")}]}]
-   ["ad-type/{ad-type}/grains-kind/{grains-kind}"
-    {:name        :route/ad-type-choice
-     :path-params {:grains-kind keyword?
-                   :ad-type keyword?}
-     :doc         "Ad-type page"
-     :controllers [{:start      #(js/console.log "START: " "ad-type/:ad-type/grains-kind/:grains-kind")
-                    :stop       #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind/:grains-kind")}]}]
+   ["sharing/"
+    ["" {:name :route/sharing
+         :doc "Page where users choose which grain kind to share"}]
+    ["grains-kind/{grains-kind}"
+     {:name :route/share-grains-form
+      :path-params {:grains-kind keyword?}
+      :doc "Form to share grains"
+      :controllers [{:parameters {:path [:grains-kind]}
+                     :start (fn [{{grains-kind :grains-kind} :path}]
+                              (dispatch [:kefirnadar.application.events/store-grains-kind (keyword grains-kind)
+                                         :sharing]))
+                     :stop #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind/:grains-kind")}]}]]
+   ["seeking/"
+    ["" {:name :route/seeking
+         :doc "Page where users browse existing grains ads"}]
+    ["grains-kind/{grains-kind}"
+     {:name :route/search-for-grains
+      :path-params {:grains-kind keyword?}
+      :doc ""
+      :controllers [{:parameters {:path [:grains-kind]}
+                     :start (fn [{{grains-kind :grains-kind} :path}]
+                              (dispatch [:kefirnadar.application.events/store-grains-kind (keyword grains-kind)
+                                         :seeking]))
+                     :stop #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind/:grains-kind")}]}]]
    ["thank-you"
-    {:name        :route/thank-you
-     :doc         "Thank you page"
+    {:name :route/thank-you
+     :doc "Thank you page"
      :controllers [{:identity identity}]}]
    ["error"
-    {:name        :route/error
-     :doc         "error page"
+    {:name :route/error
+     :doc "error page"
      :controllers [{:identity identity}]}]])
 
 (defonce router (rf/router routes))
