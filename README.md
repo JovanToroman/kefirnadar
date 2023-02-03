@@ -14,18 +14,12 @@ instalirati komandom `npm install` pokrenutom iz korena projekta.
 
 ### Bekend
 
-Pre pokretanja servera, moramo pokrenuti dev-local Datomic bazu podataka. Neophodno je da preuzmemo i podesimo
-dev-local. Uputstva možemo naći [ovde](https://docs.datomic.com/cloud/dev-local.html). Nakon toga možemo pokrenuti
-aplikaciju.
-
-```bash
-bin/run -m datomic.peer-server -h localhost -p 8998 -a kefirnadar,kefirnadar -d kefirnadar,datomic:mem://kefirnadar
-```
-
-Nakon toga možemo pokrenuti server.
+Pre pokretanja servera, moramo podesiti dev-local Datomic bazu podataka. 
+Uputstva možemo naći [ovde](https://docs.datomic.com/cloud/dev-local.html). 
+Nakon toga možemo pokrenuti aplikaciju. Nakon toga možemo pokrenuti server.
 
 Bekend je napisan u Clojuru, sa korišćenjem deps.edn fajla za upravljanje zavisnostima.
-Server pokrećemo komandom `clj A:local`.
+Server pokrećemo komandom `clj A:dev`.
 
 Kada smo pokrenuli frontend, bazu i server, trebalo bi da možemo da pristupimo aplikaciji na adresi
 http://localhost:8060.
