@@ -22,16 +22,16 @@
   :db/doc                "A user's region for selling grains."
   :db.install/_attribute :db.part/db}
 
- {:db/ident              :ad/post
-  :db/valueType          :db.type/boolean
-  :db/cardinality        :db.cardinality/one
-  :db/doc                "Person can pay and receive grains via post express."
+ {:db/ident :ad/post?
+  :db/valueType :db.type/boolean
+  :db/cardinality :db.cardinality/one
+  :db/doc "Person can pay and receive grains via post express."
   :db.install/_attribute :db.part/db}
 
- {:db/ident              :ad/pick-up
-  :db/valueType          :db.type/boolean
-  :db/cardinality        :db.cardinality/one
-  :db/doc                "Person can pay and receive grains via live exchange."
+ {:db/ident :ad/pick-up?
+  :db/valueType :db.type/boolean
+  :db/cardinality :db.cardinality/one
+  :db/doc "Person can pay and receive grains via live exchange."
   :db.install/_attribute :db.part/db}
 
  {:db/ident              :ad/quantity
