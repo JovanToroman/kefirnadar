@@ -1,0 +1,8 @@
+---
+- name: Install dependencies
+  apt: 
+    pkg: 
+      - openjdk-11-jdk-headless
+    state: latest 
+    update_cache: true
+
