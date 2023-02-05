@@ -28,4 +28,6 @@
                                 ring-logger/ring-logger {:mvn/version "1.1.1"}}}
            :build {:extra-paths ["src/build"]
                    :extra-deps {io.github.clojure/tools.build {:git/tag "v0.9.1" :git/sha "27ff8a4"}}
-                   :ns-default uberjar}}}
+                   :ns-default uberjar}}
+ :mvn/repos {"cognitect-dev-tools"
+             {:url "https://dev-tools.cognitect.com/maven/releases/"}}}
