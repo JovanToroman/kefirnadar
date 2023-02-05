@@ -18,5 +18,5 @@
 
 (defn dev-restart []
   (stop)
-  (refresh :after 'dev-start))
+  (refresh :after 'kefirnadar.configuration.start/dev-start))
 
