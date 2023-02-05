@@ -16,15 +16,14 @@
 (defn create-ad
   "Creates ad."
   [{:keys [parameters]}]
-  (infof "Parameters: %s" parameters)
-  (let [entity-body {:ad/firstname   (get-in parameters [:body :ad/firstname])
-                     :ad/lastname    (get-in parameters [:body :ad/lastname])
-                     :ad/region      (get-in parameters [:body :ad/region])
-                     :ad/post        (get-in parameters [:body :ad/post] false)
-                     :ad/pick-up     (get-in parameters [:body :ad/pick-up] false)
+  (let [entity-body {:ad/firstname (get-in parameters [:body :ad/firstname])
+                     :ad/lastname (get-in parameters [:body :ad/lastname])
+                     :ad/region (get-in parameters [:body :ad/region])
+                     :ad/post? (get-in parameters [:body :ad/post?] false)
+                     :ad/pick-up? (get-in parameters [:body :ad/pick-up?] false)
                      :ad/grains-kind (get-in parameters [:body :ad/grains-kind])
-                     :ad/quantity    (get-in parameters [:body :ad/quantity])
-                     :ad/created     (Date.)}
+                     :ad/quantity (get-in parameters [:body :ad/quantity])
+                     :ad/created (Date.)}
         assembled-entity-body (cond
                                 (and (get-in parameters [:body :ad/phone-number])
                                      (get-in parameters [:body :ad/email])) (assoc entity-body

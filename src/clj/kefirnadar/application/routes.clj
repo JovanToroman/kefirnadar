@@ -13,8 +13,8 @@
                       :parameters {:body {:ad/firstname string?
                                           :ad/lastname string?
                                           :ad/region keyword?
-                                          (ds/opt :ad/post) boolean?
-                                          (ds/opt :ad/pick-up) boolean?
+                                          (ds/opt :ad/post?) boolean?
+                                          (ds/opt :ad/pick-up?) boolean?
                                           :ad/quantity number?
                                           :ad/grains-kind keyword?
                                           (ds/opt :ad/phone-number) string?

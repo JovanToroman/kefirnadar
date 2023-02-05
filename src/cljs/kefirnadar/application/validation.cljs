@@ -22,7 +22,7 @@
     :lastname (and (not (str/blank? input)) (seq input) (str/alpha? input))
     :email (reg-matcher email-regex-str input)
     :region (keyword? input)
-    (:post :pick-up) (true? input)
+    (:post? :pick-up?) (true? input)
     :phone-number (reg-matcher phone-number-regex-str input)
     :quantity (and (< input 101) (> input 0))))
 
@@ -37,14 +37,14 @@
   "Is the whole form valid?"
   [validation-info & form-ids]
   (and (every? #(get validation-info %) form-ids)
-    (either-or-form-field-valid? validation-info :post :pick-up)
+    (either-or-form-field-valid? validation-info :post? :pick-up?)
     (either-or-form-field-valid? validation-info :phone-number :email)))
 
 (defn- either-or-update-validation
   "Some fields require at least one option to be selected. Mark all related fields as valid if at least one of them is"
   [validation-info]
   (cond-> validation-info
-    (either-or-form-field-valid? validation-info :post :pick-up) (assoc :post true :pick-up true)
+    (either-or-form-field-valid? validation-info :post? :pick-up?) (assoc :post? true :pick-up? true)
     (either-or-form-field-valid? validation-info :email :phone-number) (assoc :email true :phone-number true)))
 
 (defn validate-form-info

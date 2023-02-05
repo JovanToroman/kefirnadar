@@ -163,8 +163,8 @@
         [email-input :email]]
        [:div.mt-5
         [:p {:className (css (:p styles/styles-map))} "Kako ćete deliti zrnca? (jedan način deljenja je obavezan)"]
-        [post-toggle :post]
-        [pick-up-toggle :pick-up]]
+        [post-toggle :post?]
+        [pick-up-toggle :pick-up?]]
        [qty-input :quantity]]]
      [:div {:className (css (:input-field styles/styles-map))}
       [:button.btn.btn-outline-primary
@@ -177,17 +177,15 @@
 
 ;; Ovo cu promeniti, napravio sam ovako samo da bi video da li mi radi..
 (defn user-row
-  "A single user."
-  [_users _reg-val]
-  (for [user _users]
-    [:tr
-     [:td (:ad/firstname user)]
-     [:td (:ad/lastname user)]
-     [:td (:ad/region user)]
-     [:td (if (:ad/phone-number user) (:ad/phone-number user) (gstr/unescapeEntities "&#10007"))]
-     [:td (if (:ad/email user) (:ad/email user) (gstr/unescapeEntities "&#10007"))]
-     [:td (if (:ad/post user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
-     [:td (if (:ad/pick-up user) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]]))
+  [{:ad/keys [firstname lastname region phone-number email post? pick-up?]}]
+  [:tr {:key (random-uuid)}
+   [:td firstname]
+   [:td lastname]
+   [:td region]
+   [:td (or phone-number (gstr/unescapeEntities "&#10007"))]
+   [:td (or email (gstr/unescapeEntities "&#10007"))]
+   [:td (if (some? post?) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
+   [:td (if (some? pick-up?) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]])
 
 
 (defn ads-list
@@ -230,7 +228,7 @@
            [:th {:scope "col"} "Slanje poštom"]
            [:th {:scope "col"} "Lično preuzimanje"]]]
          [:tbody
-          (user-row ads selected-region)]]])]))
+          (map user-row ads)]]])]))
 
 
 (defn home []

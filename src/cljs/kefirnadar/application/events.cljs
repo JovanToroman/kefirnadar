@@ -18,14 +18,14 @@
   [{db :db} [grains-kind form-info]]
   (let [validation-info (validation/validate-form-info form-info)]
     (if (validation/form-valid? validation-info :firstname :lastname :region :quantity)
-      (let [{:keys [firstname lastname region post pick-up quantity phone-number email]} form-info
+      (let [{:keys [firstname lastname region post? pick-up? quantity phone-number email]} form-info
             body {:uri "/create"
                   :method :post
                   :params {:ad/firstname firstname
                            :ad/lastname lastname
                            :ad/region region
-                           :ad/post (or post false)
-                           :ad/pick-up (or pick-up false)
+                           :ad/post? (or post? false)
+                           :ad/pick-up? (or pick-up? false)
                            :ad/quantity quantity
                            :ad/grains-kind (keyword grains-kind)}
                   :on-success [::create-success]}

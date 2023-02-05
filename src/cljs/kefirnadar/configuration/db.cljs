@@ -4,8 +4,8 @@
   {:ads {:sharing {:form-data {:firstname ""
                                :lastname ""
                                :region nil
-                               :post false
-                               :pick-up false
+                               :post? false
+                               :pick-up? false
                                :quantity 0
                                :phone-number ""
                                :email ""}}}})
