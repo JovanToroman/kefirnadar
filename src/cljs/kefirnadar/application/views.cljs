@@ -104,7 +104,7 @@
   (let [value (subscribe [::subs/form-field id])
         [css] (styles/use-styletron)]
     [:div.form-group {:className (css (:input-wrapper styles/styles-map))}
-     [:label {:className (css (:label styles/styles-map))} "Razmena postom?"]
+     [:label {:className (css (:label styles/styles-map))} "Razmena poštom?"]
      [:input {:className (css (:input-field styles/styles-map))
               :on-change #(dispatch [::events/update-sharing-form id (extract-checkbox-state %)])
               :type "checkbox"
@@ -117,7 +117,7 @@
         valid? @(subscribe [::subs/form-validation id])]
     [:<>
      [:div.form-group {:className (css (:input-wrapper styles/styles-map))}
-      [:label {:className (css (:label styles/styles-map))} "Razmena uzivo?"]
+      [:label {:className (css (:label styles/styles-map))} "Razmena uživo?"]
       [:input {:className (css (:input-field styles/styles-map))
                :on-change #(dispatch [::events/update-sharing-form id (extract-checkbox-state %)])
                :type "checkbox"
@@ -150,7 +150,7 @@
         grains-kind @(subscribe [::subs/grains-kind :sharing])
         [css] (styles/use-styletron)]
     [:div {:className (css (:form-wrapper styles/styles-map))}
-     [:div {:className (css (:wrapper-title styles/styles-map))} "Kreirajte vas oglas"]
+     [:div {:className (css (:wrapper-title styles/styles-map))} "Kreirajte vaš oglas"]
      [:form
       [:div.form-group
        [first-name-input :firstname]
@@ -265,7 +265,7 @@
 
 (defn thank-you []
   [:<>
-   [:h1.mb-5 "Hvala vam sto delite kefir zrnca"]
+   [:h1.mb-5 "Hvala vam što delite kefir zrnca"]
    [:button.btn.btn-outline-success.mb-5
     {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])}
     "Početna stranica"]])
