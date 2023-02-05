@@ -3,3 +3,4 @@
 (def debug? ^boolean goog.DEBUG)
 
 (goog-define version "#DEVELOPMENT_VERSION#")
+(goog-define api-url "")

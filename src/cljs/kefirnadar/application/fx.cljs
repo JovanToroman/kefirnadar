@@ -5,6 +5,7 @@
     [cljs.core.async :refer [<! timeout]]
     [cljs.core.async.interop :refer-macros [<p!]]
     [re-frame.core :refer [reg-fx dispatch reg-event-db trim-v subscribe]]
+    [kefirnadar.configuration.config :as config]
     [taoensso.timbre :refer-macros [debugf]]))
 
 (defn api [{:keys [method
@@ -21,8 +22,7 @@
                   http/post)]
     (go
       (when delay (<! (timeout (max delay 0))))
-      (let [c (http-fn (str "http://localhost:8080"         ; hardcoded, should be moved to shadow-cljs.edn
-                            uri)
+      (let [c (http-fn (str config/api-url uri)
                        (cond-> {:with-credentials? false
                                 :headers           {"Accept" "application/edn"}}
                                (and params (not= method :get)) (assoc :transit-params params)
