@@ -19,7 +19,7 @@
 (defn start-server []
   (stop-server)
   (reset! server
-          (kit/run-server (reload/wrap-reload #'web/app) {:port 8080})))
+          (kit/run-server (reload/wrap-reload #'web/app) {:port 8088})))
 
 (defn -main [& _args]
   (log/info "Establishing DB connection")
