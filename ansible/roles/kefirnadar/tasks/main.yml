@@ -8,7 +8,7 @@
   with_items:
     - "{{ project_dir }}"
     - "{{ project_dir }}/build/target/"
-    - "{{ project_dir }}/public/"
+    - "{{ project_dir }}/public/js/"
 
 - name: Copy kefirnadar jar, public assets and config
   copy:
@@ -19,7 +19,7 @@
   with_items:
     - { src: "../target/kefirnadar.jar", dest: "{{ project_dir }}/build/target/kefirnadar.jar" }
 #    - { src: "../config.edn", dest: "{{ project_dir }}/config.edn" }
-    - { src: "../resources/public/", dest: "{{ project_dir }}/public/" }
+    - { src: "../resources/public/js/main.js", dest: "{{ project_dir }}/public/js/main.js" }
 #    - { src: "../resources/migrations/", dest: "{{ project_dir }}/resources/migrations/" }
 #    - { src: "../resources/templates/", dest: "{{ project_dir }}/resources/templates/" }
 

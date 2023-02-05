@@ -21,8 +21,7 @@
         applied-science/js-interop {:mvn/version "0.3.3"}
         mount/mount {:mvn/version "0.1.16"}
         aero/aero {:mvn/version "1.1.6"}}
- :aliases {; serve the project locally using clj -Adev:local
-           :dev {:extra-paths ["src/dev"]
+ :aliases {:dev {:extra-paths ["src/dev"]
                  :extra-deps {http-kit/http-kit {:mvn/version "2.5.3"}
                                 ring/ring-devel {:mvn/version "1.9.5"}
                                 ring-logger/ring-logger {:mvn/version "1.1.1"}}}
