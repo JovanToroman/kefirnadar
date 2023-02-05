@@ -5,7 +5,7 @@
                 :compiler-options {:warnings {:undeclared-var false}}
                 :asset-path "/js"
                 :modules {:main {:entries [kefirnadar.configuration.core]}}
-                :closure-defines {kefirnadar.configuration.config/api-url "http://localhost:8080"}
+                :closure-defines {kefirnadar.configuration.config/api-url "http://localhost:8088"}
                 :devtools {:after-load kefirnadar.configuration.core/re-render
                            :preloads [devtools.preload
                                       re-frisk.preload
