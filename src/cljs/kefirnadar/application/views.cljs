@@ -1,14 +1,15 @@
 (ns kefirnadar.application.views
-  (:require [goog.string :as gstr]
-            [kefirnadar.application.events :as events]
-            [kefirnadar.application.subscriptions :as subs]
-            [kefirnadar.application.styles :as styles]
-            [kefirnadar.application.inputs :as inputs]
-            [re-frame.core :refer [dispatch subscribe]]
-            [kefirnadar.application.regions :as regions]
-            [applied-science.js-interop :as j]
-            [kefirnadar.application.utils :as utils]
-            [kefirnadar.application.specs :as specs]))
+  (:require
+    [cuerdas.core :as str]
+    [kefirnadar.application.events :as events]
+    [kefirnadar.application.subscriptions :as subs]
+    [kefirnadar.application.styles :as styles]
+    [kefirnadar.application.inputs :as inputs]
+    [re-frame.core :refer [dispatch subscribe]]
+    [kefirnadar.application.regions :as regions]
+    [applied-science.js-interop :as j]
+    [kefirnadar.application.utils :as utils]
+    [kefirnadar.application.specs :as specs]))
 
 ;; -- helper functions region --
 (defn extract-input-value
@@ -175,17 +176,22 @@
         :on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]]]))
 
 
-;; Ovo cu promeniti, napravio sam ovako samo da bi video da li mi radi..
 (defn user-row
-  [{:ad/keys [firstname lastname region phone-number email post? pick-up?]}]
-  [:tr {:key (random-uuid)}
-   [:td firstname]
-   [:td lastname]
-   [:td region]
-   [:td (or phone-number (gstr/unescapeEntities "&#10007"))]
-   [:td (or email (gstr/unescapeEntities "&#10007"))]
-   [:td (if (some? post?) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]
-   [:td (if (some? pick-up?) (gstr/unescapeEntities "&#10004") (gstr/unescapeEntities "&#10007"))]])
+  [{:ad/keys [firstname lastname phone-number email post? pick-up?]}]
+  [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)}
+   [:h3.row (str/format "%s %s" firstname lastname)]
+   [:p.row "Ovaj delilac deli zrnca " [:strong.ml-1.mr-1 (cond
+                                                (and post? pick-up?) "ličnim preuzimanjem i poštom"
+                                                post? "samo poštom"
+                                                pick-up? "samo ličnim preuzimanjem")]
+    " i možete ih kontaktirati "
+    (cond
+      (and (not (str/blank? email)) (not (str/blank? phone-number)))
+      [:<> "telefonom na " [:strong.ml-1.mr-1 phone-number]
+       "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
+
+      (not (str/blank? phone-number)) [:<> "telefonom na " [:strong.ml-1.mr-1 phone-number]]
+      (not (str/blank? email)) [:<> "elektronskom poštom na " [:strong.ml-1.mr-1 email]])]])
 
 
 (defn ads-list
@@ -198,7 +204,7 @@
     [:div.d-flex.flex-column.min-vh-100.align-items-center
      [:button.btn.btn-outline-primary.col-md-5.mb-5
       {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]
-     [:div
+     [:div.mb-5
       [:label " Opština: "]
       [:div {:className (css {:width "140pt"})}
        [inputs/search-selector {:placeholder "Izaberite mesto"
@@ -217,18 +223,7 @@
          :disabled (nil? selected-region)}
         "Pretraži"]]]
      (when (seq ads)
-       [:div.table-responsive.mt-5
-        [:table.table.table-striped.table-bordered
-         [:thead.thead-dark
-          [:tr [:th {:scope "col"} "Ime"]
-           [:th {:scope "col"} "Prezime"]
-           [:th {:scope "col"} "Region"]
-           [:th {:scope "col"} "Telefon"]
-           [:th {:scope "col"} "E-mail"]
-           [:th {:scope "col"} "Slanje poštom"]
-           [:th {:scope "col"} "Lično preuzimanje"]]]
-         [:tbody
-          (map user-row ads)]]])]))
+       (map user-row ads))]))
 
 
 (defn home []
