@@ -8,5 +8,5 @@
                 :closure-defines {kefirnadar.configuration.config/api-url "http://localhost:8080"}
                 :devtools {:after-load kefirnadar.configuration.core/re-render
                            :preloads [devtools.preload
-                                      ;re-frisk.preload
+                                      re-frisk.preload
                                       kefirnadar.configuration.dev-preload]}}}}
