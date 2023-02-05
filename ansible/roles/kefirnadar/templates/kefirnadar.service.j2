@@ -1,0 +1,32 @@
+[Unit]
+Description=Kefir na dar
+Documentation=Not available
+
+[Service]
+
+User=deploy
+Group=deploy
+
+WorkingDirectory={{ project_dir }}
+ExecStart=/usr/bin/java -jar "{{ project_dir }}/build/target/kefirnadar.jar"
+
+StandardOutput=journal
+
+# Connects standard error to journal
+StandardError=journal
+
+Environment="KEFIRNADAR_HOME={{ project_dir }}"
+Environment="KEFIRNADAR_ENV={{ env }}"
+Environment="KEFIRNADAR_GIT_SHA=FakeSha"
+
+# When a JVM receives a SIGTERM signal it exits with code 143
+SuccessExitStatus=143
+
+# Shutdown delay in seconds, before process is tried to be killed with KILL (if configured)
+TimeoutStopSec=20
+
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

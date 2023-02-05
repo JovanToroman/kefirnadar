@@ -1,0 +1,33 @@
+---
+- name: Ensure project directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: deploy
+    group: deploy
+  with_items:
+    - "{{ project_dir }}"
+    - "{{ project_dir }}/build/target/"
+    - "{{ project_dir }}/public/"
+
+- name: Copy kefirnadar jar, public assets and config
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: deploy
+    group: deploy
+  with_items:
+    - { src: "../target/kefirnadar.jar", dest: "{{ project_dir }}/build/target/kefirnadar.jar" }
+#    - { src: "../config.edn", dest: "{{ project_dir }}/config.edn" }
+    - { src: "../resources/public/", dest: "{{ project_dir }}/public/" }
+#    - { src: "../resources/migrations/", dest: "{{ project_dir }}/resources/migrations/" }
+#    - { src: "../resources/templates/", dest: "{{ project_dir }}/resources/templates/" }
+
+- name: Copy kefirnadar service definition
+  template: 
+    src: templates/kefirnadar.service.j2
+    dest: /lib/systemd/system/kefirnadar.service
+
+- name: Enable kefirnadar service
+  command: systemctl enable /lib/systemd/system/kefirnadar.service
+  notify: restart kefirnadar

@@ -1,0 +1,23 @@
+---
+- name: Add deployment user and create home directory
+  user: 
+    name: deploy 
+    password: '*'
+    shell: /bin/bash
+
+- name: Add maintainers' ssh keys so they can log in as deploy user.
+  authorized_key: 
+    user: deploy 
+    key: https://github.com/{{ item }}.keys
+  with_items:
+    - JovanToroman
+
+- name: Remove sudo group rights
+  action: lineinfile dest=/etc/sudoers regexp="^%sudo" state=absent
+
+- name: Add deploy user to sudoers
+  action: 'lineinfile dest=/etc/sudoers regexp="deploy ALL" line="deploy ALL=(ALL) NOPASSWD: ALL" state=present'
+
+- name: Disallow password authentication
+  action: lineinfile dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication" line="PasswordAuthentication no" state=present
+  notify: Restart sshd
