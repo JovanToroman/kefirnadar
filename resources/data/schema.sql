@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS ad (
+ad_id SERIAL,
+created_on TIMESTAMP NOT NULL,
+first_name VARCHAR ( 30 ) NOT NULL,
+last_name VARCHAR ( 50 ) NOT NULL,
+region VARCHAR ( 50 ) NOT NULL,
+send_by_post BOOLEAN,
+share_in_person BOOLEAN,
+quantity INTEGER,
+grains_kind VARCHAR ( 10 ) NOT NULL,
+phone_number VARCHAR ( 15 ),
+email VARCHAR ( 40 ),
+user_id VARCHAR ( 20 )
+);

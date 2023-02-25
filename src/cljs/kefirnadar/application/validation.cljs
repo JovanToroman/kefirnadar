@@ -21,7 +21,7 @@
     :firstname (and (not (str/blank? input)) (seq input) (str/alpha? input))
     :lastname (and (not (str/blank? input)) (seq input) (str/alpha? input))
     :email (reg-matcher email-regex-str input)
-    :region (keyword? input)
+    :region (and (string? input) (not (str/blank? input)))
     (:post? :pick-up?) (true? input)
     :phone-number (reg-matcher phone-number-regex-str input)
     :quantity (and (< input 101) (> input 0))))

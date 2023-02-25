@@ -1,43 +1,36 @@
 (ns kefirnadar.application.handlers
   (:require [kefirnadar.application.queries :as q]
-            [kefirnadar.configuration.client :as client]
             [ring.util.http-response :as r]
-            [datomic.client.api :as d]
-            [taoensso.timbre :refer [infof]])
-  (:import [java.util Date]))
+            [taoensso.timbre :as log]))
 
 (defn get-ads
   "This handler returns all active ads."
-  [input]
-  (println (:params input))
-  (let [ads (q/get-ads-by-kind-and-region (client/db) (:path-params input))]
+  [{{:ad/keys [grains-kind region]} :path-params :as request}]
+  (log/debug "'get-ads' input: " request)
+  (let [ads (q/get-ads grains-kind region)]
     (r/ok ads)))
 
 (defn create-ad
   "Creates ad."
   [{:keys [parameters]}]
-  (let [entity-body {:ad/firstname (get-in parameters [:body :ad/firstname])
-                     :ad/lastname (get-in parameters [:body :ad/lastname])
-                     :ad/region (get-in parameters [:body :ad/region])
-                     :ad/post? (get-in parameters [:body :ad/post?] false)
-                     :ad/pick-up? (get-in parameters [:body :ad/pick-up?] false)
-                     :ad/grains-kind (get-in parameters [:body :ad/grains-kind])
-                     :ad/quantity (get-in parameters [:body :ad/quantity])
-                     :ad/created (Date.)}
+  (let [entity-body {:first_name (get-in parameters [:body :ad/firstname])
+                     :last_name (get-in parameters [:body :ad/lastname])
+                     :region (get-in parameters [:body :ad/region])
+                     :send_by_post (get-in parameters [:body :ad/post?] false)
+                     :share_in_person (get-in parameters [:body :ad/pick-up?] false)
+                     :grains_kind (get-in parameters [:body :ad/grains-kind])
+                     :quantity (get-in parameters [:body :ad/quantity])
+                     :created_on [:now]                     ;; Postgresql internal function
+                     :user_id (get-in parameters [:body :user-id])}
+        phone-number (get-in parameters [:body :ad/phone-number])
+        email (get-in parameters [:body :ad/email])
         assembled-entity-body (cond
-                                (and (get-in parameters [:body :ad/phone-number])
-                                     (get-in parameters [:body :ad/email])) (assoc entity-body
-                                                                              :ad/phone-number (get-in parameters [:body :ad/phone-number])
-                                                                              :ad/email (get-in parameters [:body :ad/email]))
-                                (get-in parameters [:body :ad/phone-number]) (assoc entity-body
-                                                                               :ad/phone-number (get-in parameters [:body :ad/phone-number]))
-                                (get-in parameters [:body :ad/email]) (assoc entity-body
-                                                                        :ad/email (get-in parameters [:body :ad/email])))
-        result (q/add-entity! (client/get-conn) assembled-entity-body)
-        new-ad-id (-> result :tempids vals first)
-        db-after (:db-after result)
-        new-ad (d/pull db-after [:*] new-ad-id)]
-    (if (:db-after result)
-      (r/ok new-ad)
-      (r/bad-request))))
+                                (and phone-number email) (assoc entity-body :phone_number phone-number :email email)
+                                phone-number (assoc entity-body :phone_number phone-number)
+                                email (assoc entity-body :email email))
+        {:keys [next.jdbc/update-count]} (q/add-ad assembled-entity-body)]
+
+    (if (= update-count 1)
+      (r/ok assembled-entity-body)
+      (r/bad-request!))))
 

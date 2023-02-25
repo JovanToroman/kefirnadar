@@ -56,4 +56,9 @@
   :db/valueType          :db.type/string
   :db/cardinality        :db.cardinality/one
   :db/doc                "A user's email."
-  :db.install/_attribute :db.part/db}]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident              :ad/user-id
+  :db/valueType          :db.type/string
+  :db/cardinality        :db.cardinality/one
+  :db/doc                "ID of the current user."}]

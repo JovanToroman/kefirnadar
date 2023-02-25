@@ -1,14 +1,14 @@
 (ns user
-  (:require [kefirnadar.configuration.start :as start]
-            [kefirnadar.configuration.server :as server]))
+  (:require [kefirnadar.configuration.server :as server]))
 
 (defn start []
-  (start/dev-start)
+  (server/init-db!)
   (server/start-server))
 
 (defn stop []
-  (start/stop)
   (server/stop-server))
 
 (defn restart []
-  (start/dev-restart))
+  (stop)
+  (server/init-db!)
+  (server/reload-namespaces))

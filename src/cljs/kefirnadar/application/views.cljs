@@ -9,7 +9,8 @@
     [kefirnadar.application.regions :as regions]
     [applied-science.js-interop :as j]
     [kefirnadar.application.utils :as utils]
-    [kefirnadar.application.specs :as specs]))
+    [kefirnadar.application.specs :as specs]
+    [kefirnadar.application.auth :as auth]))
 
 ;; -- helper functions region --
 (defn extract-input-value
@@ -63,12 +64,13 @@
      [:label {:className (css (:label styles/styles-map))} "Opština:"]
      [:div {:className (css (:custom-select styles/styles-map))}
       [inputs/search-selector {:placeholder "Molimo izaberite mesto"
-                               :options (map (fn [r] {:title (name r)
-                                                      :value r
-                                                      :title-cleaned (utils/replace-serbian-characters (name r))
-                                                      :on-click (fn [event]
-                                                                  (dispatch [::events/update-sharing-form id
-                                                                             (keyword (extract-input-value event))]))})
+                               :options (map (fn [region]
+                                               {:title region
+                                                :value region
+                                                :title-cleaned (utils/replace-serbian-characters region)
+                                                :on-click (fn [event]
+                                                            (dispatch [::events/update-sharing-form id
+                                                                       (extract-input-value event)]))})
                                           regions/regions)
                                :active-value @selected-region
                                :placeholder-disabled? true}]]
@@ -149,6 +151,7 @@
 (defn share-grains-form []
   (let [form-info @(subscribe [::subs/form-data])
         grains-kind @(subscribe [::subs/grains-kind :sharing])
+        user-id @(subscribe [::auth/user-id])
         [css] (styles/use-styletron)]
     [:div {:className (css (:form-wrapper styles/styles-map))}
      [:div {:className (css (:wrapper-title styles/styles-map))} "Kreirajte vaš oglas"]
@@ -170,27 +173,28 @@
      [:div {:className (css (:input-field styles/styles-map))}
       [:button.btn.btn-outline-primary
        {:className (css (:btn styles/styles-map))
-        :on-click #(dispatch [::events/validate-and-create-ad grains-kind form-info])} "Sačuvaj"]
+        :on-click #(dispatch [::events/validate-and-create-ad grains-kind form-info user-id])} "Sačuvaj"]
       [:button.btn.btn-outline-primary
        {:className (css (:btn styles/styles-map))
         :on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]]]))
 
 
-(defn user-row
-  [{:ad/keys [firstname lastname phone-number email post? pick-up?]}]
+(defn ad-row
+  [{:ad/keys [first_name last_name phone_number email send_by_post share_in_person]}]
   [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)}
-   [:h3.row (str/format "%s %s" firstname lastname)]
-   [:p.row "Ovaj delilac deli zrnca " [:strong.ml-1.mr-1 (cond
-                                                (and post? pick-up?) "ličnim preuzimanjem i poštom"
-                                                post? "samo poštom"
-                                                pick-up? "samo ličnim preuzimanjem")]
+   [:h3.row (str/format "%s %s" first_name last_name)]
+   [:p.row "Ovaj delilac deli zrnca " [:strong.ml-1.mr-1
+                                       (cond
+                                         (and send_by_post share_in_person) "ličnim preuzimanjem i poštom"
+                                         send_by_post "samo poštom"
+                                         share_in_person "samo ličnim preuzimanjem")]
     " i možete ih kontaktirati "
     (cond
-      (and (not (str/blank? email)) (not (str/blank? phone-number)))
-      [:<> "telefonom na " [:strong.ml-1.mr-1 phone-number]
+      (and (not (str/blank? email)) (not (str/blank? phone_number)))
+      [:<> "telefonom na " [:strong.ml-1.mr-1 phone_number]
        "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
 
-      (not (str/blank? phone-number)) [:<> "telefonom na " [:strong.ml-1.mr-1 phone-number]]
+      (not (str/blank? phone_number)) [:<> "telefonom na " [:strong.ml-1.mr-1 phone_number]]
       (not (str/blank? email)) [:<> "elektronskom poštom na " [:strong.ml-1.mr-1 email]])]])
 
 
@@ -210,11 +214,12 @@
        [inputs/search-selector {:placeholder "Izaberite mesto"
                                 :options (map (fn [r]
                                                 {:title (name r)
+                                                 ;; we use the cleaned title to make the search more robust
                                                  :title-cleaned (utils/replace-serbian-characters (name r))
                                                  :value r
                                                  :on-click (fn [event]
                                                              (dispatch [::events/set-seeking-region
-                                                                        (keyword (extract-input-value event))]))})
+                                                                        (extract-input-value event)]))})
                                            regions/regions)
                                 :active-value selected-region
                                 :placeholder-disabled? true}]
@@ -223,7 +228,7 @@
          :disabled (nil? selected-region)}
         "Pretraži"]]]
      (when (seq ads)
-       (map user-row ads))]))
+       (map ad-row ads))]))
 
 
 (defn home []
@@ -244,18 +249,18 @@
     [:<>
      [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
       {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                            :path-params {:grains-kind :milk-type}}])
-       :value :milk-type}
+                                                            :path-params {:grains-kind "milk-type"}}])
+       :value "milk-type"}
       "Mlečni"]
      [:button.btn.btn-outline-primary.col-md-5.mb-5
       {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                            :path-params {:grains-kind :water-type}}])
-       :value :water-type}
+                                                            :path-params {:grains-kind "water-type"}}])
+       :value "water-type"}
       "Vodeni"]
      [:button.btn.btn-outline-primary.col-md-5
       {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                            :path-params {:grains-kind :kombucha}}])
-       :value :kombucha}
+                                                            :path-params {:grains-kind "kombucha"}}])
+       :value "kombucha"}
       "Kombuha"]]))
 
 (defn thank-you []
@@ -270,26 +275,36 @@
    [:h1 "Trenutno nema korisnika koji dele zrnca u izabranom regionu."]
    [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]])
 
-;; FORM
+(defn privacy-policy
+  []
+  [:div
+   [:h1 "Politika privatnosti"]
+   [:p "Ovo je naša politika privatnosti"]])
 
 (defn- panels [panel-name]
-  (case (:name (:data panel-name))
+  (case panel-name
     :route/home [home]
-    ;; -----
     :route/sharing [grains-kind :sharing]
     :route/seeking [grains-kind :seeking]
-    ;; -----
     :route/share-grains-form [share-grains-form]
     :route/search-for-grains [ads-list]
-    ;; -----
     :route/thank-you [thank-you]
-    ;; -----
     :route/error [error]
+    :route/privacy-policy [privacy-policy]
     [:div]))
 
+(defn login-page []
+  [:div
+   [:h1.mb-5 "Prijavljivanje"]
+   [:button.btn.btn-primary
+    {:on-click #(auth/log-user-in (:facebook auth/auth-methods))}
+    [:i.fa-brands.fa-facebook.fa-xl.mr-3] "Prijavite se pomoću Fejsbuka"]])
+
 (defn main-panel []
-  (let [active-panel @(subscribe [::subs/active-route])
-        [css] (styles/use-styletron)]
+  (let [{{panel-name :name public? :public?} :data} @(subscribe [::subs/active-route])
+        [css] (styles/use-styletron)
+        authenticated? @(subscribe [::auth/authenticated?])
+        authentication-required? (and (not authenticated?) (not public?))]
     [:div.container
      ;; NAVBAR
      [:nav.navbar.navbar-expand-lg.navbar-light.bg-light
@@ -301,6 +316,8 @@
      ;; CONTENT
      [:div.d-flex.flex-column.justify-content-center.align-items-center
       {:className (css (:main-panel styles/styles-map))}
-      [panels active-panel]]
+      (if authentication-required?
+        [login-page]
+        [panels panel-name])]
      ;; FOOTER
      [:p.copyright-text "Copyright © 2022 All Rights Reserved by Do Brave Software"]]))

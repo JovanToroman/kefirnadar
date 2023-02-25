@@ -9,7 +9,6 @@
         re-frisk/re-frisk {:mvn/version "1.5.2"}
         metosin/reitit {:mvn/version "0.5.17"}
         metosin/ring-http-response {:mvn/version "0.9.3"}
-        com.datomic/dev-local {:mvn/version "1.0.243"}
         ring-cors/ring-cors {:mvn/version "0.1.13"}
         http-kit/http-kit {:mvn/version "2.5.3"}
         ring/ring {:mvn/version "1.4.0"}
@@ -20,13 +19,16 @@
         com.andrewmcveigh/cljs-time {:mvn/version "0.5.2"}
         applied-science/js-interop {:mvn/version "0.3.3"}
         mount/mount {:mvn/version "0.1.16"}
-        aero/aero {:mvn/version "1.1.6"}}
+        aero/aero {:mvn/version "1.1.6"}
+        org.postgresql/postgresql {:mvn/version "42.5.2"}
+        com.github.seancorfield/next.jdbc {:mvn/version "1.3.847"}
+        com.github.seancorfield/honeysql {:mvn/version "2.4.980"}
+        com.zaxxer/HikariCP {:mvn/version "5.0.1"}
+        org.clojure/tools.namespace {:mvn/version "1.4.1"}}
  :aliases {:dev {:extra-paths ["src/dev"]
                  :extra-deps {http-kit/http-kit {:mvn/version "2.5.3"}
-                                ring/ring-devel {:mvn/version "1.9.5"}
-                                ring-logger/ring-logger {:mvn/version "1.1.1"}}}
+                              ring/ring-devel {:mvn/version "1.9.5"}
+                              ring-logger/ring-logger {:mvn/version "1.1.1"}}}
            :build {:extra-paths ["src/build"]
                    :extra-deps {io.github.clojure/tools.build {:git/tag "v0.9.1" :git/sha "27ff8a4"}}
-                   :ns-default uberjar}}
- :mvn/repos {"cognitect-dev-tools"
-             {:url "https://dev-tools.cognitect.com/maven/releases/"}}}
+                   :ns-default uberjar}}}
