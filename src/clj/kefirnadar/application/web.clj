@@ -1,6 +1,5 @@
 (ns kefirnadar.application.web
   (:require [kefirnadar.application.routes :as routes]
-            [kefirnadar.configuration.client :as client]
             [muuntaja.core :as m]
             [reitit.coercion.spec]
             [reitit.ring :as ring]
@@ -8,14 +7,6 @@
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.parameters :as parameters]
             [ring.middleware.cors :refer [wrap-cors]]))
-
-(defn wrap-datomic
-  [handler]
-  (fn [request]
-    (handler
-      (-> request
-        (assoc :db (client/db))
-        (assoc :conn (client/get-conn))))))
 
 (defn wrap-merge-params
   [handler]
@@ -42,7 +33,6 @@
                            coercion/coerce-request-middleware
                            coercion/coerce-exceptions-middleware
                            wrap-merge-params
-                           wrap-datomic
                            [wrap-cors :access-control-allow-origin #".*"
                             :access-control-allow-methods [:delete :get
                                                            :patch :post :put]]]}})

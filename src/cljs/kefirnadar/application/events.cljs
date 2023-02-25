@@ -1,11 +1,11 @@
 (ns kefirnadar.application.events
   (:require [kefirnadar.application.fx :as fx]
-            [kefirnadar.configuration.routes :as routes]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx trim-v]]
             [cuerdas.core :as str]
             [kefirnadar.configuration.db :as db]
             [kefirnadar.application.validation :as validation]
-            [kefirnadar.application.specs :as specs]))
+            [kefirnadar.application.specs :as specs]
+            [reitit.frontend.easy :as rfe]))
 
 
 (defn set-dropdown-filtering-value [db [region]]
@@ -15,7 +15,7 @@
 
 ;; -- create ad business logic
 (defn validate-and-create-ad
-  [{db :db} [grains-kind form-info]]
+  [{db :db} [grains-kind form-info user-id]]
   (let [validation-info (validation/validate-form-info form-info)]
     (if (validation/form-valid? validation-info :firstname :lastname :region :quantity)
       (let [{:keys [firstname lastname region post? pick-up? quantity phone-number email]} form-info
@@ -27,8 +27,9 @@
                            :ad/post? (or post? false)
                            :ad/pick-up? (or pick-up? false)
                            :ad/quantity quantity
-                           :ad/grains-kind (keyword grains-kind)}
-                  :on-success [::create-success]}
+                           :ad/grains-kind grains-kind
+                           :user-id user-id}
+                  :on-success [::validate-and-create-ad-success]}
             assembled-fx-api-body (cond
                                     (and phone-number email) (-> body
                                                                (assoc-in [:params :ad/email] email)
@@ -40,17 +41,35 @@
 
 (reg-event-fx ::validate-and-create-ad trim-v validate-and-create-ad)
 
-(defn create-success
+(defn validate-and-create-ad-success
   "Dispatched on successful ad creation."
   [_ [_new-ad]]
   {::load-route! {:data {:name :route/thank-you}}})
 
-(reg-event-fx ::create-success trim-v create-success)
+(reg-event-fx ::validate-and-create-ad-success trim-v validate-and-create-ad-success)
 
-;; -- end create business logic
+;; region routing
+(defn redirect!
+  "If `replace` is truthy, previous page will be replaced in history, otherwise added."
+  [{:keys [name path-params query-params replace]}]
+  ;; query params returns an empty map {} and replace-state and push-state are multiarity
+  ;; this if-let prevents a lonely ? from being appended to the url if there are no query params
+  (if-let [query-params (not-empty query-params)]
+    (if replace
+      (rfe/replace-state name path-params query-params)
+      (rfe/push-state name path-params query-params))
+    (if replace
+      (rfe/replace-state name path-params)
+      (rfe/push-state name path-params))))
 
-;; -route events-
-(reg-fx ::load-route! routes/load-route!)
+(defn load-route! [{:keys [data path-params query-params replace params] :as _route}]
+  (redirect! {:name         (-> data :name)
+              :params       params
+              :path-params  path-params
+              :query-params query-params
+              :replace      replace}))
+
+(reg-fx ::load-route! load-route!)
 
 (defn dispatch-load-route!
   "A coeffect to dispatch the load-route! effect."
@@ -58,7 +77,7 @@
   {::load-route! route})
 
 (reg-event-fx ::dispatch-load-route! trim-v dispatch-load-route!)
-;; -end route events-
+;; endregion
 
 (reg-event-db
   ::store-grains-kind trim-v
@@ -103,7 +122,3 @@
   [_ _]
   {::load-route! {:data {:name :route/error}}})
 (reg-event-db ::fetch-ads-success trim-v fetch-ads-success)
-
-;; -- end fetch business logic
-
-

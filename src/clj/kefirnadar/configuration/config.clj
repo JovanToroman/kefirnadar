@@ -9,3 +9,5 @@
     (aero/read-config {:profile profile})))
 
 (def config (read-config (mount/args)))
+
+(def postgres (:postgres config))

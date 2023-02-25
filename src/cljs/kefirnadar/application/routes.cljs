@@ -1,5 +1,7 @@
-(ns kefirnadar.configuration.routes
+(ns kefirnadar.application.routes
   (:require [kefirnadar.application.subscriptions :as subs]
+            [kefirnadar.application.auth :as auth]
+            [kefirnadar.application.events :as events]
             [re-frame.core :refer [dispatch subscribe]]
             [reitit.coercion.schema]
             [reitit.coercion.spec]
@@ -7,13 +9,16 @@
             [reitit.frontend.controllers :as rfc]
             [reitit.frontend.easy :as rfe]))
 
-
 ; region routes
 (def routes
   ["/" {:coercion reitit.coercion.spec/coercion}
    ["" {:name :route/home
         :controllers [{:identity identity
-                       :start #(dispatch [:kefirnadar.application.events/clean-db])}]
+                       :start #(dispatch [::events/clean-db])}
+                      {:identity identity
+                       :start (fn []
+                                (js/console.log "My controller")
+                                (auth/get-authentication-statuses!))}]
         :doc "Home page"}]
    ["sharing/"
     ["" {:name :route/sharing
@@ -24,7 +29,7 @@
       :doc "Form to share grains"
       :controllers [{:parameters {:path [:grains-kind]}
                      :start (fn [{{grains-kind :grains-kind} :path}]
-                              (dispatch [:kefirnadar.application.events/store-grains-kind (keyword grains-kind)
+                              (dispatch [::events/store-grains-kind grains-kind
                                          :sharing]))
                      :stop #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind/:grains-kind")}]}]]
    ["seeking/"
@@ -36,7 +41,7 @@
       :doc ""
       :controllers [{:parameters {:path [:grains-kind]}
                      :start (fn [{{grains-kind :grains-kind} :path}]
-                              (dispatch [:kefirnadar.application.events/store-grains-kind (keyword grains-kind)
+                              (dispatch [::events/store-grains-kind grains-kind
                                          :seeking]))
                      :stop #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind/:grains-kind")}]}]]
    ["thank-you"
@@ -46,6 +51,11 @@
    ["error"
     {:name :route/error
      :doc "error page"
+     :controllers [{:identity identity}]}]
+   ["privacy-policy"
+    {:name :route/privacy-policy
+     :doc "privacy policy"
+     :public? true
      :controllers [{:identity identity}]}]])
 
 (defonce router (rf/router routes))
@@ -60,23 +70,3 @@
         (dispatch [:kefirnadar.configuration.events/set-active-route
                    (assoc route :controllers (rfc/apply-controllers (:controllers old-route) route))])))
     {:use-fragment false}))
-
-(defn redirect!
-  "If `replace` is truthy, previous page will be replaced in history, otherwise added."
-  [{:keys [name path-params query-params replace]}]
-  ;; query params returns an empty map {} and replace-state and push-state are multiarity
-  ;; this if-let prevents a lonely ? from being appended to the url if there are no query params
-  (if-let [query-params (not-empty query-params)]
-    (if replace
-      (rfe/replace-state name path-params query-params)
-      (rfe/push-state name path-params query-params))
-    (if replace
-      (rfe/replace-state name path-params)
-      (rfe/push-state name path-params))))
-
-(defn load-route! [{:keys [data path-params query-params replace params] :as _route}]
-  (redirect! {:name         (-> data :name)
-              :params       params
-              :path-params  path-params
-              :query-params query-params
-              :replace      replace}))

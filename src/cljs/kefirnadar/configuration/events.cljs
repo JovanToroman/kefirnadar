@@ -1,6 +1,6 @@
 (ns kefirnadar.configuration.events
   (:require [kefirnadar.configuration.db :as db]
-            [kefirnadar.configuration.routes :as routes]
+            [kefirnadar.application.routes :as routes]
             [re-frame.core :refer [reg-event-db reg-event-fx reg-sub]]))
 
 ; not needed at the moment
