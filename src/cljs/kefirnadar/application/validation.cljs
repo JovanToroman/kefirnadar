@@ -18,8 +18,8 @@
 
 (defn field-validation [id input]
   (case id
-    :firstname (and (not (str/blank? input)) (seq input) (str/alpha? input))
-    :lastname (and (not (str/blank? input)) (seq input) (str/alpha? input))
+    :firstname (and (not (str/blank? input)) (seq input) (str/letters? input))
+    :lastname (and (not (str/blank? input)) (seq input) (str/letters? input))
     :email (reg-matcher email-regex-str input)
     :region (and (string? input) (not (str/blank? input)))
     (:post? :pick-up?) (true? input)

@@ -1,1 +1,2 @@
 project_dir: /home/deploy/kefirnadar
+postgresql_version: 14

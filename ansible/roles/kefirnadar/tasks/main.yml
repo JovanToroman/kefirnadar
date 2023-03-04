@@ -18,10 +18,8 @@
     group: deploy
   with_items:
     - { src: "../target/kefirnadar.jar", dest: "{{ project_dir }}/build/target/kefirnadar.jar" }
-#    - { src: "../config.edn", dest: "{{ project_dir }}/config.edn" }
     - { src: "../resources/public/js/main.js", dest: "{{ project_dir }}/public/js/main.js" }
-#    - { src: "../resources/migrations/", dest: "{{ project_dir }}/resources/migrations/" }
-#    - { src: "../resources/templates/", dest: "{{ project_dir }}/resources/templates/" }
+    - { src: "../resources/public/index.html", dest: "{{ project_dir }}/public/index.html" }
 
 - name: Copy kefirnadar service definition
   template: 

@@ -1,0 +1,62 @@
+---
+- name: Install postgres dependencies
+  apt:
+    pkg:
+      - unzip
+      - postgresql-{{ postgresql_version }}
+    state: present
+    update-cache: yes
+
+- name: Create postgres user
+  user:
+    name: postgres
+    state: present
+
+# TODO: Remove postgres user's permissions
+
+- name: Copy user setup sql script
+  template:
+    src: templates/create_user_script.sql.j2
+    dest: /etc/create_user_script.sql
+
+# this one was added in order to eliminate a warning that was being shown during running of the playbook
+- name: Ensure ansible module remote_tmp directory
+  file:
+    path: /var/lib/postgresql/.ansible/tmp
+    state: directory
+    owner: deploy
+    group: deploy
+    mode: 0777
+
+- name: Create Postgres database
+  shell: "psql -U postgres -tc \"SELECT 1 FROM pg_database WHERE datname = 'kefirnadar'\" 
+  | grep -q 1 
+  || psql -U postgres -c \"CREATE DATABASE kefirnadar\""
+  become_user: postgres
+
+- name: Create database user
+  shell: "psql -U postgres -f /etc/create_user_script.sql"
+  become_user: postgres
+
+- name: Copy needed Postgres setup files
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: deploy
+    group: deploy
+    mode: 0777
+  with_items:
+    - { src: "/etc/kefirnadar-{{env}}-secrets.edn", dest: "/etc/kefirnadar-{{env}}-secrets.edn" }
+    - { src: templates/postgres_permissions.j2, dest: "/etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf" }
+
+- name: Restart postgresql
+  service:
+    name: postgresql
+    state: restarted
+
+- name: Copy secrets file from the host to the server
+  copy:
+    src: /etc/kefirnadar-{{env}}-secrets.edn
+    dest: /etc/kefirnadar-{{env}}-secrets.edn
+    owner: deploy
+    group: deploy

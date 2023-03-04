@@ -8,7 +8,7 @@ User=deploy
 Group=deploy
 
 WorkingDirectory={{ project_dir }}
-ExecStart=/usr/bin/java -jar "{{ project_dir }}/build/target/kefirnadar.jar"
+ExecStart=/usr/bin/java -jar "{{ project_dir }}/build/target/kefirnadar.jar" -p {{env}}
 
 StandardOutput=journal
 

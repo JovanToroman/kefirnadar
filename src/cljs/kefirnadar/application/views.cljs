@@ -198,6 +198,13 @@
       (not (str/blank? email)) [:<> "elektronskom poštom na " [:strong.ml-1.mr-1 email]])]])
 
 
+(defn format-grains-kind [grains-kind]
+  (case grains-kind
+    "milk-type" "mlečni kefir"
+    "water-type" "vodeni kefir"
+    "kombucha" "kombuhu"
+    "nepoznato"))
+
 (defn ads-list
   "List of all ads."
   []
@@ -206,7 +213,7 @@
         grains-kind @(subscribe [::subs/grains-kind :seeking])
         [css] (styles/use-styletron)]
     [:div.d-flex.flex-column.min-vh-100.align-items-center
-     [:button.btn.btn-outline-primary.col-md-5.mb-5
+     [:button.btn.btn-outline-primary.mb-5.mt-5
       {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]
      [:div.mb-5
       [:label " Opština: "]
@@ -227,8 +234,12 @@
         {:on-click #(dispatch [::events/fetch-ads selected-region grains-kind])
          :disabled (nil? selected-region)}
         "Pretraži"]]]
-     (when (seq ads)
-       (map ad-row ads))]))
+     (cond
+       (seq ads) (map ad-row ads)
+       (some? ads) [:p (str/format "Trenutno niko ne deli %s u mestu %s"
+                         (format-grains-kind grains-kind) selected-region)]
+       (some? selected-region) "Molimo pokrenite pretragu"
+       :else "Molimo izaberite opštinu i pokrenite pretragu")]))
 
 
 (defn home []
@@ -303,7 +314,7 @@
 (defn main-panel []
   (let [{{panel-name :name public? :public?} :data} @(subscribe [::subs/active-route])
         [css] (styles/use-styletron)
-        authenticated? @(subscribe [::auth/authenticated?])
+        #_#_#_#_authenticated? @(subscribe [::auth/authenticated?])
         authentication-required? (and (not authenticated?) (not public?))]
     [:div.container
      ;; NAVBAR
@@ -316,8 +327,9 @@
      ;; CONTENT
      [:div.d-flex.flex-column.justify-content-center.align-items-center
       {:className (css (:main-panel styles/styles-map))}
-      (if authentication-required?
+      #_(if authentication-required?
         [login-page]
-        [panels panel-name])]
+        [panels panel-name])
+      [panels panel-name]]
      ;; FOOTER
-     [:p.copyright-text "Copyright © 2022 All Rights Reserved by Do Brave Software"]]))
+     [:p.copyright-text "Copyright © 2022-2023 All Rights Reserved by Do Brave Plus Software"]]))

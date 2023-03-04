@@ -14,7 +14,6 @@
   (handle-login-response [_this response]
     (let [{:keys [status authResponse] :as rsp}
           ^::specs/facebook-get-login-status-response (update (js->clj response :keywordize-keys true) :status keyword)]
-      (js/console.log "Response: " rsp ". Acting now")
       (dispatch [::set-authentication-data (cond-> {:status status
                                                     :authenticated? (case status
                                                                       :connected true

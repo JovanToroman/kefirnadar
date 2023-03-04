@@ -8,7 +8,7 @@
   []
   (postgres/execute-transaction! {:select [:ad_id]
                                   :from [:ad]
-                                  :where [:< :created_at [:raw ["NOW() - INTERVAL '30 days'"]]]}))
+                                  :where [:< :ad.created_on [:raw ["NOW() - INTERVAL '30 days'"]]]}))
 
 (defn get-ads
   [grains-kind region]

@@ -21,7 +21,7 @@
                      :grains_kind (get-in parameters [:body :ad/grains-kind])
                      :quantity (get-in parameters [:body :ad/quantity])
                      :created_on [:now]                     ;; Postgresql internal function
-                     :user_id (get-in parameters [:body :user-id])}
+                     #_#_:user_id (get-in parameters [:body :user-id])}
         phone-number (get-in parameters [:body :ad/phone-number])
         email (get-in parameters [:body :ad/email])
         assembled-entity-body (cond

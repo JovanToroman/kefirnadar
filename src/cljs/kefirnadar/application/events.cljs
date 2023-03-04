@@ -9,7 +9,9 @@
 
 
 (defn set-dropdown-filtering-value [db [region]]
-  (assoc-in db [:ads :seeking :region-filter] region))
+  (-> db
+    (assoc-in [:ads :seeking :region-filter] region)
+    (update-in [:ads :seeking] dissoc :filtered-ads)))
 
 (reg-event-db ::set-seeking-region trim-v set-dropdown-filtering-value)
 
@@ -19,7 +21,7 @@
   (let [validation-info (validation/validate-form-info form-info)]
     (if (validation/form-valid? validation-info :firstname :lastname :region :quantity)
       (let [{:keys [firstname lastname region post? pick-up? quantity phone-number email]} form-info
-            body {:uri "/create"
+            body {:uri "/api/create"
                   :method :post
                   :params {:ad/firstname firstname
                            :ad/lastname lastname
@@ -28,7 +30,7 @@
                            :ad/pick-up? (or pick-up? false)
                            :ad/quantity quantity
                            :ad/grains-kind grains-kind
-                           :user-id user-id}
+                           #_#_:user-id user-id}
                   :on-success [::validate-and-create-ad-success]}
             assembled-fx-api-body (cond
                                     (and phone-number email) (-> body
@@ -104,7 +106,7 @@
 (defn fetch-ads
   "Fetches all ads matching the specified region."
   [_ [region grains-kind]]
-  {::fx/api {:uri (str/format "/list/grains-kind/%s/region/%s" grains-kind region)
+  {::fx/api {:uri (str/format "/api/list/grains-kind/%s/region/%s" grains-kind region)
              :method :get
              :on-success [::fetch-ads-success]
              :on-error [::fetch-ads-fail]}})

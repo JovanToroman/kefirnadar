@@ -8,22 +8,24 @@
 
 (def ^{:private true} pooled (atom nil))
 
-(defn opp-pg-conn [] @pooled)
+(defn pg-conn [] @pooled)
+
+(defn datasource [] (:datasource (pg-conn)))
 
 (defn stop! []
-  (.close (:datasource @pooled)))
+  (.close (datasource)))
 
 (defn execute-transaction!
   [query]
-  (jdbc/execute-one! (opp-pg-conn)
+  (jdbc/execute-one! (pg-conn)
     (sql/format query)))
 
 (defn execute-query!
   [query]
-  (jdbc/execute! (opp-pg-conn)
+  (jdbc/execute! (pg-conn)
     (sql/format query)))
 
 (defn start! [schema]
   (log/info "starting db...")
-  (reset! pooled (connection/->pool HikariDataSource config/postgres))
-  (jdbc/execute-one! (opp-pg-conn) [schema]))
+  (reset! pooled (connection/->pool HikariDataSource @config/postgres-main))
+  (jdbc/execute-one! (pg-conn) [schema]))
