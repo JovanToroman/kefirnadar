@@ -1,0 +1,13 @@
+DO
+$do$
+BEGIN
+   IF EXISTS (
+      SELECT FROM pg_catalog.pg_roles
+      WHERE  rolname = '{{ db_user }}') THEN
+
+      RAISE NOTICE 'Role {{ db_user }} already exists. Skipping.';
+   ELSE
+      CREATE ROLE {{ db_user }} LOGIN SUPERUSER PASSWORD '{{ db_password }}';
+   END IF;
+END
+$do$;

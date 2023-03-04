@@ -4,10 +4,10 @@
     name: nginx 
     state: latest
 
-#- name: Copy nginx basic config (used for letsencrypt)
-#  template:
-#    src: templates/nginx.basic.conf.j2
-#    dest: /etc/nginx/sites-available/omnicode-static
+- name: Copy nginx basic config (used for letsencrypt)
+  template:
+    src: templates/nginx.basic.conf.j2
+    dest: /etc/nginx/sites-available/kefirnadar-static
 
 - name: Copy nginx main config
   template:
@@ -19,22 +19,27 @@
     src: templates/nginx.conf.j2 
     dest: /etc/nginx/sites-available/default
 
-#- name: Symlink sites-available to sites-enabled
-#  file:
-#    src: /etc/nginx/sites-available/omnicode-static
-#    dest: /etc/nginx/sites-enabled/default
-#    state: link
-#
-#- name: Install certbot
-#  apt:
-#    pkg:
-#      - certbot
-#      - python-certbot-nginx
-#    state: latest
-#    update_cache: true
-#
-#- name: Get certificate
-#  command: certbot certonly --webroot -w /home/deploy/omnicode/public {{ lets_encrypt_cli_domains }} --non-interactive --agree-tos -m mjackson.za@gmail.com
+- name: Symlink site config
+  file:
+    src: /etc/nginx/sites-available/kefirnadar-static
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+
+- name: Restart nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: Install certbot
+  apt:
+    pkg:
+      - certbot
+      - python3-certbot-nginx
+    state: latest
+    update_cache: true
+
+- name: Get certificate
+  command: certbot certonly --webroot -w {{project_dir}}/public {{ lets_encrypt_cli_domains }} --non-interactive --agree-tos -m toromanj@gmail.com
 
 - name: Update site config
   file:
@@ -42,11 +47,6 @@
     dest: /etc/nginx/sites-enabled/default
     state: link
   notify: restart nginx
-
-- name: Restart nginx
-  service:
-    name: nginx
-    state: restarted
 
 - name: Add nginx daily restart cron job to restart nginx after getting new certificate
   cron:

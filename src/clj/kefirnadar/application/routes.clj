@@ -3,8 +3,8 @@
             [spec-tools.data-spec :as ds]))
 
 (def routes
-  ["" {:swagger {:consumes ["application/edn" "application/transit+json"]
-                 :produces ["application/edn" "application/transit+json"]}}
+  ["/api" {:swagger {:consumes ["application/edn" "application/transit+json"]
+                     :produces ["application/edn" "application/transit+json"]}}
    ["/list/grains-kind/{ad/grains-kind}/region/{ad/region}"
     {:get {:handler h/get-ads
            :parameters {:path {:ad/region string?
@@ -19,4 +19,4 @@
                                           :ad/grains-kind string?
                                           (ds/opt :ad/phone-number) string?
                                           (ds/opt :ad/email) string?
-                                          :user-id string?}}}}]])
+                                          #_#_:user-id string?}}}}]])

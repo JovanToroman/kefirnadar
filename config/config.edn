@@ -1,5 +1,8 @@
-{:secrets #include #profile {:dev "/etc/kefirnadar-dev-secrets.edn"}
- :postgres {:dbtype "postgresql"
-            :jdbcUrl #ref [:secrets :postgres :jdbcUrl]
-            :minimumIdle 5
-            :maximumPoolSize 30}}
+{:secrets #include #profile {:dev "/etc/kefirnadar-dev-secrets.edn"
+                             :staging "/etc/kefirnadar-staging-secrets.edn"}
+ :postgres {:main {:dbtype "postgresql"
+                   :jdbcUrl #ref [:secrets :postgres :main :jdbcUrl]
+                   :user #ref [:secrets :postgres :main :user]
+                   :password #ref [:secrets :postgres :main :password]
+                   :minimumIdle 5
+                   :maximumPoolSize 30}}}

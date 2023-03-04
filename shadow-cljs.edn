@@ -9,4 +9,11 @@
                 :devtools {:after-load kefirnadar.configuration.core/re-render
                            :preloads [devtools.preload
                                       re-frisk.preload
-                                      kefirnadar.configuration.dev-preload]}}}}
+                                      kefirnadar.configuration.dev-preload]}}
+          :staging {:target :browser
+                    :output-dir "resources/public/js"
+                    :compiler-options {:warnings {:undeclared-var false}}
+                    :asset-path "/js"
+                    :modules {:main {:entries [kefirnadar.configuration.core]}}
+                    :closure-defines {kefirnadar.configuration.config/api-url "https://kefirnadar.rs"}
+                    :devtools {:after-load kefirnadar.configuration.core/re-render}}}}

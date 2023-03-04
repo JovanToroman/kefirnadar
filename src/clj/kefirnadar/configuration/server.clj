@@ -1,10 +1,12 @@
 (ns kefirnadar.configuration.server
   (:require
     [clojure.java.io :as io]
+    [clojure.tools.cli :as cli]
     [kefirnadar.application.async :as async]
     [kefirnadar.application.web :as web]
     [kefirnadar.configuration.postgres :as postgres]
     [clojure.tools.namespace.repl :as repl]
+    [mount.core :as mount]
     [org.httpkit.server :as kit]
     [ring.middleware.reload :as reload]
     [taoensso.timbre :as log])
@@ -14,9 +16,14 @@
 
 (defonce server (atom nil))
 
+(def cli-options
+  [["-p" "--profile PROFILE" "The profile to use" :default :dev :parse-fn keyword]])
+
 (repl/set-refresh-dirs "src/clj/kefirnadar/application")
 
 (defn stop-server []
+  (when (some? (postgres/datasource))
+    (postgres/stop!))
   (when @server
     @(kit/server-stop! @server)                             ; we deref the returned promise to do the stopping in sync
     (reset! server nil)))
@@ -29,17 +36,22 @@
 (defn init-db! []
   (try (postgres/start! (slurp (io/reader (io/resource "data/schema.sql"))))
        (log/info "System started")
-       (catch PSQLException _ (log/error (str "DB failed to start. It seems you are missing your secrets file. Please "
-                                           "make sure that file /etc/kefirnadar-dev-secrets.edn exists and that it "
-                                           "contains Postgresql config.")))))
+       (catch PSQLException e (log/error
+                                (str "DB failed to start. It seems you are missing your secrets file. Please "
+                                  (format "make sure that file /etc/kefirnadar-%s-secrets.edn exists and that it "
+                                    (:profile (mount/args)))
+                                  "contains Postgresql config. Exception message: " (.getMessage e))))))
 
 (defn reload-namespaces []
   (repl/refresh :after 'kefirnadar.configuration.server/start-server))
 
-(defn -main [& _args]
+(defn -main [& args]
+  (let [opts (:options (cli/parse-opts args cli-options))]
+    (log/info "Arguments: " opts)
+    (mount/start-with-args opts))
   (log/info "Establishing DB connection")
   (init-db!)
   (log/info "Starting local server")
   (start-server)
-  (log/info "Local server started on port 8080")
+  (log/info "Local server started on port 8088")
   (async/remove-old-ads-thread true))

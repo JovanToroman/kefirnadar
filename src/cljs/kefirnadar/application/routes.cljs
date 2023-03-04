@@ -15,10 +15,8 @@
    ["" {:name :route/home
         :controllers [{:identity identity
                        :start #(dispatch [::events/clean-db])}
-                      {:identity identity
-                       :start (fn []
-                                (js/console.log "My controller")
-                                (auth/get-authentication-statuses!))}]
+                      #_{:identity identity
+                       :start (fn [] (auth/get-authentication-statuses!))}]
         :doc "Home page"}]
    ["sharing/"
     ["" {:name :route/sharing

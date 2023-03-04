@@ -7,6 +7,6 @@
   roles:
     - deploy-user
     - clojure
-    - datomic
+    - postgresql
     - kefirnadar
     - nginx
