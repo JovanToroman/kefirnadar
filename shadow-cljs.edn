@@ -5,7 +5,8 @@
                 :compiler-options {:warnings {:undeclared-var false}}
                 :asset-path "/js"
                 :modules {:main {:entries [kefirnadar.configuration.core]}}
-                :closure-defines {kefirnadar.configuration.config/api-url "http://localhost:8088"}
+                :closure-defines {kefirnadar.configuration.config/api-url "http://localhost:8088"
+                                  kefirnadar.configuration.config/site-url "http://localhost:8060"}
                 :devtools {:after-load kefirnadar.configuration.core/re-render
                            :preloads [devtools.preload
                                       re-frisk.preload
@@ -15,5 +16,6 @@
                     :compiler-options {:warnings {:undeclared-var false}}
                     :asset-path "/js"
                     :modules {:main {:entries [kefirnadar.configuration.core]}}
-                    :closure-defines {kefirnadar.configuration.config/api-url "https://kefirnadar.rs"}
+                    :closure-defines {kefirnadar.configuration.config/api-url "https://kefirnadar.rs"
+                                      kefirnadar.configuration.config/site-url "https://kefirnadar.rs"}
                     :devtools {:after-load kefirnadar.configuration.core/re-render}}}}

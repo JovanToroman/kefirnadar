@@ -24,8 +24,15 @@
   (fn [db _] (get-in db [:ads :seeking :region-filter])))
 
 (reg-sub ::filtered-ads
-  (fn [db _] (get-in db [:ads :seeking :filtered-ads])))
+  (fn [db _] (get-in db [:ads :seeking :filtered-ads :ads])))
+
+(reg-sub ::ads-count
+  (fn [db _] (get-in db [:ads :seeking :filtered-ads :ads-count])))
 
 (reg-sub ::grains-kind
   (fn [db [_ ^::specs/user-action user-action]]
     (get-in db [:ads user-action :grains-kind])))
+
+(reg-sub ::ads-pagination-info
+  (fn [db [_ action]]
+    (get-in db [:ads action :pagination-info])))

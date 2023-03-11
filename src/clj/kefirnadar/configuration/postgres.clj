@@ -25,6 +25,11 @@
   (jdbc/execute! (pg-conn)
     (sql/format query)))
 
+(defn execute-one!
+  [query]
+  (jdbc/execute-one! (pg-conn)
+    (sql/format query)))
+
 (defn start! [schema]
   (log/info "starting db...")
   (reset! pooled (connection/->pool HikariDataSource @config/postgres-main))

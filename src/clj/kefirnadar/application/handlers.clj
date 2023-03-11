@@ -1,14 +1,17 @@
 (ns kefirnadar.application.handlers
   (:require [kefirnadar.application.queries :as q]
             [ring.util.http-response :as r]
+            [kefirnadar.common.utils :refer [-m]]
             [taoensso.timbre :as log]))
 
 (defn get-ads
   "This handler returns all active ads."
-  [{{:ad/keys [grains-kind region]} :path-params :as request}]
-  (log/debug "'get-ads' input: " request)
-  (let [ads (q/get-ads grains-kind region)]
-    (r/ok ads)))
+  [{{:ad/keys [grains-kind] :keys [page-number page-size] :as params} :params}]
+  (log/debug "'get-ads' params: " params)
+  (let [ads (q/get-ads grains-kind (-m page-number page-size))
+        count (q/get-ads-count grains-kind)]
+    (r/ok {:ads ads
+           :ads-count count})))
 
 (defn create-ad
   "Creates ad."

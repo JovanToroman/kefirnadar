@@ -11,14 +11,22 @@
                                   :where [:< :ad.created_on [:raw ["NOW() - INTERVAL '30 days'"]]]}))
 
 (defn get-ads
-  [grains-kind region]
-  (log/spy :debug
-    (postgres/execute-query! {:select [:created_on :first_name :last_name :region :send_by_post :share_in_person
-                                       :quantity :grains_kind :phone_number :email]
-                              :from [:ad]
-                              :where [:and
-                                      [:= :ad.grains_kind grains-kind]
-                                      [:= :ad.region region]]})))
+  [grains-kind {:keys [page-number page-size]}]
+  (let [offset (* (dec page-number) page-size)]
+    (log/spy :debug
+      (postgres/execute-query! {:select [:created_on :first_name :last_name :region :send_by_post :share_in_person
+                                         :quantity :grains_kind :phone_number :email :ad_id]
+                                :from [:ad]
+                                :where [:= :ad.grains_kind grains-kind]
+                                :limit page-size
+                                :offset offset
+                                :order-by [[:ad.created_on :desc]]}))))
+
+(defn get-ads-count
+  [grains-kind]
+  (:count (postgres/execute-one! {:select [:%count.*]
+                                  :from [:ad]
+                                  :where [:= :ad.grains_kind grains-kind]})))
 ;; endregion
 
 ;; region transactions
@@ -38,10 +46,10 @@
 
 
 (comment
-  (add-ad {:send_by_post true,
+  (mapv (fn [no] (add-ad {:send_by_post true,
            :email "",
            :first_name "asdasd",
-           :phone_number "062333444",
+           :phone_number (str "062" no),
            :grains_kind "milk-type",
            :region "Ada",
            :created_on [:now],
@@ -49,3 +57,7 @@
            :user_id "10226481938492906",
            :quantity 3,
            :share_in_person false}))
+    (range 100000 100100)))
+
+(comment "Remove all ads"
+  (postgres/execute-transaction! {:truncate [:ad]}))

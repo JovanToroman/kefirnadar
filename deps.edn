@@ -1,4 +1,4 @@
-{:paths ["src/clj" "src/cljs" "resources" "config"]
+{:paths ["src/clj" "src/cljs" "src/cljc" "resources" "config"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         org.clojure/clojurescript {:mvn/version "1.11.4"}
         re-frame/re-frame {:mvn/version "1.2.0"}

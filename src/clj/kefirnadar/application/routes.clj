@@ -1,14 +1,17 @@
 (ns kefirnadar.application.routes
   (:require [kefirnadar.application.handlers :as h]
-            [spec-tools.data-spec :as ds]))
+            [spec-tools.data-spec :as ds]
+            [kefirnadar.application.specs :as specs]
+            [kefirnadar.common.utils]))
 
 (def routes
   ["/api" {:swagger {:consumes ["application/edn" "application/transit+json"]
                      :produces ["application/edn" "application/transit+json"]}}
-   ["/list/grains-kind/{ad/grains-kind}/region/{ad/region}"
+   ["/list/grains-kind/{ad/grains-kind}"
     {:get {:handler h/get-ads
-           :parameters {:path {:ad/region string?
-                               :ad/grains-kind string?}}}}]
+           :parameters {:path {:ad/grains-kind string?}
+                        :query {(ds/opt :page-number) pos-int?
+                                (ds/opt :page-size) ::specs/page-size}}}}]
    ["/create" {:post {:handler h/create-ad
                       :parameters {:body {:ad/firstname string?
                                           :ad/lastname string?

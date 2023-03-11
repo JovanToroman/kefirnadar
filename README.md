@@ -14,9 +14,17 @@ instalirati komandom `npm install` pokrenutom iz korena projekta.
 
 ### Bekend
 
-Pre pokretanja servera, moramo podesiti dev-local Datomic bazu podataka. 
-Uputstva možemo naći [ovde](https://docs.datomic.com/cloud/dev-local.html). 
-Nakon toga možemo pokrenuti aplikaciju. Nakon toga možemo pokrenuti server.
+Pre pokretanja servera, moramo podesiti PostgreSQL bazu podataka i napraviti bazu sa imenom `kefirnadar`. Zatim treba da
+napravimo korisnika baze sa željenim korsiničkim imenom i lozinkom. Onda treba definisati parametre za pristup bazi, kao
+što su JDBC url, korisničko ime i lozinka u fajlu `/etc/kefirnadar-dev-secrets.edn`. Evo ga primer konfiguracije:
+```clojure
+{:postgres {:main {:jdbcUrl
+                   "jdbc:postgresql://127.0.0.1:5432/kefirnadar?user=mojkorisnik&password=mojalozinka"
+                   :user "mojkorisnik"
+                   :password "mojalozinka"}}}
+```
+
+Nakon toga možemo pokrenuti server.
 
 Bekend je napisan u Clojuru, sa korišćenjem deps.edn fajla za upravljanje zavisnostima.
 Server pokrećemo komandom `clj A:dev`.

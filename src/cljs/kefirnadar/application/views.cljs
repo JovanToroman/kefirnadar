@@ -9,8 +9,11 @@
     [kefirnadar.application.regions :as regions]
     [applied-science.js-interop :as j]
     [kefirnadar.application.utils :as utils]
+    [kefirnadar.common.utils :refer-macros [-m]]
     [kefirnadar.application.specs :as specs]
-    [kefirnadar.application.auth :as auth]))
+    [kefirnadar.application.auth :as auth]
+    [kefirnadar.application.pagination :as pagination]
+    [kefirnadar.configuration.config :as config]))
 
 ;; -- helper functions region --
 (defn extract-input-value
@@ -210,7 +213,9 @@
   []
   (let [selected-region @(subscribe [::subs/seeking-region])
         ads @(subscribe [::subs/filtered-ads])
+        ads-count @(subscribe [::subs/ads-count])
         grains-kind @(subscribe [::subs/grains-kind :seeking])
+        {:keys [page-number page-size]} @(subscribe [::subs/ads-pagination-info :seeking])
         [css] (styles/use-styletron)]
     [:div.d-flex.flex-column.min-vh-100.align-items-center
      [:button.btn.btn-outline-primary.mb-5.mt-5
@@ -229,17 +234,20 @@
                                                                         (extract-input-value event)]))})
                                            regions/regions)
                                 :active-value selected-region
-                                :placeholder-disabled? true}]
-       [:button.btn.btn-outline-primary.mt-5.col-12
-        {:on-click #(dispatch [::events/fetch-ads selected-region grains-kind])
-         :disabled (nil? selected-region)}
-        "Pretraži"]]]
+                                :placeholder-disabled? true}]]]
      (cond
-       (seq ads) (map ad-row ads)
+       (seq ads) [:div (map ad-row ads)
+                  (pagination/pagination
+                    {:change-page-redirect-url-fn (fn [page-number page-size]
+                                                    (str/format "%s/seeking/grains-kind/%s?page-number=%s&page-size=%s"
+                                                      config/site-url grains-kind page-number page-size))
+                     :page-number page-number
+                     :page-size page-size
+                     :total-count ads-count
+                     :label "Paginacija oglasa"})]
        (some? ads) [:p (str/format "Trenutno niko ne deli %s u mestu %s"
                          (format-grains-kind grains-kind) selected-region)]
-       (some? selected-region) "Molimo pokrenite pretragu"
-       :else "Molimo izaberite opštinu i pokrenite pretragu")]))
+       :else "Greska")]))
 
 
 (defn home []

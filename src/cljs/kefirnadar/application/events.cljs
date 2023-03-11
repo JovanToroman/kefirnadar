@@ -5,6 +5,7 @@
             [kefirnadar.configuration.db :as db]
             [kefirnadar.application.validation :as validation]
             [kefirnadar.application.specs :as specs]
+            [kefirnadar.common.utils :refer-macros [-m]]
             [reitit.frontend.easy :as rfe]))
 
 
@@ -104,9 +105,9 @@
     (assoc-in db [:ads :sharing :form-data-validation id] val)))
 
 (defn fetch-ads
-  "Fetches all ads matching the specified region."
-  [_ [region grains-kind]]
-  {::fx/api {:uri (str/format "/api/list/grains-kind/%s/region/%s" grains-kind region)
+  [_ [grains-kind {:keys [page-number page-size]}]]
+  {::fx/api {:uri (str/format "/api/list/grains-kind/%s?page-number=%s&page-size=%s"
+                    grains-kind page-number page-size)
              :method :get
              :on-success [::fetch-ads-success]
              :on-error [::fetch-ads-fail]}})
@@ -116,11 +117,17 @@
 
 (defn fetch-ads-success
   "Stores fetched ads in the app db."
-  [db [ads]]
-  (assoc-in db [:ads :seeking :filtered-ads] ads))
+  [db [{:keys [ads ads-count]}]]
+  (assoc-in db [:ads :seeking :filtered-ads] (-m ads ads-count)))
 
 (defn fetch-ads-fail
   "Failed to fetch the ads, render error page"
   [_ _]
-  {::load-route! {:data {:name :route/error}}})
+  #_{::load-route! {:data {:name :route/error}}})
+
 (reg-event-db ::fetch-ads-success trim-v fetch-ads-success)
+(reg-event-db ::fetch-ads-fail trim-v fetch-ads-fail)
+
+(reg-event-db ::store-ads-pagination-info trim-v
+  (fn [db [action pagination-info]]
+    (assoc-in db [:ads action :pagination-info] pagination-info)))

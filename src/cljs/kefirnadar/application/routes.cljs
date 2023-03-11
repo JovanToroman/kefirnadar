@@ -2,9 +2,11 @@
   (:require [kefirnadar.application.subscriptions :as subs]
             [kefirnadar.application.auth :as auth]
             [kefirnadar.application.events :as events]
+            [kefirnadar.common.utils :refer-macros [-m]]
             [re-frame.core :refer [dispatch subscribe]]
             [reitit.coercion.schema]
             [reitit.coercion.spec]
+            [spec-tools.data-spec :as ds]
             [reitit.frontend :as rf]
             [reitit.frontend.controllers :as rfc]
             [reitit.frontend.easy :as rfe]))
@@ -23,24 +25,28 @@
          :doc "Page where users choose which grain kind to share"}]
     ["grains-kind/{grains-kind}"
      {:name :route/share-grains-form
-      :path-params {:grains-kind keyword?}
+      :parameters {:path {:grains-kind keyword?}}
       :doc "Form to share grains"
       :controllers [{:parameters {:path [:grains-kind]}
                      :start (fn [{{grains-kind :grains-kind} :path}]
-                              (dispatch [::events/store-grains-kind grains-kind
-                                         :sharing]))
+                              (dispatch [::events/store-grains-kind grains-kind :sharing]))
                      :stop #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind/:grains-kind")}]}]]
    ["seeking/"
     ["" {:name :route/seeking
          :doc "Page where users browse existing grains ads"}]
     ["grains-kind/{grains-kind}"
      {:name :route/search-for-grains
-      :path-params {:grains-kind keyword?}
+      :parameters {:path {:grains-kind string?}
+                   :query {(ds/opt :page-number) int?
+                           (ds/opt :page-size) int?}}
       :doc ""
-      :controllers [{:parameters {:path [:grains-kind]}
-                     :start (fn [{{grains-kind :grains-kind} :path}]
-                              (dispatch [::events/store-grains-kind grains-kind
-                                         :seeking]))
+      :controllers [{:parameters {:path [:grains-kind]
+                                  :query [:page-number :page-size]}
+                     :start (fn [{{:keys [grains-kind]} :path
+                                  {:keys [page-number page-size] :or {page-number 1 page-size 10}} :query}]
+                              (dispatch [::events/store-grains-kind grains-kind :seeking])
+                              (dispatch [::events/fetch-ads grains-kind (-m page-number page-size)])
+                              (dispatch [::events/store-ads-pagination-info :seeking (-m page-number page-size)]))
                      :stop #(js/console.log "STOP: " "ad-type/:ad-type/grains-kind/:grains-kind")}]}]]
    ["thank-you"
     {:name :route/thank-you

@@ -4,3 +4,4 @@
 
 (goog-define version "#DEVELOPMENT_VERSION#")
 (goog-define api-url "")
+(goog-define kefirnadar.configuration.config/site-url "")
