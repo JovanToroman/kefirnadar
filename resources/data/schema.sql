@@ -7,8 +7,9 @@ region VARCHAR ( 50 ) NOT NULL,
 send_by_post BOOLEAN,
 share_in_person BOOLEAN,
 quantity INTEGER,
-grains_kind VARCHAR ( 10 ) NOT NULL,
 phone_number VARCHAR ( 15 ),
 email VARCHAR ( 40 ),
-user_id VARCHAR ( 20 )
+sharing_milk_type BOOLEAN,
+sharing_water_type BOOLEAN,
+sharing_kombucha BOOLEAN
 );

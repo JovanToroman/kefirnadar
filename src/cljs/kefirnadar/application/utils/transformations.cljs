@@ -1,4 +1,4 @@
-(ns kefirnadar.application.utils
+(ns kefirnadar.application.utils.transformations
   (:require [cuerdas.core :as cuerdas]
             [clojure.string :as str]))
 

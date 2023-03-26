@@ -23,6 +23,7 @@
     :email (reg-matcher email-regex-str input)
     :region (and (string? input) (not (str/blank? input)))
     (:post? :pick-up?) (true? input)
+    (:sharing-milk-type? :sharing-water-type? :sharing-kombucha?) (true? input)
     :phone-number (reg-matcher phone-number-regex-str input)
     :quantity (and (< input 101) (> input 0))))
 
@@ -33,19 +34,23 @@
           (true? (get validation-info form-id)))
     form-ids))
 
+;; TODO: check if these two validation steps can be unified
 (defn form-valid?
   "Is the whole form valid?"
   [validation-info & form-ids]
   (and (every? #(get validation-info %) form-ids)
     (either-or-form-field-valid? validation-info :post? :pick-up?)
-    (either-or-form-field-valid? validation-info :phone-number :email)))
+    (either-or-form-field-valid? validation-info :phone-number :email)
+    (either-or-form-field-valid? validation-info :sharing-milk-type? :sharing-water-type? :sharing-kombucha?)))
 
 (defn- either-or-update-validation
   "Some fields require at least one option to be selected. Mark all related fields as valid if at least one of them is"
   [validation-info]
   (cond-> validation-info
     (either-or-form-field-valid? validation-info :post? :pick-up?) (assoc :post? true :pick-up? true)
-    (either-or-form-field-valid? validation-info :email :phone-number) (assoc :email true :phone-number true)))
+    (either-or-form-field-valid? validation-info :email :phone-number) (assoc :email true :phone-number true)
+    (either-or-form-field-valid? validation-info :sharing-milk-type? :sharing-water-type? :sharing-kombucha?)
+    (assoc :sharing-milk-type? true :sharing-water-type? true :sharing-kombucha? true)))
 
 (defn validate-form-info
   "Validates form field info and stores results in app db, upon which error messages are then displayed"

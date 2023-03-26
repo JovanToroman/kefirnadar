@@ -11,22 +11,35 @@
                                   :where [:< :ad.created_on [:raw ["NOW() - INTERVAL '30 days'"]]]}))
 
 (defn get-ads
-  [grains-kind {:keys [page-number page-size]}]
-  (let [offset (* (dec page-number) page-size)]
+  [{:keys [page-number page-size regions seeking-milk-type? seeking-water-type? seeking-kombucha? receive-by-post?
+           receive-in-person?]}]
+  (let [offset (* (dec page-number) page-size)
+        where-clause (cond-> []
+                       (seq regions) (conj [:in :ad.region regions])
+                       (some boolean? [seeking-milk-type? seeking-water-type? seeking-kombucha?])
+                       (conj (cond-> [:or]
+                               (some? seeking-milk-type?) (conj [:= :ad.sharing_milk_type seeking-milk-type?])
+                               (some? seeking-water-type?) (conj [:= :ad.sharing_water_type seeking-water-type?])
+                               (some? seeking-kombucha?) (conj [:= :ad.sharing_kombucha seeking-kombucha?])))
+                       (some boolean? [receive-by-post? receive-in-person?])
+                       (conj (cond-> [:or]
+                               (some? receive-by-post?) (conj [:= :ad.send_by_post receive-by-post?])
+                               (some? receive-in-person?) (conj [:= :ad.share_in_person receive-in-person?]))))]
+    (log/debug "Where clause: " where-clause)
     (log/spy :debug
-      (postgres/execute-query! {:select [:created_on :first_name :last_name :region :send_by_post :share_in_person
-                                         :quantity :grains_kind :phone_number :email :ad_id]
-                                :from [:ad]
-                                :where [:= :ad.grains_kind grains-kind]
-                                :limit page-size
-                                :offset offset
-                                :order-by [[:ad.created_on :desc]]}))))
-
-(defn get-ads-count
-  [grains-kind]
-  (:count (postgres/execute-one! {:select [:%count.*]
-                                  :from [:ad]
-                                  :where [:= :ad.grains_kind grains-kind]})))
+      {:ads (postgres/execute-query!
+              (cond-> {:select [:created_on :first_name :last_name :region :send_by_post :share_in_person
+                                :quantity :phone_number :email :ad_id :sharing_milk_type :sharing_water_type
+                                :sharing_kombucha]
+                       :from [:ad]
+                       :limit page-size
+                       :offset offset
+                       :order-by [[:ad.created_on :desc]]}
+                (seq where-clause) (assoc :where (into [:and] where-clause))))
+       :ads-count (:count (postgres/execute-one!
+                            (cond-> {:select [:%count.*]
+                                     :from [:ad]}
+                              (seq where-clause) (assoc :where (into [:and] where-clause)))))})))
 ;; endregion
 
 ;; region transactions
@@ -46,18 +59,19 @@
 
 
 (comment
-  (mapv (fn [no] (add-ad {:send_by_post true,
-           :email "",
-           :first_name "asdasd",
-           :phone_number (str "062" no),
-           :grains_kind "milk-type",
-           :region "Ada",
-           :created_on [:now],
-           :last_name "asdassadsad",
-           :user_id "10226481938492906",
-           :quantity 3,
-           :share_in_person false}))
-    (range 100000 100100)))
+  (mapv (fn [no]
+          (add-ad {:send_by_post true,
+                   :email "",
+                   :first_name "asdasd",
+                   :phone_number (str "062" no),
+                   :region "Apatin",
+                   :created_on [:now],
+                   :last_name "asdassadsad",
+                   ;;:user_id "10226481938492906",
+                   :quantity 3,
+                   :share_in_person false
+                   :sharing_milk_type true}))
+    (range 100000 100010)))
 
 (comment "Remove all ads"
   (postgres/execute-transaction! {:truncate [:ad]}))

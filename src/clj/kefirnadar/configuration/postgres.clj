@@ -6,7 +6,7 @@
             [taoensso.timbre :as log])
   (:import [com.zaxxer.hikari HikariDataSource]))
 
-(def ^{:private true} pooled (atom nil))
+(defonce  pooled (atom nil))
 
 (defn pg-conn [] @pooled)
 

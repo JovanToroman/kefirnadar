@@ -1,45 +1,35 @@
 (ns kefirnadar.application.events
   (:require [kefirnadar.application.fx :as fx]
             [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx trim-v]]
-            [cuerdas.core :as str]
-            [kefirnadar.configuration.db :as db]
+            [kefirnadar.application.db :as db]
             [kefirnadar.application.validation :as validation]
+            [kefirnadar.application.utils.route :as route-utils]
             [kefirnadar.application.specs :as specs]
             [kefirnadar.common.utils :refer-macros [-m]]
             [reitit.frontend.easy :as rfe]))
 
-
-(defn set-dropdown-filtering-value [db [region]]
-  (-> db
-    (assoc-in [:ads :seeking :region-filter] region)
-    (update-in [:ads :seeking] dissoc :filtered-ads)))
-
-(reg-event-db ::set-seeking-region trim-v set-dropdown-filtering-value)
-
-;; -- create ad business logic
 (defn validate-and-create-ad
-  [{db :db} [grains-kind form-info user-id]]
+  [{db :db} [form-info #_user-id]]
   (let [validation-info (validation/validate-form-info form-info)]
     (if (validation/form-valid? validation-info :firstname :lastname :region :quantity)
-      (let [{:keys [firstname lastname region post? pick-up? quantity phone-number email]} form-info
+      (let [{:keys [firstname lastname region post? pick-up? quantity phone-number email sharing-milk-type?
+                    sharing-water-type? sharing-kombucha?]} form-info
             body {:uri "/api/create"
                   :method :post
                   :params {:ad/firstname firstname
                            :ad/lastname lastname
                            :ad/region region
-                           :ad/post? (or post? false)
-                           :ad/pick-up? (or pick-up? false)
+                           :ad/email email
+                           :ad/phone-number phone-number
+                           :ad/post? post?
+                           :ad/pick-up? pick-up?
                            :ad/quantity quantity
-                           :ad/grains-kind grains-kind
+                           :ad/sharing-milk-type? sharing-milk-type?
+                           :ad/sharing-water-type? sharing-water-type?
+                           :ad/sharing-kombucha? sharing-kombucha?
                            #_#_:user-id user-id}
-                  :on-success [::validate-and-create-ad-success]}
-            assembled-fx-api-body (cond
-                                    (and phone-number email) (-> body
-                                                               (assoc-in [:params :ad/email] email)
-                                                               (assoc-in [:params :ad/phone-number] phone-number))
-                                    phone-number (assoc-in body [:params :ad/phone-number] phone-number)
-                                    email (assoc-in body [:params :ad/email] email))]
-        {::fx/api assembled-fx-api-body})
+                  :on-success [::validate-and-create-ad-success]}]
+        {::fx/api body})
       {:db (assoc-in db [:ads :sharing :form-data-validation] validation-info)})))
 
 (reg-event-fx ::validate-and-create-ad trim-v validate-and-create-ad)
@@ -82,12 +72,6 @@
 (reg-event-fx ::dispatch-load-route! trim-v dispatch-load-route!)
 ;; endregion
 
-(reg-event-db
-  ::store-grains-kind trim-v
-  (fn [db [grains-kind ^::specs/user-action user-action]]
-    (assoc-in db [:ads user-action :grains-kind] grains-kind)))
-
-
 (defn clean-db
   [_ _]
   db/default-db)
@@ -105,13 +89,11 @@
     (assoc-in db [:ads :sharing :form-data-validation id] val)))
 
 (defn fetch-ads
-  [_ [grains-kind {:keys [page-number page-size]}]]
-  {::fx/api {:uri (str/format "/api/list/grains-kind/%s?page-number=%s&page-size=%s"
-                    grains-kind page-number page-size)
+  [_ [^::specs/filters filters ^::specs/pagination-info pagination-info]]
+  {::fx/api {:uri (route-utils/url-for "/api/list" :query (merge filters pagination-info) :path {})
              :method :get
              :on-success [::fetch-ads-success]
              :on-error [::fetch-ads-fail]}})
-
 
 (reg-event-fx ::fetch-ads trim-v fetch-ads)
 
@@ -131,3 +113,37 @@
 (reg-event-db ::store-ads-pagination-info trim-v
   (fn [db [action pagination-info]]
     (assoc-in db [:ads action :pagination-info] pagination-info)))
+
+(reg-event-db ::store-show-filters
+  (fn [db [_ current]]
+    (assoc-in db [:ads :seeking :show-filters?] (not current))))
+
+(reg-event-fx ::apply-filters trim-v
+  (fn [{:keys [db]} [filters]]
+    (let [{:keys [path-params]} (:active-route db)]
+      {:db (assoc-in db [:ads :seeking :show-filters?] false)
+       ::load-route! {:data {:name :route/seeking}
+                      :query-params filters
+                      :path-params path-params}})))
+
+(defn filters-update-functions [filter-key]
+  (case filter-key
+    :regions (fn [_current added]
+               ;; TODO: change to support multiple selected regions
+               #{added})
+    nil merge
+    (fn [_ value] value)))
+
+;; TODO: refactor this to multiples effects, one for each case
+(reg-event-db ::update-filters trim-v
+  (fn [db [value filter-key]]
+    (update-in db (cond-> [:ads :seeking :filters]
+                    (some? filter-key) (conj filter-key)) (filters-update-functions filter-key) value)))
+
+(reg-event-db ::reset-filters
+  (fn [db _]
+    (assoc-in db [:ads :seeking :filters] (get-in db/default-db [:ads :seeking :filters]))))
+
+(reg-event-db ::set-ads-meta trim-v
+  (fn [db [ad-id meta-key value]]
+    (assoc-in db [:ads :seeking :ads-meta ad-id meta-key] value)))

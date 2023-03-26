@@ -2,6 +2,7 @@
 
 (defmacro -m
   [& args]
-  (reduce (fn [m v] (assoc m (keyword v) v))
+  (reduce (fn [m v]
+            (assoc m (keyword v) v))
     {}
     args))

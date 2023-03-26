@@ -1,10 +1,19 @@
 (ns kefirnadar.application.inputs
   "A place for all UI components which are generic and reusable"
   (:require [reagent.core :as r]
-            [kefirnadar.application.utils :as utils]
+            [kefirnadar.application.utils.transformations :as transform]
             [applied-science.js-interop :as j]
             [kefirnadar.application.styles :as styles]
             [clojure.string :as str]))
+
+;; TODO: move this to a common ns
+(defn extract-input-value
+  [event]
+  (j/get-in event [:target :value]))
+
+(defn extract-checkbox-state
+  [event]
+  (j/get-in event [:target :checked]))
 
 (defn- render-options
   [filtered-options active-value ^atom show-options?]
@@ -37,7 +46,9 @@
            :value @search-text
            :aria-label "Search"}]
          [:i.fa.fa-keyboard {:aria-hidden "true"}]]
-        [:div.dropdown-menu {:aria-labelledby id :className (css {:display "block"})}
+        [:div.dropdown-menu {:aria-labelledby id :className (css {:display "block"
+                                                                  :height :300pt
+                                                                  :overflow-y :scroll})}
          (if (seq filtered-options)
            (render-options filtered-options active-value show-options?)
            [:p "Nema rezultata"])]])}))
@@ -59,11 +70,11 @@
                                (filter (fn [{:keys [title title-cleaned]}]
                                          (or (re-find
                                                (re-pattern
-                                                 (str "(?i)" (utils/remove-reserved-characters @search-text)))
+                                                 (str "(?i)" (transform/remove-reserved-characters @search-text)))
                                                title)
                                            (re-find
                                              (re-pattern
-                                               (str "(?i)" (utils/remove-reserved-characters @search-text)))
+                                               (str "(?i)" (transform/remove-reserved-characters @search-text)))
                                              title-cleaned)))
                                  options))
             {:keys [title]
@@ -104,3 +115,12 @@
                                       :filtered-options filtered-options
                                       :active-value active-value
                                       :show-options? show-options?}])]))))
+
+(defn checkbox [label value on-change]
+  (let [[css] (styles/use-styletron)]
+    [:div.form-group {:className (css (:input-wrapper styles/styles-map))}
+     [:label {:className (css (:label styles/styles-map))} label]
+     [:input {:className (css (:input-field styles/styles-map))
+              :on-change on-change
+              :type "checkbox"
+              :checked value}]]))
