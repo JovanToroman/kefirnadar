@@ -206,8 +206,13 @@
       "nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
       (cond
         (and (not (str/blank? email)) (not (str/blank? phone_number)))
-        [:<> "telefonom na " [:strong.ml-1.mr-1 phone_number]
-         "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
+        [:<> "telefonom na " (if show-phone-number?
+                                           [:strong.ml-1.mr-1 phone_number]
+                                           [:button.btn.btn-sm.btn-info.ml-1
+                                            {:on-click
+                                             #(dispatch [::events/set-ads-meta ad_id :show-phone-number? true])}
+                                            "Prikaži broj"])
+          "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
 
         (not (str/blank? phone_number)) [:<> "telefonom na "
                                          (if show-phone-number?
