@@ -214,11 +214,11 @@
       "nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
       (cond
         (and (not (str/blank? email)) (not (str/blank? phone_number)))
-        [:<> "telefonom na " [phone_number show-phone-number? phone_number ad_id]
+        [:<> "telefonom na " [phone-number show-phone-number? phone_number ad_id]
           "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
 
         (not (str/blank? phone_number)) [:<> "telefonom na "
-                                         [phone_number show-phone-number? phone_number ad_id]]
+                                         [phone-number show-phone-number? phone_number ad_id]]
         (not (str/blank? email)) [:<> "elektronskom poštom na " [:strong.ml-1.mr-1 email]])]]))
 
 (defn region-filter []
