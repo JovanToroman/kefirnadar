@@ -1,18 +1,18 @@
 (ns kefirnadar.application.views
   (:require
-   [cuerdas.core :as str]
-   [kefirnadar.application.events :as events]
-   [kefirnadar.application.subscriptions :as subs]
-   [kefirnadar.application.styles :as styles]
-   [kefirnadar.application.inputs :as inputs]
-   [re-frame.core :refer [dispatch subscribe]]
-   [kefirnadar.application.regions :as regions]
-   [kefirnadar.application.utils.transformations :as transform]
-   [kefirnadar.common.utils :refer-macros [-m]]
-   [kefirnadar.application.specs :as specs]
-   [kefirnadar.application.auth :as auth]
-   [kefirnadar.application.pagination :as pagination]
-   [reitit.frontend.easy :as rfe]))
+    [cuerdas.core :as str]
+    [kefirnadar.application.events :as events]
+    [kefirnadar.application.subscriptions :as subs]
+    [kefirnadar.application.styles :as styles]
+    [kefirnadar.application.inputs :as inputs]
+    [re-frame.core :refer [dispatch subscribe]]
+    [kefirnadar.application.regions :as regions]
+    [kefirnadar.application.utils.transformations :as transform]
+    [kefirnadar.common.utils :refer-macros [-m]]
+    [kefirnadar.application.specs :as specs]
+    [kefirnadar.application.auth :as auth]
+    [kefirnadar.application.pagination :as pagination]
+    [reitit.frontend.easy :as rfe]))
 
 (defn first-name-input [id]
   (let [value @(subscribe [::subs/form-field id])
@@ -30,6 +30,7 @@
      (when (and (some? value) (false? valid?))
        [:spam.text-danger {:className (css (:error styles/styles-map))} "Molimo da unesete vaše ime"])]))
 
+
 (defn last-name-input [id]
   (let [value @(subscribe [::subs/form-field id])
         valid? @(subscribe [::subs/form-validation id])
@@ -43,6 +44,7 @@
               :placeholder "Vase prezime..."}]
      (when (and (some? value) (false? valid?))
        [:p.text-danger {:className (css (:error styles/styles-map))} "Molimo da unesete vaše prezime"])]))
+
 
 (defn region-select [id]
   (let [selected-region (subscribe [::subs/form-field id])
@@ -59,7 +61,7 @@
                                                 :on-click (fn [event]
                                                             (dispatch [::events/update-sharing-form id
                                                                        (inputs/extract-input-value event)]))})
-                                             regions/regions)
+                                          regions/regions)
                                :active-value @selected-region
                                :placeholder-disabled? true}]]
      (when (false? valid?)
@@ -100,6 +102,7 @@
               :on-change #(dispatch [::events/update-sharing-form id (inputs/extract-checkbox-state %)])
               :type "checkbox"
               :checked @value}]]))
+
 
 (defn pick-up-toggle [id]
   (let [value (subscribe [::subs/form-field id])
@@ -148,6 +151,8 @@
        [:p.text-danger {:className (css (:error styles/styles-map))}
         "Molimo proverite unetu količinu, vrednost mora biti između 1 i 100."])]))
 
+
+
 (defn share-grains-form []
   (let [form-info @(subscribe [::subs/form-data])
         #_#_user-id @(subscribe [::auth/user-id])
@@ -186,14 +191,6 @@
                    sharing_water_type (conj "vodeni kefir")
                    sharing_kombucha (conj "kombuhu"))))
 
-(defn reveal-phone-number [show-phone-number? phone-number ad-id]
-  (if show-phone-number?
-    [:strong.ml-1.mr-1 phone-number]
-    [:button.btn.btn-sm.btn-info.ml-1
-     {:on-click
-      #(dispatch [::events/set-ads-meta ad-id :show-phone-number? true])}
-     "Prikaži broj"]))
-
 (defn ad-row
   [{:ad/keys [first_name last_name phone_number email send_by_post share_in_person region sharing_milk_type
               sharing_water_type sharing_kombucha ad_id]}]
@@ -209,11 +206,21 @@
       "nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
       (cond
         (and (not (str/blank? email)) (not (str/blank? phone_number)))
-        [:<> "telefonom na " (reveal-phone-number show-phone-number? phone_number ad_id)
-         "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
+        [:<> "telefonom na " (if show-phone-number?
+                                           [:strong.ml-1.mr-1 phone_number]
+                                           [:button.btn.btn-sm.btn-info.ml-1
+                                            {:on-click
+                                             #(dispatch [::events/set-ads-meta ad_id :show-phone-number? true])}
+                                            "Prikaži broj"])
+          "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
 
         (not (str/blank? phone_number)) [:<> "telefonom na "
-                                         (reveal-phone-number show-phone-number? phone_number ad_id)]
+                                         (if show-phone-number?
+                                           [:strong.ml-1.mr-1 phone_number]
+                                           [:button.btn.btn-sm.btn-info.ml-1
+                                            {:on-click
+                                             #(dispatch [::events/set-ads-meta ad_id :show-phone-number? true])}
+                                            "Prikaži broj"])]
         (not (str/blank? email)) [:<> "elektronskom poštom na " [:strong.ml-1.mr-1 email]])]]))
 
 (defn region-filter []
@@ -231,7 +238,7 @@
                                                 :on-click (fn [event]
                                                             (dispatch [::events/update-filters
                                                                        (inputs/extract-input-value event) :regions]))})
-                                             regions/regions)
+                                          regions/regions)
                                ;; TODO: change this to use multiple regions
                                :active-value (first selected-regions)
                                :placeholder-disabled? true}]]]))
@@ -284,17 +291,18 @@
        (seq ads) [:div (into [:<>] (map ad-row) ads)
                   (pagination/pagination
                     ;; TODO: zameniti sa rfe/href
-                   {:change-page-redirect-url-fn (fn [page-number page-size]
-                                                   (rfe/href :route/seeking {} (merge
-                                                                                {:page-number page-number
-                                                                                 :page-size page-size}
-                                                                                filters)))
-                    :page-number page-number
-                    :page-size page-size
-                    :total-count ads-count
-                    :label "Paginacija oglasa"})]
+                    {:change-page-redirect-url-fn (fn [page-number page-size]
+                                                    (rfe/href :route/seeking {} (merge
+                                                                                  {:page-number page-number
+                                                                                   :page-size page-size}
+                                                                                  filters)))
+                     :page-number page-number
+                     :page-size page-size
+                     :total-count ads-count
+                     :label "Paginacija oglasa"})]
        (some? ads) [:p "Trenutno niko ne deli zrnca sa izabranim filterima. Probajte da promenite filtere."]
        :else "Greska")]))
+
 
 (defn home []
   [:<>
@@ -306,26 +314,27 @@
     {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/seeking}}])}
     "Tražim"]])
 
+
 #_(defn grains-kind [^::specs/user-action user-action]
-    (let [route-to-load (case user-action
-                          :sharing :route/share-grains-form
-                          :seeking :route/search-for-grains)]
-      [:<>
-       [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
-        {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                              :path-params {:grains-kind "milk-type"}}])
-         :value "milk-type"}
-        "Mlečni"]
-       [:button.btn.btn-outline-primary.col-md-5.mb-5
-        {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                              :path-params {:grains-kind "water-type"}}])
-         :value "water-type"}
-        "Vodeni"]
-       [:button.btn.btn-outline-primary.col-md-5
-        {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                              :path-params {:grains-kind "kombucha"}}])
-         :value "kombucha"}
-        "Kombuha"]]))
+  (let [route-to-load (case user-action
+                        :sharing :route/share-grains-form
+                        :seeking :route/search-for-grains)]
+    [:<>
+     [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
+      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
+                                                            :path-params {:grains-kind "milk-type"}}])
+       :value "milk-type"}
+      "Mlečni"]
+     [:button.btn.btn-outline-primary.col-md-5.mb-5
+      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
+                                                            :path-params {:grains-kind "water-type"}}])
+       :value "water-type"}
+      "Vodeni"]
+     [:button.btn.btn-outline-primary.col-md-5
+      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
+                                                            :path-params {:grains-kind "kombucha"}}])
+       :value "kombucha"}
+      "Kombuha"]]))
 
 (defn thank-you []
   [:<>
@@ -366,7 +375,7 @@
   (let [{{panel-name :name _public? :public?} :data} @(subscribe [::subs/active-route])
         [css] (styles/use-styletron)
         #_#_#_#_authenticated? @(subscribe [::auth/authenticated?])
-            authentication-required? (and (not authenticated?) (not public?))]
+        authentication-required? (and (not authenticated?) (not public?))]
     [:div.container
      ;; NAVBAR
      [:nav.navbar.navbar-expand-lg.navbar-light.bg-light
@@ -379,8 +388,8 @@
      [:div.d-flex.flex-column.justify-content-center.align-items-center
       {:className (css (:main-panel styles/styles-map))}
       #_(if authentication-required?
-          [login-page]
-          [panels panel-name])
+        [login-page]
+        [panels panel-name])
       [panels panel-name]]
      ;; FOOTER
      [:p.copyright-text "Copyright © 2022-2023 All Rights Reserved by Do Brave Plus Software"]]))
