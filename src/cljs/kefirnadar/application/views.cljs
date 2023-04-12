@@ -191,6 +191,14 @@
                    sharing_water_type (conj "vodeni kefir")
                    sharing_kombucha (conj "kombuhu"))))
 
+(defn phone-number [show-phone-number? phone-number ad-id]
+  (if show-phone-number?
+    [:strong.ml-1.mr-1 phone-number]
+    [:button.btn.btn-sm.btn-info.ml-1
+     {:on-click
+      #(dispatch [::events/set-ads-meta ad-id :show-phone-number? true])}
+     "Prikaži broj"]))
+
 (defn ad-row
   [{:ad/keys [first_name last_name phone_number email send_by_post share_in_person region sharing_milk_type
               sharing_water_type sharing_kombucha ad_id]}]
@@ -206,21 +214,11 @@
       "nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
       (cond
         (and (not (str/blank? email)) (not (str/blank? phone_number)))
-        [:<> "telefonom na " (if show-phone-number?
-                                           [:strong.ml-1.mr-1 phone_number]
-                                           [:button.btn.btn-sm.btn-info.ml-1
-                                            {:on-click
-                                             #(dispatch [::events/set-ads-meta ad_id :show-phone-number? true])}
-                                            "Prikaži broj"])
+        [:<> "telefonom na " [phone_number show-phone-number? phone_number ad_id]
           "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
 
         (not (str/blank? phone_number)) [:<> "telefonom na "
-                                         (if show-phone-number?
-                                           [:strong.ml-1.mr-1 phone_number]
-                                           [:button.btn.btn-sm.btn-info.ml-1
-                                            {:on-click
-                                             #(dispatch [::events/set-ads-meta ad_id :show-phone-number? true])}
-                                            "Prikaži broj"])]
+                                         [phone_number show-phone-number? phone_number ad_id]]
         (not (str/blank? email)) [:<> "elektronskom poštom na " [:strong.ml-1.mr-1 email]])]]))
 
 (defn region-filter []
