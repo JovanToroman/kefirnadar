@@ -160,14 +160,15 @@
 (defn phone-number [show-phone-number? phone-number ad-id]
   (if show-phone-number?
     [:strong.ml-1.mr-1 phone-number]
-    [:button.btn.btn-sm.btn-info.ml-1
+    [:button.btn.btn-sm.btn-info.ml-1.mr-1
      {:on-click
       #(dispatch [::events/set-ads-meta ad-id :show-phone-number? true])}
      "Prikaži broj"]))
 
 (defn ad-row
-  [{:ad/keys [ime prezime phone_number email send_by_post share_in_person region sharing_milk_type
-              sharing_water_type sharing_kombucha ad_id]}]
+  [{:ad/keys [send_by_post share_in_person region sharing_milk_type
+              sharing_water_type sharing_kombucha ad_id]
+    :korisnik/keys [ime prezime phone_number email]}]
   (let [show-phone-number? @(subscribe [::subs/ads-meta ad_id :show-phone-number?])]
     [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)}
      [:h3.row (str/format "%s %s" ime prezime)]
