@@ -43,7 +43,8 @@
                                      (set-user-cookie-info! {:status status
                                                              :authenticated? authenticated?
                                                              :method :facebook})
-                                     (dispatch [::ensure-user user-info])))))
+                                     (dispatch [::ensure-user user-info])
+                                     (dispatch [::set-authenticated true])))))
       #_(dispatch [::set-authentication-data (cond-> {:status status
                                                       :authenticated? authenticated?}
                                                (some? authResponse) (assoc :user-info (js->clj authResponse
@@ -89,13 +90,16 @@
 (reg-event-db ::log-user-in trim-v
   (fn [_db [authentication-provider]]
     (log-user-in (authentication-provider auth-methods))))
+
+(reg-event-db ::set-authenticated trim-v
+  (fn [db [authenticated?]]
+    (assoc-in db [:auth :authenticated?] authenticated?)))
 ;; endregion
 
 ;; region subs
 (reg-sub ::authenticated?
-  (fn [_db _]
-    (let [{:keys [authenticated?]} (cookies/get user-cookie-name)]
-      authenticated?)))
+  (fn [db _]
+    (get-in db [:auth :authenticated?])))
 
 (reg-sub ::user-info
   (fn [_db _]

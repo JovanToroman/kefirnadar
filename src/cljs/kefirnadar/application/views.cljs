@@ -160,16 +160,24 @@
 (defn phone-number [show-phone-number? phone-number ad-id]
   (if show-phone-number?
     [:strong.ml-1.mr-1 phone-number]
-    [:button.btn.btn-sm.btn-info.ml-1.mr-1
+    [:button.btn.btn-sm.btn-info.ml-1.mr-1.mb-1
      {:on-click
       #(dispatch [::events/set-ads-meta ad-id :show-phone-number? true])}
      "Prikaži broj"]))
 
+(defn prikaz-imejla [show-email? email ad-id]
+  (if show-email?
+    [:strong.ml-1.mr-1 email]
+    [:button.btn.btn-sm.btn-info.ml-1.mr-1
+     {:on-click
+      #(dispatch [::events/set-ads-meta ad-id :show-email? true])}
+     "Prikaži imejl adresu"]))
+
 (defn ad-row
-  [{:ad/keys [send_by_post share_in_person region sharing_milk_type
-              sharing_water_type sharing_kombucha ad_id]
+  [{:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id]
     :korisnik/keys [ime prezime phone_number email]}]
-  (let [show-phone-number? @(subscribe [::subs/ads-meta ad_id :show-phone-number?])]
+  (let [show-phone-number? @(subscribe [::subs/ads-meta ad_id :show-phone-number?])
+        show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
     [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)}
      [:h3.row (str/format "%s %s" ime prezime)]
      [:p.row "Ovaj delilac deli " [:strong.ml-1.mr-1
@@ -182,11 +190,11 @@
       (cond
         (and (not (str/blank? email)) (not (str/blank? phone_number)))
         [:<> "telefonom na " [phone-number show-phone-number? phone_number ad_id]
-          "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
+          "ili elektronskom poštom na " [prikaz-imejla show-email? email ad_id]]
 
         (not (str/blank? phone_number)) [:<> "telefonom na "
                                          [phone-number show-phone-number? phone_number ad_id]]
-        (not (str/blank? email)) [:<> "elektronskom poštom na " [:strong.ml-1.mr-1 email]])]]))
+        (not (str/blank? email)) [:<> "elektronskom poštom na " [prikaz-imejla show-email? email ad_id]])]]))
 
 (defn region-filter []
   (let [[css] (styles/use-styletron)
@@ -252,6 +260,7 @@
       "Filteri"]
      (when show-filters?
        [filters-view])
+     [:h3 "Broj oglasa: " ads-count]
      (cond
        (seq ads) [:div (into [:<>] (map ad-row) ads)
                   (pagination/pagination

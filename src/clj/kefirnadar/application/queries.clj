@@ -1,5 +1,6 @@
 (ns kefirnadar.application.queries
   (:require
+    [clojure.pprint :as pprint]
     [clojure.string :as str]
     [kefirnadar.configuration.postgres :as postgres]
     [taoensso.timbre :as log]))
@@ -17,16 +18,16 @@
   (let [offset (* (dec page-number) page-size)
         where-clause (cond-> []
                        (seq regions) (conj [:in :ad.region regions])
-                       (some boolean? [seeking-milk-type? seeking-water-type? seeking-kombucha?])
+                       (some true? [seeking-milk-type? seeking-water-type? seeking-kombucha?])
                        (conj (cond-> [:or]
-                               (some? seeking-milk-type?) (conj [:= :ad.sharing_milk_type seeking-milk-type?])
-                               (some? seeking-water-type?) (conj [:= :ad.sharing_water_type seeking-water-type?])
-                               (some? seeking-kombucha?) (conj [:= :ad.sharing_kombucha seeking-kombucha?])))
-                       (some boolean? [receive-by-post? receive-in-person?])
+                               seeking-milk-type? (conj [:= :ad.sharing_milk_type true])
+                               seeking-water-type? (conj [:= :ad.sharing_water_type true])
+                               seeking-kombucha? (conj [:= :ad.sharing_kombucha true])))
+                       (some true? [receive-by-post? receive-in-person?])
                        (conj (cond-> [:or]
-                               (some? receive-by-post?) (conj [:= :ad.send_by_post receive-by-post?])
-                               (some? receive-in-person?) (conj [:= :ad.share_in_person receive-in-person?]))))]
-    (log/debug "Where clause: " where-clause)
+                               receive-by-post? (conj [:= :ad.send_by_post true])
+                               receive-in-person? (conj [:= :ad.share_in_person true]))))]
+    (log/debug "Where clause: " (with-out-str (pprint/pprint where-clause)))
     (log/spy :debug
       {:ads (postgres/execute-query!
               (cond-> {:select [:created_on :ime :prezime :region :send_by_post :share_in_person
@@ -99,18 +100,23 @@
   (dohvati-facebook-korisnika "testuserid")
 
   (mapv (fn [no]
-          (add-ad {:send_by_post true,
-                   :email "",
-                   :first_name "asdasd",
-                   :phone_number (str "062" no),
-                   :region "Apatin",
+          (add-ad {:send_by_post false,
+                   :region "Ada",
                    :created_on [:now],
-                   :last_name "asdassadsad",
-                   ;;:user_id "10226481938492906",
-                   :quantity 3,
-                   :share_in_person false
-                   :sharing_milk_type true}))
-    (range 100000 100010)))
+                   :id_korisnika 1
+                   :quantity 22,
+                   :share_in_person true
+                   :sharing_water_type true}))
+    (range 100000 100010))
+
+  ;; get info for a specific ad
+  (postgres/execute-query!
+    {:select [:created_on :ime :prezime :region :send_by_post :share_in_person
+              :quantity :phone_number :email :ad_id :sharing_milk_type :sharing_water_type
+              :sharing_kombucha :korisnik.id_korisnika]
+     :from [:ad]
+     :join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
+     :where [:= :ad.ad_id 2]}))
 
 (comment "Remove all ads"
   (postgres/execute-transaction! {:truncate [:ad]}))
