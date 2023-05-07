@@ -1,5 +1,6 @@
 (ns kefirnadar.application.queries
   (:require
+    [clojure.string :as str]
     [kefirnadar.configuration.postgres :as postgres]
     [taoensso.timbre :as log]))
 
@@ -28,10 +29,11 @@
     (log/debug "Where clause: " where-clause)
     (log/spy :debug
       {:ads (postgres/execute-query!
-              (cond-> {:select [:created_on :first_name :last_name :region :send_by_post :share_in_person
+              (cond-> {:select [:created_on :ime :prezime :region :send_by_post :share_in_person
                                 :quantity :phone_number :email :ad_id :sharing_milk_type :sharing_water_type
-                                :sharing_kombucha]
+                                :sharing_kombucha :korisnik.id_korisnika]
                        :from [:ad]
+                       :join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
                        :limit page-size
                        :offset offset
                        :order-by [[:ad.created_on :desc]]}
@@ -55,10 +57,47 @@
   (log/info :debug "remove-old-ads: " ad-ids)
   (postgres/execute-transaction! {:delete-from [:ad]
                                   :where [:in :ad.ad_id ad-ids]}))
+
+(defn dohvati-korisnika
+  [id-korisnika]
+  (postgres/execute-one!
+    {:select [:id_korisnika :facebook_user_id :ime :prezime :phone-number :email]
+     :from [:korisnik]
+     :where [:= :korisnik.id_korisnika id-korisnika]}))
+
+(defn dohvati-facebook-korisnika
+  [user-id]
+  (postgres/execute-one!
+    {:select [:id_korisnika :facebook_user_id :ime :prezime :phone-number :email]
+     :from [:korisnik]
+     :where [:= :korisnik.facebook_user_id user-id]}))
+
+(defn dodaj-korisnika [{:keys [_accessToken _expiresIn _signedRequest userID name]}]
+  (let [korisnik (dohvati-facebook-korisnika userID)]
+    (when (nil? korisnik)
+      (log/info :debug "Dodajem korisnika: " userID)
+      (let [[ime prezime] (str/split name #" " 2)]
+        (postgres/execute-transaction! {:insert-into [:korisnik]
+                                        :columns [:facebook_user_id :ime :prezime]
+                                        :values [[userID ime prezime]]})))
+    (dohvati-facebook-korisnika userID)))
+
+(defn azuriraj-korisnika [id-korisnika kolona vrednost]
+  (postgres/execute-transaction! {:update :korisnik
+                                  :set {kolona vrednost}
+                                  :where [:= :id_korisnika id-korisnika]}))
 ;; endregion
 
 
 (comment
+  ;; add user
+  (postgres/execute-transaction! {:insert-into [:korisnik]
+                                  :columns [:facebook_user_id :ime :prezime]
+                                  :values [["testuserid" "ime" "prezime"]]})
+
+  ;; get user
+  (dohvati-facebook-korisnika "testuserid")
+
   (mapv (fn [no]
           (add-ad {:send_by_post true,
                    :email "",

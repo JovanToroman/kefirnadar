@@ -5,20 +5,19 @@
             [kefirnadar.application.validation :as validation]
             [kefirnadar.application.utils.route :as route-utils]
             [kefirnadar.application.specs :as specs]
+            [kefirnadar.application.auth :as auth]
             [kefirnadar.common.utils :refer-macros [-m]]
             [reitit.frontend.easy :as rfe]))
 
 (defn validate-and-create-ad
-  [{db :db} [form-info #_user-id]]
+  [{db :db} [form-info id-korisnika]]
   (let [validation-info (validation/validate-form-info form-info)]
-    (if (validation/form-valid? validation-info :firstname :lastname :region :quantity)
-      (let [{:keys [firstname lastname region post? pick-up? quantity phone-number email sharing-milk-type?
+    (if (validation/form-valid? validation-info :region :quantity)
+      (let [{:keys [region post? pick-up? quantity phone-number email sharing-milk-type?
                     sharing-water-type? sharing-kombucha?]} form-info
             body {:uri "/api/create"
                   :method :post
-                  :params {:ad/firstname firstname
-                           :ad/lastname lastname
-                           :ad/region region
+                  :params {:ad/region region
                            :ad/email email
                            :ad/phone-number phone-number
                            :ad/post? post?
@@ -27,7 +26,7 @@
                            :ad/sharing-milk-type? sharing-milk-type?
                            :ad/sharing-water-type? sharing-water-type?
                            :ad/sharing-kombucha? sharing-kombucha?
-                           #_#_:user-id user-id}
+                           :korisnik/id id-korisnika}
                   :on-success [::validate-and-create-ad-success]}]
         {::fx/api body})
       {:db (assoc-in db [:ads :sharing :form-data-validation] validation-info)})))
@@ -36,7 +35,8 @@
 
 (defn validate-and-create-ad-success
   "Dispatched on successful ad creation."
-  [_ [_new-ad]]
+  [_ [{:keys [korisnik]}]]
+  (auth/set-user-cookie-info! (assoc (auth/get-user-cookie-info) :korisnik korisnik))
   {::load-route! {:data {:name :route/thank-you}}})
 
 (reg-event-fx ::validate-and-create-ad-success trim-v validate-and-create-ad-success)
