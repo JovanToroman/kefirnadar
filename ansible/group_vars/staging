@@ -13,6 +13,6 @@ db_password: !vault |
           37656432663532663864393036396237653037643966663731336532616238353935363562326337
           6636626362353437340a643732613737396365373638663239396163396238363766393032656132
           6462
-lets_encrypt_cli_domains: -d kefirnadar.rs -d www.kefirnadar.rs
-nginx_server_name: kefirnadar.rs
-domain_url: kefirnadar.rs
+lets_encrypt_cli_domains: -d staging.kefirnadar.rs -d www.staging.kefirnadar.rs
+nginx_server_name: staging.kefirnadar.rs
+domain_url: staging.kefirnadar.rs
