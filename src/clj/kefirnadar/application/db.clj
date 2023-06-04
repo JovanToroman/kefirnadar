@@ -1,4 +1,4 @@
-(ns kefirnadar.application.queries
+(ns kefirnadar.application.db
   (:require
     [clojure.pprint :as pprint]
     [clojure.string :as str]
@@ -66,14 +66,14 @@
      :from [:korisnik]
      :where [:= :korisnik.id_korisnika id-korisnika]}))
 
-(defn dohvati-facebook-korisnika
+(defn- dohvati-facebook-korisnika
   [user-id]
   (postgres/execute-one!
     {:select [:id_korisnika :facebook_user_id :ime :prezime :phone-number :email]
      :from [:korisnik]
      :where [:= :korisnik.facebook_user_id user-id]}))
 
-(defn dodaj-korisnika [{:keys [_accessToken _expiresIn _signedRequest userID name]}]
+(defn dodaj-facebook-korisnika [{:keys [_accessToken _expiresIn _signedRequest userID name]}]
   (let [korisnik (dohvati-facebook-korisnika userID)]
     (when (nil? korisnik)
       (log/info :debug "Dodajem korisnika: " userID)

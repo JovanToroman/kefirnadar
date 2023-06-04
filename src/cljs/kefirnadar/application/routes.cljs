@@ -23,7 +23,7 @@
         :controllers [{:identity identity
                        :start #(dispatch [::events/clean-db])}
                       {:identity identity
-                       :start (fn [] (auth/get-authentication-statuses!))}]
+                       :start #(dispatch [::auth/ucitaj-korisnika])}]
         :doc "Home page"}]
    ["sharing" {:name :route/sharing
                :doc "Form to share grains"}]

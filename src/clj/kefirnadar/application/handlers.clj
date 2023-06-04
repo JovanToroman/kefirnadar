@@ -1,5 +1,5 @@
 (ns kefirnadar.application.handlers
-  (:require [kefirnadar.application.queries :as q]
+  (:require [kefirnadar.application.db :as q]
             [ring.util.http-response :as r]
             [kefirnadar.common.coercion :as coerce-common]
             [taoensso.timbre :as log]
@@ -40,7 +40,8 @@
              :korisnik (prilagodi-korisnika-za-frontend (q/dohvati-korisnika id-korisnika))})
       (r/bad-request!))))
 
-(defn ensure-user
+(defn potvrdi-fejsbuk-korisnika
+  "Dodaje korisnika ako ne postoji u bazi"
   [{{params :body} :parameters}]
-  (let [korisnik (prilagodi-korisnika-za-frontend (q/dodaj-korisnika params))]
+  (let [korisnik (prilagodi-korisnika-za-frontend (q/dodaj-facebook-korisnika params))]
     (r/ok {:korisnik korisnik})))

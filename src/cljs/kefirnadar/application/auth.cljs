@@ -6,14 +6,9 @@
             [reagent.cookies :as cookies]
             [kefirnadar.application.fx :as fx]))
 
+;; region Kolacici
 ;; TODO: how to make this safer, i.e. protect against identity theft
 (defonce user-cookie-name "user-cookie")
-
-(defprotocol AuthMethod
-  (get-login-status [this] "Checks whether the current user is logged in with this auth method")
-  (handle-login-response [this response] "Finish logging the user in if they were authenticated by the auth provider")
-  (log-user-in [this] "Logs the user in using the auth method")
-  (log-user-out [this] "Logs the user out using the auth method"))
 
 (defn set-user-cookie-info!
   [user-info]
@@ -24,6 +19,13 @@
 
 (defn remove-user-cookie-info! []
   (cookies/remove! user-cookie-name))
+;; endregion
+
+(defprotocol AuthMethod
+  (get-login-status [this] "Checks whether the current user is logged in with this auth method")
+  (handle-login-response [this response] "Finish logging the user in if they were authenticated by the auth provider")
+  (log-user-in [this] "Logs the user in using the auth method")
+  (log-user-out [this] "Logs the user out using the auth method"))
 
 (defrecord FacebookLogin [] AuthMethod
   (get-login-status [this]
@@ -43,7 +45,7 @@
                                      (set-user-cookie-info! {:status status
                                                              :authenticated? authenticated?
                                                              :method :facebook})
-                                     (dispatch [::ensure-user user-info])
+                                     (dispatch [::potvrdi-fejsbuk-korisnika user-info])
                                      (dispatch [::set-authenticated true])))))
       #_(dispatch [::set-authentication-data (cond-> {:status status
                                                       :authenticated? authenticated?}
@@ -64,28 +66,20 @@
     (get-login-status auth-method)))
 
 ;; region events
-(reg-event-fx ::ensure-user trim-v
+(reg-event-fx ::potvrdi-fejsbuk-korisnika trim-v
   (fn [_ [^::specs/authResponse user-info]]
-    {::fx/api {:uri (route-utils/url-for "/api/auth/ensure-user")
+    {::fx/api {:uri (route-utils/url-for "/api/auth/potvrdi-fejsbuk-korisnika")
                :method :post
                :params user-info
                :on-success [::ensure-user-success]
                :on-error [::ensure-user-fail]}}))
 
-(defn ensure-user-success
-  "Stores fetched ads in the app db."
-  [db [{:keys [korisnik]}]]
-  (let [user-cookie (get-user-cookie-info)]
-    (set-user-cookie-info! (assoc user-cookie :korisnik korisnik)))
-  db)
-
-(defn ensure-user-fail
-  "Failed to fetch the ads, render error page"
-  [db _]
-  db)
-
-(reg-event-db ::ensure-user-success trim-v ensure-user-success)
-(reg-event-db ::ensure-user-fail trim-v ensure-user-fail)
+(reg-event-db ::ensure-user-success trim-v
+  (fn [db [{:keys [korisnik]}]]
+    (let [user-cookie (get-user-cookie-info)]
+      (set-user-cookie-info! (assoc user-cookie :korisnik korisnik)))
+    db))
+(reg-event-db ::ensure-user-fail trim-v (fn [db _] db))
 
 (reg-event-db ::log-user-in trim-v
   (fn [_db [authentication-provider]]
@@ -94,6 +88,11 @@
 (reg-event-db ::set-authenticated trim-v
   (fn [db [authenticated?]]
     (assoc-in db [:auth :authenticated?] authenticated?)))
+
+(reg-event-fx ::ucitaj-korisnika trim-v
+  (fn [_ _]
+    (when (get-user-cookie-info)
+      {:dispatch [::set-authenticated true]})))
 ;; endregion
 
 ;; region subs

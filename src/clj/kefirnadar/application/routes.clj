@@ -8,8 +8,8 @@
 (def routes
   ["/api" {:swagger {:consumes ["application/edn" "application/transit+json"]
                      :produces ["application/edn" "application/transit+json"]}}
-   ["/auth/ensure-user"
-    {:post {:handler h/ensure-user
+   ["/auth/potvrdi-fejsbuk-korisnika"
+    {:post {:handler h/potvrdi-fejsbuk-korisnika
             :parameters {:body {:accessToken string?
                                 :expiresIn number?
                                 :signedRequest string?

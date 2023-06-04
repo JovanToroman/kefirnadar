@@ -73,8 +73,8 @@
 ;; endregion
 
 (defn clean-db
-  [_ _]
-  db/default-db)
+  [db _]
+  (merge db db/default-db))
 
 (reg-event-db ::clean-db clean-db)
 
