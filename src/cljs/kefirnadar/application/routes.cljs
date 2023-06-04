@@ -22,8 +22,8 @@
    ["" {:name :route/home
         :controllers [{:identity identity
                        :start #(dispatch [::events/clean-db])}
-                      #_{:identity identity
-                       :start (fn [] (auth/get-authentication-statuses!))}]
+                      {:identity identity
+                       :start #(dispatch [::auth/ucitaj-korisnika])}]
         :doc "Home page"}]
    ["sharing" {:name :route/sharing
                :doc "Form to share grains"}]
@@ -46,6 +46,11 @@
                                (dispatch [::events/fetch-ads filters (-m page-number page-size)])
                                (dispatch [::events/update-filters filters])
                                (dispatch [::events/store-ads-pagination-info :seeking (-m page-number page-size)])))}]}]
+   ["odjava"
+    {:name :route/odjava
+     :doc "Odjavi korisnika"
+     :controllers [{:start (fn [_]
+                             (auth/log-user-out (:facebook auth/auth-methods)))}]}]
    ["thank-you"
     {:name :route/thank-you
      :doc "Thank you page"

@@ -1,5 +1,5 @@
 (ns kefirnadar.application.async
-  (:require [kefirnadar.application.queries :as q]
+  (:require [kefirnadar.application.db :as q]
             [taoensso.timbre :as log]))
 
 

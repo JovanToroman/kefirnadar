@@ -14,38 +14,6 @@
     [kefirnadar.application.pagination :as pagination]
     [reitit.frontend.easy :as rfe]))
 
-(defn first-name-input [id]
-  (let [value @(subscribe [::subs/form-field id])
-        valid? @(subscribe [::subs/form-validation id])
-        [css] (styles/use-styletron)]
-    [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} "Ime:"]
-     [:input
-      {:className (css (:input-field styles/styles-map))
-       :value value
-       :on-change #(dispatch [::events/update-sharing-form id (inputs/extract-input-value %)])
-       :type "text"
-       :required true
-       :placeholder "Vase ime..."}]
-     (when (and (some? value) (false? valid?))
-       [:spam.text-danger {:className (css (:error styles/styles-map))} "Molimo da unesete vaše ime"])]))
-
-
-(defn last-name-input [id]
-  (let [value @(subscribe [::subs/form-field id])
-        valid? @(subscribe [::subs/form-validation id])
-        [css] (styles/use-styletron)]
-    [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} "Prezime:"]
-     [:input {:className (css (:input-field styles/styles-map))
-              :value value
-              :on-change #(dispatch [::events/update-sharing-form id (inputs/extract-input-value %)])
-              :type "text"
-              :placeholder "Vase prezime..."}]
-     (when (and (some? value) (false? valid?))
-       [:p.text-danger {:className (css (:error styles/styles-map))} "Molimo da unesete vaše prezime"])]))
-
-
 (defn region-select [id]
   (let [selected-region (subscribe [::subs/form-field id])
         valid? @(subscribe [::subs/form-validation id])
@@ -155,14 +123,12 @@
 
 (defn share-grains-form []
   (let [form-info @(subscribe [::subs/form-data])
-        #_#_user-id @(subscribe [::auth/user-id])
-        [css] (styles/use-styletron)]
+        [css] (styles/use-styletron)
+        id-korisnika @(subscribe [::auth/user-id])]
     [:div {:className (css (:form-wrapper styles/styles-map))}
      [:div {:className (css (:wrapper-title styles/styles-map))} "Kreirajte vaš oglas"]
      [:form
       [:div.form-group
-       [first-name-input :firstname]
-       [last-name-input :lastname]
        [region-select :region]
        [:div.mt-5
         [:p {:className (css (:p styles/styles-map))}
@@ -180,7 +146,7 @@
      [:div {:className (css (:input-field styles/styles-map))}
       [:button.btn.btn-outline-primary
        {:className (css (:btn styles/styles-map))
-        :on-click #(dispatch [::events/validate-and-create-ad form-info #_user-id])} "Sačuvaj"]
+        :on-click #(dispatch [::events/validate-and-create-ad form-info id-korisnika])} "Sačuvaj"]
       [:button.btn.btn-outline-primary
        {:className (css (:btn styles/styles-map))
         :on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]]]))
@@ -194,17 +160,26 @@
 (defn phone-number [show-phone-number? phone-number ad-id]
   (if show-phone-number?
     [:strong.ml-1.mr-1 phone-number]
-    [:button.btn.btn-sm.btn-info.ml-1
+    [:button.btn.btn-sm.btn-info.ml-1.mr-1.mb-1
      {:on-click
       #(dispatch [::events/set-ads-meta ad-id :show-phone-number? true])}
      "Prikaži broj"]))
 
+(defn prikaz-imejla [show-email? email ad-id]
+  (if show-email?
+    [:strong.ml-1.mr-1 email]
+    [:button.btn.btn-sm.btn-info.ml-1.mr-1
+     {:on-click
+      #(dispatch [::events/set-ads-meta ad-id :show-email? true])}
+     "Prikaži imejl adresu"]))
+
 (defn ad-row
-  [{:ad/keys [first_name last_name phone_number email send_by_post share_in_person region sharing_milk_type
-              sharing_water_type sharing_kombucha ad_id]}]
-  (let [show-phone-number? @(subscribe [::subs/ads-meta ad_id :show-phone-number?])]
+  [{:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id]
+    :korisnik/keys [ime prezime phone_number email]}]
+  (let [show-phone-number? @(subscribe [::subs/ads-meta ad_id :show-phone-number?])
+        show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
     [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)}
-     [:h3.row (str/format "%s %s" first_name last_name)]
+     [:h3.row (str/format "%s %s" ime prezime)]
      [:p.row "Ovaj delilac deli " [:strong.ml-1.mr-1
                                    (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
                                    (cond
@@ -215,11 +190,11 @@
       (cond
         (and (not (str/blank? email)) (not (str/blank? phone_number)))
         [:<> "telefonom na " [phone-number show-phone-number? phone_number ad_id]
-          "ili elektronskom poštom na " [:strong.ml-1.mr-1 email]]
+          "ili elektronskom poštom na " [prikaz-imejla show-email? email ad_id]]
 
         (not (str/blank? phone_number)) [:<> "telefonom na "
                                          [phone-number show-phone-number? phone_number ad_id]]
-        (not (str/blank? email)) [:<> "elektronskom poštom na " [:strong.ml-1.mr-1 email]])]]))
+        (not (str/blank? email)) [:<> "elektronskom poštom na " [prikaz-imejla show-email? email ad_id]])]]))
 
 (defn region-filter []
   (let [[css] (styles/use-styletron)
@@ -285,6 +260,7 @@
       "Filteri"]
      (when show-filters?
        [filters-view])
+     [:h3 "Broj oglasa: " ads-count]
      (cond
        (seq ads) [:div (into [:<>] (map ad-row) ads)
                   (pagination/pagination
@@ -370,9 +346,9 @@
     [:i.fa-brands.fa-facebook.fa-xl.mr-3] "Prijavite se pomoću Fejsbuka"]])
 
 (defn main-panel []
-  (let [{{panel-name :name _public? :public?} :data} @(subscribe [::subs/active-route])
+  (let [{{panel-name :name public? :public?} :data} @(subscribe [::subs/active-route])
         [css] (styles/use-styletron)
-        #_#_#_#_authenticated? @(subscribe [::auth/authenticated?])
+        authenticated? @(subscribe [::auth/authenticated?])
         authentication-required? (and (not authenticated?) (not public?))]
     [:div.container
      ;; NAVBAR
@@ -381,13 +357,14 @@
       [:ul.navbar-nav
        ; more menu items can be added here
        [:li.nav-item.active
-        [:a.nav-link {:href "/"} "Početna"]]]]
+        [:a.nav-link {:href "/"} "Početna"]]]
+      (when authenticated?
+        [:a.ml-auto.navbar-nav {:href "/odjava"} "Odjavi me"])]
      ;; CONTENT
      [:div.d-flex.flex-column.justify-content-center.align-items-center
       {:className (css (:main-panel styles/styles-map))}
-      #_(if authentication-required?
+      (if authentication-required?
         [login-page]
-        [panels panel-name])
-      [panels panel-name]]
+        [panels panel-name])]
      ;; FOOTER
      [:p.copyright-text "Copyright © 2022-2023 All Rights Reserved by Do Brave Plus Software"]]))

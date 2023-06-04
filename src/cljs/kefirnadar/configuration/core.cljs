@@ -3,7 +3,7 @@
             [kefirnadar.configuration.events :as events]
             [kefirnadar.application.styles :as styles]
             [kefirnadar.application.views :as views]
-            [re-frame.core :as re-frame :refer [dispatch]]
+            [re-frame.core :as re-frame :refer [dispatch-sync]]
             [reagent.dom :as reagent-dom]
             [taoensso.timbre :as timbre]))
 
@@ -25,7 +25,7 @@
     (println "dev mode")))
 
 (defn ^:export start []
-  (dispatch [::events/boot])
+  (dispatch-sync [::events/boot])
   (dev-setup)
   (mount-root))
 

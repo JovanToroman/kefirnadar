@@ -8,6 +8,13 @@
 (def routes
   ["/api" {:swagger {:consumes ["application/edn" "application/transit+json"]
                      :produces ["application/edn" "application/transit+json"]}}
+   ["/auth/potvrdi-fejsbuk-korisnika"
+    {:post {:handler h/potvrdi-fejsbuk-korisnika
+            :parameters {:body {:accessToken string?
+                                :expiresIn number?
+                                :signedRequest string?
+                                :userID string?
+                                :name string?}}}}]
    ["/list"
     {:get {:handler h/get-ads
            :parameters {:query {(ds/opt :page-number) pos-int?
@@ -19,8 +26,7 @@
                                 (ds/opt :receive-by-post?) boolean?
                                 (ds/opt :receive-in-person?) boolean?}}}}]
    ["/create" {:post {:handler h/create-ad
-                      :parameters {:body {:ad/firstname string?
-                                          :ad/lastname string?
+                      :parameters {:body {:korisnik/id int?
                                           :ad/region string?
                                           :ad/post? boolean?
                                           :ad/pick-up? boolean?
