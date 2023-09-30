@@ -10,5 +10,4 @@
 
 (defn restart []
   (stop)
-  (server/init-db!)
   (server/reload-namespaces))

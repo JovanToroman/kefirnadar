@@ -11,8 +11,8 @@
 
 (defn validate-and-create-ad
   [{db :db} [form-info id-korisnika]]
-  (let [validation-info (validation/validate-form-info form-info)]
-    (if (validation/form-valid? validation-info :region :quantity)
+  (let [validation-info (validation/either-or-update-validation (validation/validate-form-info form-info))]
+    (if (validation/sharing-form-valid? validation-info :region :quantity)
       (let [{:keys [region post? pick-up? quantity phone-number email sharing-milk-type?
                     sharing-water-type? sharing-kombucha?]} form-info
             body {:uri "/api/create"
@@ -33,13 +33,9 @@
 
 (reg-event-fx ::validate-and-create-ad trim-v validate-and-create-ad)
 
-(defn validate-and-create-ad-success
-  "Dispatched on successful ad creation."
-  [_ [{:keys [korisnik]}]]
-  (auth/set-user-cookie-info! (assoc (auth/get-user-cookie-info) :korisnik korisnik))
-  {::load-route! {:data {:name :route/thank-you}}})
-
-(reg-event-fx ::validate-and-create-ad-success trim-v validate-and-create-ad-success)
+(reg-event-fx ::validate-and-create-ad-success trim-v
+  (fn [_ _]
+    {::load-route! {:data {:name :route/thank-you}}}))
 
 ;; region routing
 (defn redirect!
@@ -87,6 +83,26 @@
   ::store-sharing-form-validation-results
   (fn [db [_ id val]]
     (assoc-in db [:ads :sharing :form-data-validation id] val)))
+
+(reg-event-db
+  ::azuriraj-formu-registracije
+  (fn [db [_ id val]]
+    (assoc-in db [:ads :registracija :form-data id] val)))
+
+(reg-event-db
+  ::azuriraj-formu-prijave
+  (fn [db [_ id val]]
+    (assoc-in db [:ads :prijava :form-data id] val)))
+
+(reg-event-db
+  ::azuriraj-formu-za-slanje-imejla-za-resetovanje-lozinke
+  (fn [db [_ id val]]
+    (assoc-in db [:ads :slanje-imejla-za-resetovanje-lozinke :form-data id] val)))
+
+(reg-event-db
+  ::azuriraj-formu-za-resetovanje-lozinke
+  (fn [db [_ id val]]
+    (assoc-in db [:ads :resetovanje-lozinke :form-data id] val)))
 
 (defn fetch-ads
   [_ [^::specs/filters filters ^::specs/pagination-info pagination-info]]

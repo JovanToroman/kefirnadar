@@ -5,7 +5,7 @@
   (fn [db _]
     (:active-route db)))
 
-(reg-sub ::form-data (fn [db _] (get-in db [:ads :sharing :form-data])))
+(reg-sub ::sharing-form-data (fn [db _] (get-in db [:ads :sharing :form-data])))
 
 (reg-sub ::form-field
   (fn [db [_ id]]
@@ -14,6 +14,38 @@
 (reg-sub ::form-validation
   (fn [db [_ id]]
     (get-in db [:ads :sharing :form-data-validation id])))
+
+(reg-sub ::polje-forme-registracije
+  (fn [db [_ id]]
+    (get-in db [:ads :registracija :form-data id])))
+
+(reg-sub ::provera-forme-registracije
+  (fn [db [_ id]]
+    (get-in db [:ads :registracija :form-data-validation id])))
+
+(reg-sub ::polje-forme-prijave
+  (fn [db [_ id]]
+    (get-in db [:ads :prijava :form-data id])))
+
+(reg-sub ::provera-forme-prijave
+  (fn [db [_ id]]
+    (get-in db [:ads :prijava :form-data-validation id])))
+
+(reg-sub ::polje-forme-za-slanje-imejla-za-resetovanje-lozinke
+  (fn [db [_ id]]
+    (get-in db [:ads :slanje-imejla-za-resetovanje-lozinke :form-data id])))
+
+(reg-sub ::polje-forme-za-resetovanje-lozinke
+  (fn [db [_ id]]
+    (get-in db [:ads :resetovanje-lozinke :form-data id])))
+
+(reg-sub ::provera-forme-za-resetovanje-lozinke
+  (fn [db [_ id]]
+    (get-in db [:ads :resetovanje-lozinke :form-data-validation id])))
+
+(reg-sub ::kod-greske
+  (fn [db [_ stranica]]
+    (get-in db [:ads stranica :greska])))
 
 (reg-sub ::filters
   (fn [db [_ filter-key]] (get-in db (cond-> [:ads :seeking :filters]
@@ -36,3 +68,7 @@
 (reg-sub ::show-filters?
   (fn [db _]
     (get-in db [:ads :seeking :show-filters?])))
+
+(reg-sub ::aktivacioni-kod-poslat?
+  (fn [db _]
+    (get-in db [:auth :aktivacioni-kod-poslat?])))

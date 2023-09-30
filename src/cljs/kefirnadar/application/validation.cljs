@@ -9,6 +9,8 @@
 (def phone-number-regex-str
   "[06|+][0-9]{1,5}[/-\\s]*[0-9]{1,4}[/-\\s]*[0-9]{2,4}[/-\\s]*[0-9]{2,4}[\\s]*[0-9]{2,4}[\\s]*")
 
+(def password-regex
+  "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$")
 
 (defn reg-matcher
   [regex-str input]
@@ -20,12 +22,18 @@
   (case id
     :firstname (and (not (str/blank? input)) (seq input) (str/letters? input))
     :lastname (and (not (str/blank? input)) (seq input) (str/letters? input))
+    ;; TODO: unify these two by using imejl only
     :email (reg-matcher email-regex-str input)
+    :imejl (reg-matcher email-regex-str input)
     :region (and (string? input) (not (str/blank? input)))
     (:post? :pick-up?) (true? input)
     (:sharing-milk-type? :sharing-water-type? :sharing-kombucha?) (true? input)
     :phone-number (reg-matcher phone-number-regex-str input)
-    :quantity (and (< input 101) (> input 0))))
+    :broj-telefona (reg-matcher phone-number-regex-str input)
+    :quantity (and (< input 101) (> input 0))
+    :lozinka (reg-matcher password-regex input)
+    :nova-lozinka (reg-matcher password-regex input)
+    :korisnicko-ime (and (string? input) (not (str/blank? input)) (> (count input) 4))))
 
 (defn either-or-form-field-valid?
   "Check whether at least one option was selected"
@@ -35,8 +43,8 @@
     form-ids))
 
 ;; TODO: check if these two validation steps can be unified
-(defn form-valid?
-  "Is the whole form valid?"
+(defn sharing-form-valid?
+  "Is the whole sharing form valid?"
   [validation-info & form-ids]
   (and (every? #(get validation-info %) form-ids)
     (either-or-form-field-valid? validation-info :post? :pick-up?)
@@ -58,5 +66,8 @@
   (->> form-info
     (map (fn [[form-field-key form-field-value]]
            [form-field-key (field-validation form-field-key form-field-value)]))
-    (into {})
-    either-or-update-validation))
+    (into {})))
+
+(defn forma-validna?
+  [validation-info]
+  (every? (comp true? second) validation-info))

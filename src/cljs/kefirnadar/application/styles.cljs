@@ -26,11 +26,6 @@
                                  :margin     "20px auto"
                                  :box-shadow "1px 1px 2px rgba(0,0,0,0.125)"
                                  :padding    "30px"}
-                 :wrapper-title {:font-size      "24px"
-                                 :font-weight    "700"
-                                 :margin-bottom  "25px"
-                                 :text-transform "uppercase"
-                                 :text-align     "center"}
                  :input-wrapper {:display       "flex"
                                  :margin-bottom "15px"
                                  :align-items   "center"}

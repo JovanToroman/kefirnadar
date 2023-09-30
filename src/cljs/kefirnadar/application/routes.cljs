@@ -18,12 +18,12 @@
 
 ; region routes
 (def routes
-  ["/" {:coercion reitit.coercion.spec/coercion}
+  ["/" {:coercion reitit.coercion.spec/coercion
+        :controllers [{:identity identity
+                       :start #(dispatch [::auth/ucitaj-korisnika])}]}
    ["" {:name :route/home
         :controllers [{:identity identity
-                       :start #(dispatch [::events/clean-db])}
-                      {:identity identity
-                       :start #(dispatch [::auth/ucitaj-korisnika])}]
+                       :start #(dispatch [::events/clean-db])}]
         :doc "Home page"}]
    ["sharing" {:name :route/sharing
                :doc "Form to share grains"}]
@@ -48,9 +48,53 @@
                                (dispatch [::events/store-ads-pagination-info :seeking (-m page-number page-size)])))}]}]
    ["odjava"
     {:name :route/odjava
-     :doc "Odjavi korisnika"
+     :doc "Odjava korisnika"
      :controllers [{:start (fn [_]
-                             (auth/log-user-out (:facebook auth/auth-methods)))}]}]
+                             (dispatch [::auth/odjavi-korisnika]))}]}]
+   ["registracija"
+    {:name :route/registracija
+     :doc "Registracija korisnika"
+     :public? true}
+    ;; TODO: mozda dodati da se prekopira imejl adresa ako je korisnik dosao sa forme za prijavu kako bi se olaksalo korisniku
+    ]
+   ["nakon-registracije"
+    {:name :route/nakon-registracije
+     :doc "Obaveštenja za novoregistrovanog korisnika o potrebnoj aktivaciji naloga"
+     :public? true}]
+   ["prijava"
+    {:name :route/prijava
+     :doc "Prijava korisnika"
+     :public? true}]
+   ["aktiviraj-korisnika/{aktivacioni-kod}"
+    {:name :route/aktiviraj-korisnika
+     :doc "Ruta za aktiviranje novokreiranog korisničkog naloga"
+     :controllers [{:parameters {:path [:aktivacioni-kod]}
+                    :start (fn [{{:keys [aktivacioni-kod]} :path}]
+                             (dispatch [::auth/aktiviraj-korisnika aktivacioni-kod]))}]
+     :public? true}]
+   ["slanje-imejla-za-resetovanje-lozinke"
+    {:name :route/slanje-imejla-za-resetovanje-lozinke
+     :doc "Ruta za resetovanje lozinke"
+     :controllers [{:parameters {:query [:imejl]}
+                    :start (fn [{{:keys [imejl]} :query}]
+                             (dispatch [::events/azuriraj-formu-za-slanje-imejla-za-resetovanje-lozinke :imejl imejl]))}]
+     :public? true}]
+   ["nakon-slanja-imejla-za-resetovanje-lozinke"
+    {:name :route/nakon-slanja-imejla-za-resetovanje-lozinke
+     :doc "Obaveštenje za korisnika o resetovanju lozinke"
+     :public? true}]
+   ["resetovanje-lozinke/{kod-za-resetovanje-lozinke}"
+    {:name :route/resetovanje-lozinke
+     :doc "Ruta za aktiviranje novokreiranog korisničkog naloga"
+     :controllers [{:parameters {:path [:kod-za-resetovanje-lozinke]}
+                    :start (fn [{{:keys [kod-za-resetovanje-lozinke]} :path}]
+                             (dispatch [::events/azuriraj-formu-za-resetovanje-lozinke
+                                        :kod-za-resetovanje-lozinke kod-za-resetovanje-lozinke]))}]
+     :public? true}]
+   ["nakon-resetovanja-lozinke"
+    {:name :route/nakon-resetovanja-lozinke
+     :doc "Obaveštenje o uspešnom resetovanju lozinke"
+     :public? true}]
    ["thank-you"
     {:name :route/thank-you
      :doc "Thank you page"

@@ -8,13 +8,29 @@
 (def routes
   ["/api" {:swagger {:consumes ["application/edn" "application/transit+json"]
                      :produces ["application/edn" "application/transit+json"]}}
-   ["/auth/potvrdi-fejsbuk-korisnika"
-    {:post {:handler h/potvrdi-fejsbuk-korisnika
-            :parameters {:body {:accessToken string?
-                                :expiresIn number?
-                                :signedRequest string?
-                                :userID string?
-                                :name string?}}}}]
+   ["/auth"
+    ["/potvrdi-fejsbuk-korisnika" {:post {:handler h/potvrdi-fejsbuk-korisnika
+                                          :parameters {:body {:accessToken string?
+                                                              :expiresIn number?
+                                                              :signedRequest string?
+                                                              :userID string?
+                                                              :name string?}}}}]
+    ["/dodaj-korisnika" {:post {:handler h/dodaj-korisnika
+                                :parameters {:body {:imejl string?
+                                                    :lozinka string?
+                                                    :korisnicko-ime string?}}}}]
+    ["/prijava" {:post {:handler h/prijava
+                        :parameters {:body {:imejl string?
+                                            :lozinka string?}}}}]
+    ["/aktiviraj-korisnika" {:post {:handler h/aktiviraj-korisnika
+                                    :parameters {:body {:aktivacioni-kod string?}}}}]
+    ["/posalji-aktivacioni-kod" {:post {:handler h/posalji-aktivacioni-kod
+                                        :parameters {:body {:imejl string?}}}}]
+    ["/posalji-imejl-za-resetovanje-lozinke" {:post {:handler h/posalji-imejl-za-resetovanje-lozinke
+                                                     :parameters {:body {:imejl string?}}}}]
+    ["/resetuj-lozinku" {:post {:handler h/resetuj-lozinku
+                                :parameters {:body {:kod-za-resetovanje-lozinke string?
+                                                    :nova-lozinka string?}}}}]]
    ["/list"
     {:get {:handler h/get-ads
            :parameters {:query {(ds/opt :page-number) pos-int?
