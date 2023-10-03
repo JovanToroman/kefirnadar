@@ -1,5 +1,6 @@
 {:secrets #include #profile {:dev "/etc/kefirnadar-dev-secrets.edn"
-                             :staging "/etc/kefirnadar-staging-secrets.edn"}
+                             :staging "/etc/kefirnadar-staging-secrets.edn"
+                             :production "/etc/kefirnadar-production-secrets.edn"}
  :postgres {:main {:dbtype "postgresql"
                    :jdbcUrl #ref [:secrets :postgres :main :jdbcUrl]
                    :user #ref [:secrets :postgres :main :user]

@@ -12,6 +12,7 @@
     [kefirnadar.application.specs :as specs]
     [kefirnadar.application.auth :as auth]
     [kefirnadar.application.pagination :as pagination]
+    [kefirnadar.application.ui-components :as components]
     [reitit.frontend.easy :as rfe]))
 
 (defn region-select [id]
@@ -35,31 +36,13 @@
      (when (false? valid?)
        [:p.text-danger {:className (css (:error styles/styles-map))} "Molimo da izaberete region"])]))
 
-(defn phone-number-input [id]
-  (let [value @(subscribe [::subs/form-field id])
-        [css] (styles/use-styletron)]
-    [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} "Telefon:"]
-     [:input {:className (css (:input-field styles/styles-map))
-              :value value
-              :on-change #(dispatch [::events/update-sharing-form id (inputs/extract-input-value %)])
-              :type "text"
-              :placeholder "06x-xxxx-xxxx"}]]))
-
 (defn email-input [id]
   (let [value @(subscribe [::subs/form-field id])
-        valid? @(subscribe [::subs/form-validation id])
-        [css] (styles/use-styletron)]
-    [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} "Imejl adresa:"]
-     [:input {:className (css (:input-field styles/styles-map))
-              :value value
-              :on-change #(dispatch [::events/update-sharing-form id (inputs/extract-input-value %)])
-              :type "text"
-              :placeholder "xxxx@xxxx.xxx"}]
-     (when (and (some? value) (false? valid?))
-       [:p.text-danger {:className (css (:error styles/styles-map))}
-        "Molimo vas da unesete ispravan način kontakta"])]))
+        valid? @(subscribe [::subs/form-validation id])]
+    (inputs/imejl {:vrednost value
+                   :on-change #(dispatch [::events/update-sharing-form id (inputs/extract-input-value %)])
+                   :tekst-greske "Molimo vas da unesete ispravan način kontakta"
+                   :ispravno? valid?})))
 
 (defn post-toggle [id]
   (let [value (subscribe [::subs/form-field id])
@@ -122,18 +105,21 @@
 
 
 (defn share-grains-form []
-  (let [form-info @(subscribe [::subs/form-data])
+  (let [form-info @(subscribe [::subs/sharing-form-data])
         [css] (styles/use-styletron)
-        id-korisnika @(subscribe [::auth/user-id])]
-    [:div {:className (css (:form-wrapper styles/styles-map))}
-     [:div {:className (css (:wrapper-title styles/styles-map))} "Kreirajte vaš oglas"]
+        id-korisnika @(subscribe [::auth/user-id])
+        broj-telefona-form-id :phone-number]
+    [:div.col-md-8.mt-3
+     [:h1 "Kreirajte vaš oglas"]
      [:form
       [:div.form-group
        [region-select :region]
        [:div.mt-5
         [:p {:className (css (:p styles/styles-map))}
          "Kako da vas zainteresovani kontaktiraju? (telefon ili imejl adresa je obavezna)"]
-        [phone-number-input :phone-number]
+        [inputs/broj-telefona {:vrednost @(subscribe [::subs/form-field broj-telefona-form-id])
+                               :on-change #(dispatch [::events/update-sharing-form broj-telefona-form-id
+                                                      (inputs/extract-input-value %)])}]
         [email-input :email]]
        [:div.mt-5
         [:p {:className (css (:p styles/styles-map))} "Kako ćete deliti zrnca? (jedan način deljenja je obavezan)"]
@@ -174,12 +160,13 @@
      "Prikaži imejl adresu"]))
 
 (defn ad-row
-  [{:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id]
-    :korisnik/keys [ime prezime phone_number email]}]
+  [css {:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id]
+        :korisnik/keys [korisnicko_ime phone_number email]}]
   (let [show-phone-number? @(subscribe [::subs/ads-meta ad_id :show-phone-number?])
         show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
-    [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)}
-     [:h3.row (str/format "%s %s" ime prezime)]
+    [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)
+                                         :className (css {:line-height 2})}
+     [:h3.row korisnicko_ime]
      [:p.row "Ovaj delilac deli " [:strong.ml-1.mr-1
                                    (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
                                    (cond
@@ -188,13 +175,13 @@
                                      share_in_person " samo ličnim preuzimanjem,")]
       "nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
       (cond
-        (and (not (str/blank? email)) (not (str/blank? phone_number)))
+        (and (not (str/empty-or-nil? email)) (not (str/empty-or-nil? phone_number)))
         [:<> "telefonom na " [phone-number show-phone-number? phone_number ad_id]
-          "ili elektronskom poštom na " [prikaz-imejla show-email? email ad_id]]
+         "ili elektronskom poštom na " [prikaz-imejla show-email? email ad_id]]
 
-        (not (str/blank? phone_number)) [:<> "telefonom na "
+        (not (str/empty-or-nil? phone_number)) [:<> "telefonom na "
                                          [phone-number show-phone-number? phone_number ad_id]]
-        (not (str/blank? email)) [:<> "elektronskom poštom na " [prikaz-imejla show-email? email ad_id]])]]))
+        (not (str/empty-or-nil? email)) [:<> "elektronskom poštom na " [prikaz-imejla show-email? email ad_id]])]]))
 
 (defn region-filter []
   (let [[css] (styles/use-styletron)
@@ -254,7 +241,8 @@
         ads-count @(subscribe [::subs/ads-count])
         {:keys [page-number page-size]} @(subscribe [::subs/ads-pagination-info])
         show-filters? @(subscribe [::subs/show-filters?])
-        filters @(subscribe [::subs/filters])]
+        filters @(subscribe [::subs/filters])
+        [css] (styles/use-styletron)]
     [:div.d-flex.flex-column.min-vh-100.align-items-center
      [:button.btn.btn-secondary.mt-5.mb-3 {:on-click #(dispatch [::events/store-show-filters show-filters?])}
       "Filteri"]
@@ -262,9 +250,9 @@
        [filters-view])
      [:h3 "Broj oglasa: " ads-count]
      (cond
-       (seq ads) [:div (into [:<>] (map ad-row) ads)
+       ;; iz nekog razloga ne mozemo koristiti css direktno unutar komponenata
+       (seq ads) [:div (into [:<>] (map (partial ad-row css)) ads)
                   (pagination/pagination
-                    ;; TODO: zameniti sa rfe/href
                     {:change-page-redirect-url-fn (fn [page-number page-size]
                                                     (rfe/href :route/seeking {} (merge
                                                                                   {:page-number page-number
@@ -320,13 +308,160 @@
 (defn error []
   [:<>
    [:h1 "Trenutno nema korisnika koji dele zrnca u izabranom regionu."]
-   [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])} "Početna stranica"]])
+   [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])}
+    "Početna stranica"]])
 
 (defn privacy-policy
   []
   [:div
    [:h1 "Politika privatnosti"]
    [:p "Ovo je naša politika privatnosti"]])
+
+(defn greska-registracije [kod-greske]
+  (let [[css] (styles/use-styletron)]
+    [:p.text-danger {:className (css (:error styles/styles-map))}
+     (case kod-greske
+       :imejl-vec-iskoriscen "Korisnik sa ovom imejl adresom je već registrovan. Pokušajte da se prijavite."
+       :korisnicko-ime-zauzeto "Korisničko ime je zauzeto. Probajte drugo korisničko ime."
+       nil)]))
+
+(defn registracija-korisnika
+  []
+  (if (not @(subscribe [::auth/authenticated?]))
+    (let [korisnicko-ime @(subscribe [::subs/polje-forme-registracije :korisnicko-ime])
+          korisnicko-ime-validno? @(subscribe [::subs/provera-forme-registracije :korisnicko-ime])
+          imejl @(subscribe [::subs/polje-forme-registracije :imejl])
+          imejl-validan? @(subscribe [::subs/provera-forme-registracije :imejl])
+          lozinka @(subscribe [::subs/polje-forme-registracije :lozinka])
+          lozinka-validna? @(subscribe [::subs/provera-forme-registracije :lozinka])
+          kod-greske @(subscribe [::subs/kod-greske :registracija])]
+      [:div.col-md-6
+       [inputs/korisnicko-ime {:vrednost korisnicko-ime
+                               :on-change #(dispatch [::events/azuriraj-formu-registracije :korisnicko-ime
+                                                      (inputs/extract-input-value %)])
+                               :tekst-greske "Unesite ime od makar 5 karaktera"
+                               :ispravno? korisnicko-ime-validno?}]
+       [inputs/imejl {:vrednost imejl
+                      :on-change #(dispatch [::events/azuriraj-formu-registracije :imejl (inputs/extract-input-value %)])
+                      :tekst-greske "Unesite ispravnu imejl adresu"
+                      :ispravno? imejl-validan?}]
+       [inputs/lozinka {:vrednost lozinka
+                        :on-change #(dispatch [::events/azuriraj-formu-registracije :lozinka (inputs/extract-input-value
+                                                                                               %)])
+                        :tekst-greske "Unesite kompleksniju lozinku sa minimum osam karaktera koja sadrži makar jedan
+                       broj, jedno veliko slovo i jedan poseban karakter"
+                        :ispravno? lozinka-validna?}]
+       [inputs/dugme {:oznaka "Registruj se"
+                      :on-click #(dispatch [::auth/dodaj-korisnika {:imejl imejl
+                                                                    :lozinka lozinka
+                                                                    :korisnicko-ime korisnicko-ime}])}]
+       [greska-registracije kod-greske]])
+    "Već ste prijavljeni. Ne možete se registrovati opet dok se ne odjavite."))
+
+(defn greska-prijave [kod-greske]
+  (let [[css] (styles/use-styletron)]
+    [:p.text-danger {:className (css (:error styles/styles-map))}
+     (case kod-greske
+       :korisnik-ne-postoji "Neuspešna prijava. Proverite da li ste uneli ispravnu imejl adresu."
+       :korisnik-nije-aktiviran (str "Vaš nalog nije aktiviran. Molimo proverite sanduče elektronske pošte i pratite "
+                                  "vezu za aktivaciju naloga.")
+       :pogresna-lozinka "Pogrešna lozinka"
+       kod-greske)]))
+
+(defn prijava-korisnika
+  []
+  (if (not @(subscribe [::auth/authenticated?]))
+    (let [imejl @(subscribe [::subs/polje-forme-prijave :imejl])
+          imejl-validan? @(subscribe [::subs/provera-forme-prijave :imejl])
+          lozinka @(subscribe [::subs/polje-forme-prijave :lozinka])
+          kod-greske @(subscribe [::subs/kod-greske :prijava])
+          aktivacioni-kod-poslat? @(subscribe [::subs/aktivacioni-kod-poslat?])]
+      [:div.col-md-6.align-items-center
+       [inputs/imejl {:vrednost imejl
+                      :on-change #(dispatch [::events/azuriraj-formu-prijave :imejl (inputs/extract-input-value %)])
+                      :tekst-greske "Unesite ispravnu imejl adresu"
+                      :ispravno? imejl-validan?}]
+       [inputs/lozinka {:vrednost lozinka
+                        :on-change #(dispatch [::events/azuriraj-formu-prijave :lozinka (inputs/extract-input-value %)])}]
+       [inputs/dugme {:oznaka "Prijavi se"
+                      :on-click #(dispatch [::auth/prijava {:imejl imejl
+                                                            :lozinka lozinka}])}]
+       [:a.link-primary.row {:href (rfe/href :route/slanje-imejla-za-resetovanje-lozinke {} (when (not (str/blank? imejl))
+                                                                                          {:imejl imejl}))}
+        "Zaboravili ste lozinku?"]
+       [:a.link-primary.row {:href (rfe/href :route/registracija)}
+        "Nemate nalog? Registrujte se!"]
+       [greska-prijave kod-greske]
+       (when (= kod-greske :korisnik-nije-aktiviran)
+         (if-not aktivacioni-kod-poslat?
+           [inputs/dugme {:oznaka "Ponovo pošalji registracioni kod na svoju imejl adresu"
+                          :on-click #(dispatch [::auth/posalji-aktivacioni-kod imejl])}]
+           [:p "Aktivacioni kod je poslat na vašu imejl adresu"]))])
+    [:div.alert.alert-primary {:role "alert"} "Već ste prijavljeni. Ne možete se prijaviti opet dok se ne odjavite."]))
+
+(defn- greska-aktiviranja [kod-greske]
+  (let [[css] (styles/use-styletron)]
+    [:p.text-danger {:className (css (:error styles/styles-map))}
+     (case kod-greske
+       :aktivacioni-kod-neispravan "Veza za aktivaciju je neispravna."
+       kod-greske)]))
+
+(defn aktiviraj-korisnika []
+  (if (not @(subscribe [::auth/authenticated?]))
+    (let [kod-greske @(subscribe [::subs/kod-greske :aktiviraj-korisnika])]
+      [:<>
+       [:h1 "Molimo sačekajte dok aktiviramo vaš nalog \uD83D\uDC86"]
+       [components/spinner 10]
+       [greska-aktiviranja kod-greske]])
+    [:div.alert.alert-primary {:role "alert"} "Već ste prijavljeni. Ne možete aktivirati nalog dok se ne odjavite."]))
+
+(defn nakon-registracije []
+  [:h1 "Molimo posetite vaše imejl sanduče i pratite link za aktivaciju naloga koji smo vam poslali"])
+
+(defn slanje-imejla-za-resetovanje-lozinke
+  []
+  (if (not @(subscribe [::auth/authenticated?]))
+    (let [imejl @(subscribe [::subs/polje-forme-za-slanje-imejla-za-resetovanje-lozinke :imejl])]
+      [:div.col-md-6
+       [inputs/imejl {:vrednost imejl
+                      :on-change #(dispatch [::events/azuriraj-formu-za-slanje-imejla-za-resetovanje-lozinke
+                                             :imejl (inputs/extract-input-value %)])
+                      :tekst-greske "Unesite ispravnu imejl adresu"}]
+       [inputs/dugme {:oznaka "Pošalji imejl za resetovanje lozinke"
+                      :on-click #(dispatch [::auth/posalji-imejl-za-resetovanje-lozinke imejl])}]])
+    [:div.alert.alert-primary {:role "alert"} "Već ste prijavljeni. Ne možete resetovati lozinku dok se ne odjavite."]))
+
+(defn nakon-slanja-imejla-za-resetovanje-lozinke []
+  [:h1 "Ukoliko ste uneli ispravnu imejl adresu, u sanduče će vam stići imejl sa vezom za resetovanje lozinke."])
+
+(defn greska-resetovanja-lozinke [kod-greske]
+  (let [[css] (styles/use-styletron)]
+    [:p.text-danger {:className (css (:error styles/styles-map))}
+     (case kod-greske
+       :kod-za-resetovanje-lozinke-neispravan "Neispravan kod za resetovanje lozinke"
+       :pogresna-lozinka "Stara lozinka koju ste uneli je neispravna"
+       kod-greske)]))
+
+(defn resetovanje-lozinke
+  []
+  (let [kod-za-resetovanje-lozinke @(subscribe [::subs/polje-forme-za-resetovanje-lozinke :kod-za-resetovanje-lozinke])
+        nova-lozinka @(subscribe [::subs/polje-forme-za-resetovanje-lozinke :nova-lozinka])
+        nova-lozinka-validna? @(subscribe [::subs/provera-forme-za-resetovanje-lozinke :nova-lozinka])
+        kod-greske @(subscribe [::subs/kod-greske :resetovanje-lozinke])]
+    [:div.col-md-6
+     [inputs/lozinka {:vrednost nova-lozinka
+                      :on-change #(dispatch [::events/azuriraj-formu-za-resetovanje-lozinke
+                                             :nova-lozinka (inputs/extract-input-value %)])
+                      :tekst-greske "Unesite kompleksniju lozinku sa minimum osam karaktera koja sadrži makar jedan
+                       broj, jedno veliko slovo i jedan poseban karakter"
+                      :ispravno? nova-lozinka-validna?
+                      :natpis "Nova lozinka: "}]
+     [inputs/dugme {:oznaka "Resetuj lozinku"
+                    :on-click #(dispatch [::auth/resetuj-lozinku kod-za-resetovanje-lozinke (-m nova-lozinka)])}]
+     [greska-resetovanja-lozinke kod-greske]]))
+
+(defn nakon-resetovanja-lozinke []
+  [:h1 "Uspešno ste resetovali lozinku."])
 
 (defn- panels [panel-name]
   (case panel-name
@@ -336,14 +471,28 @@
     :route/thank-you [thank-you]
     :route/error [error]
     :route/privacy-policy [privacy-policy]
+    :route/registracija [registracija-korisnika]
+    :route/aktiviraj-korisnika [aktiviraj-korisnika]
+    :route/prijava [prijava-korisnika]
+    :route/nakon-registracije [nakon-registracije]
+    :route/slanje-imejla-za-resetovanje-lozinke [slanje-imejla-za-resetovanje-lozinke]
+    :route/nakon-slanja-imejla-za-resetovanje-lozinke [nakon-slanja-imejla-za-resetovanje-lozinke]
+    :route/resetovanje-lozinke [resetovanje-lozinke]
+    :route/nakon-resetovanja-lozinke [nakon-resetovanja-lozinke]
     [:div]))
 
 (defn login-page []
   [:div
-   [:h1.mb-5 "Prijavljivanje"]
-   [:button.btn.btn-primary
+   [:h1.mb-5.text-center "Prijavljivanje"]
+   [:button.btn.btn-primary.col-md-12.mb-3
     {:on-click #(auth/log-user-in (:facebook auth/auth-methods))}
-    [:i.fa-brands.fa-facebook.fa-xl.mr-3] "Prijavite se pomoću Fejsbuka"]])
+    [:i.fa-brands.fa-facebook.fa-xl.mr-3] "Prijavi se pomoću Fejsbuka"]
+   [:button.btn.btn-secondary.col-md-12.mb-3
+    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/prijava}}])}
+    "Prijavi se pomoću imejla i lozinke"]
+   [:button.btn.btn-outline-secondary.col-md-12
+    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/registracija}}])}
+    "Napravi novi nalog"]])
 
 (defn main-panel []
   (let [{{panel-name :name public? :public?} :data} @(subscribe [::subs/active-route])
@@ -365,6 +514,6 @@
       {:className (css (:main-panel styles/styles-map))}
       (if authentication-required?
         [login-page]
-        [panels panel-name])]
+        [panels panel-name authenticated?])]
      ;; FOOTER
-     [:p.copyright-text "Copyright © 2022-2023 All Rights Reserved by Do Brave Plus Software"]]))
+     [:p.copyright-text.mt-5.d-flex.justify-content-center "Copyright © 2022-2023 All Rights Reserved by Do Brave Plus Software"]]))

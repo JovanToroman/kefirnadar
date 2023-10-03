@@ -1,16 +1,18 @@
 (ns kefirnadar.application.handlers
-  (:require [kefirnadar.application.db :as q]
+  (:require [crypto.password.pbkdf2 :as password]
+            [kefirnadar.application.db :as db]
             [ring.util.http-response :as r]
             [kefirnadar.common.coercion :as coerce-common]
             [taoensso.timbre :as log]
-            [cuerdas.core :as str]))
+            [cuerdas.core :as str]
+            [kefirnadar.application.imejl :as imejl]))
 
 (defn get-ads
   "This handler returns active ads."
   [{params :params}]
   (log/debug "'get-ads' params: " params)
   (let [params (coerce-common/coerce-regions params)]
-    (r/ok (q/get-ads params))))
+    (r/ok (db/get-ads params))))
 
 (defn prilagodi-korisnika-za-frontend [korisnik]
   (update-keys korisnik (comp keyword str/kebab)))
@@ -30,18 +32,82 @@
                      :sharing_kombucha (get-in parameters [:body :ad/sharing-kombucha?])}
         phone-number (get-in parameters [:body :ad/phone-number])
         email (get-in parameters [:body :ad/email])
-        {:keys [next.jdbc/update-count]} (q/add-ad entity-body)]
+        {:keys [next.jdbc/update-count]} (db/add-ad entity-body)]
     (when (not (str/blank? email))
-      (q/azuriraj-korisnika id-korisnika :email email))
+      (db/azuriraj-korisnika [:id_korisnika id-korisnika] :email email))
     (when (not (str/blank? phone-number))
-      (q/azuriraj-korisnika id-korisnika :phone_number phone-number))
+      (db/azuriraj-korisnika [:id_korisnika id-korisnika] :phone_number phone-number))
     (if (= update-count 1)
       (r/ok {:oglas entity-body
-             :korisnik (prilagodi-korisnika-za-frontend (q/dohvati-korisnika id-korisnika))})
+             :korisnik (prilagodi-korisnika-za-frontend (db/dohvati-korisnika id-korisnika))})
       (r/bad-request!))))
 
 (defn potvrdi-fejsbuk-korisnika
   "Dodaje korisnika ako ne postoji u bazi"
   [{{params :body} :parameters}]
-  (let [korisnik (prilagodi-korisnika-za-frontend (q/dodaj-facebook-korisnika params))]
+  (let [korisnik (prilagodi-korisnika-za-frontend (db/dodaj-facebook-korisnika params))]
     (r/ok {:korisnik korisnik})))
+
+(defn dodaj-korisnika
+  [{{{:keys [imejl korisnicko-ime] :as params} :body} :parameters {origin "origin"} :headers}]
+  (let [korisnik-postoji?       (some? (db/dohvati-korisnika-po-imejlu imejl))
+        korisnicko-ime-zauzeto? (some? (db/dohvati-korisnika-po-korisnickom-imenu korisnicko-ime))]
+    (cond
+      korisnik-postoji? (r/bad-request {:greska :imejl-vec-iskoriscen})
+      korisnicko-ime-zauzeto? (r/bad-request {:greska :korisnicko-ime-zauzeto})
+      :else (let [aktivacioni-kod (str (random-uuid))]
+              (imejl/posalji-imejl imejl "Aktivacija naloga u aplikaciji Kefirnadar"
+                (imejl/aktivacioni-imejl (format "%s/aktiviraj-korisnika/%s" origin aktivacioni-kod)))
+              (db/dodaj-korisnika (assoc params :aktivacioni-kod aktivacioni-kod))
+              (r/ok)))))
+
+(defn posalji-aktivacioni-kod
+  [{{{:keys [imejl]} :body} :parameters {origin "origin"} :headers}]
+  (let [aktivacioni-kod (str (random-uuid))]
+    (imejl/posalji-imejl imejl "Aktivacija naloga u aplikaciji Kefirnadar"
+      (imejl/aktivacioni-imejl (format "%s/aktiviraj-korisnika/%s" origin aktivacioni-kod)))
+    (db/azuriraj-korisnika [:email imejl] :aktivacioni_kod aktivacioni-kod)
+    (r/ok)))
+
+
+(defn aktiviraj-korisnika
+  [{{{:keys [aktivacioni-kod]} :body} :parameters}]
+  (let [{:korisnik/keys [email]} (db/dohvati-korisnika-po-aktivacionom-kodu aktivacioni-kod)
+        aktivacioni-kod-ispravan? (some? email)]
+    (log/debugf "aktiviraj-korisnika pozvan sa imejl adresom %s i aktivacionim kodom %s" email aktivacioni-kod)
+    (if (and (some? aktivacioni-kod) aktivacioni-kod-ispravan?)
+      (do (db/aktiviraj-korisnika aktivacioni-kod)
+          (r/ok))
+      (r/bad-request {:greska :aktivacioni-kod-neispravan}))))
+
+(defn posalji-imejl-za-resetovanje-lozinke
+  [{{{:keys [imejl]} :body} :parameters {origin "origin"} :headers}]
+  (if (some? (db/dohvati-korisnika-po-imejlu imejl))
+    (let [kod-za-resetovanje-lozinke (str (random-uuid))]
+      (imejl/posalji-imejl imejl "Resetovanje lozinke u aplikaciji Kefirnadar"
+        (imejl/resetovanje-lozinke-imejl (format "%s/resetovanje-lozinke/%s" origin kod-za-resetovanje-lozinke)))
+      (db/azuriraj-korisnika [:email imejl] :kod_za_resetovanje_lozinke kod-za-resetovanje-lozinke)
+      (r/ok))
+    (r/bad-request)))
+;; podesiti gresku za ovo gore
+
+(defn resetuj-lozinku
+  [{{{:keys [kod-za-resetovanje-lozinke nova-lozinka]} :body} :parameters}]
+  (let [{:korisnik/keys [email]} (db/dohvati-korisnika-po-kodu-za-resetovanje-lozinke
+                                   kod-za-resetovanje-lozinke)
+        kod-za-resetovanje-lozinke-ispravan? (some? email)]
+    (log/debugf "resetuj-lozinku pozvan za imejl adresu %s i kodom za resetovanje lozinke %s"
+      email kod-za-resetovanje-lozinke)
+    (cond
+      (not kod-za-resetovanje-lozinke-ispravan?) (r/bad-request {:greska :kod-za-resetovanje-lozinke-neispravan})
+      :else (do (db/resetuj-lozinku kod-za-resetovanje-lozinke nova-lozinka)
+                (r/ok)))))
+
+(defn prijava
+  [{{{:keys [imejl lozinka]} :body} :parameters}]
+  (if-some [{:korisnik/keys [hes_lozinke aktiviran] :as korisnik} (db/dohvati-korisnika-po-imejlu imejl)]
+    (cond
+      (not aktiviran) (r/bad-request {:greska :korisnik-nije-aktiviran})
+      (not (password/check lozinka hes_lozinke)) (r/bad-request {:greska :pogresna-lozinka})
+      :else (r/ok {:korisnik (prilagodi-korisnika-za-frontend korisnik)}))
+    (r/bad-request {:greska :korisnik-ne-postoji})))

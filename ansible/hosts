@@ -1,2 +1,5 @@
 [staging]
-194.182.177.51
+# ip address here
+
+[production]
+# ip address here

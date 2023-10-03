@@ -38,6 +38,7 @@
   shell: "psql -U postgres -f /etc/create_user_script.sql"
   become_user: postgres
 
+# TODO: move this step to the kefinadar role jer ovo nema veze samo sa PG vec sa celom aplikacijom
 - name: Copy needed Postgres setup files
   copy:
     src: "{{ item.src }}"

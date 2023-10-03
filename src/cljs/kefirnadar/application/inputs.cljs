@@ -6,7 +6,6 @@
             [kefirnadar.application.styles :as styles]
             [clojure.string :as str]))
 
-;; TODO: move this to a common ns
 (defn extract-input-value
   [event]
   (j/get-in event [:target :value]))
@@ -124,3 +123,61 @@
               :on-change on-change
               :type "checkbox"
               :checked value}]]))
+
+(defn imejl [{:keys [vrednost on-change tekst-greske ispravno?]}]
+  (let [[css] (styles/use-styletron)]
+    [:div.form-group
+     [:label {:className (css (:label styles/styles-map))} "Imejl adresa:"]
+     [:input {:className (css (:input-field styles/styles-map))
+              :value vrednost
+              :on-change on-change
+              :type "text"
+              :placeholder "xxxx@xxxx.xxx"}]
+     (when (and (some? vrednost) (false? ispravno?))
+       [:p.text-danger {:className (css (:error styles/styles-map))}
+        tekst-greske])]))
+
+(defn broj-telefona [{:keys [vrednost on-change tekst-greske ispravno?]}]
+  (let [[css] (styles/use-styletron)]
+    [:div.form-group
+     [:label {:className (css (:label styles/styles-map))} "Broj telefona:"]
+     [:input {:className (css (:input-field styles/styles-map))
+              :value vrednost
+              :on-change on-change
+              :type "text"
+              :placeholder "06x-xxxx-xxxx"}]
+     (when (and (some? vrednost) (false? ispravno?))
+       [:p.text-danger {:className (css (:error styles/styles-map))}
+        tekst-greske])]))
+
+(defn lozinka [{:keys [vrednost on-change tekst-greske ispravno? natpis] :or {natpis "Lozinka: "}}]
+  (let [[css] (styles/use-styletron)]
+    [:div.form-group
+     [:label {:className (css (:label styles/styles-map))} natpis]
+     [:input {:className (css (:input-field styles/styles-map))
+              :value vrednost
+              :on-change on-change
+              :type "password"}]
+     (when (and (some? vrednost) (false? ispravno?))
+       [:p.text-danger {:className (css (:error styles/styles-map))}
+        tekst-greske])]))
+
+(defn dugme [{:keys [oznaka on-click]}]
+  (let [[css] (styles/use-styletron)]
+    [:button.btn.btn-outline-primary
+     {:className (css (:btn styles/styles-map))
+      :on-click on-click}
+     oznaka]))
+
+(defn korisnicko-ime [{:keys [vrednost on-change tekst-greske ispravno?]}]
+  (let [[css] (styles/use-styletron)]
+    [:div.form-group
+     [:label {:className (css (:label styles/styles-map))} "Korisnicko ime:"]
+     [:input {:className (css (:input-field styles/styles-map))
+              :value vrednost
+              :on-change on-change
+              :type "text"
+              :placeholder "Ime koje će se prikazivati pored vaših oglasa"}]
+     (when (and (some? vrednost) (false? ispravno?))
+       [:p.text-danger {:className (css (:error styles/styles-map))}
+        tekst-greske])]))

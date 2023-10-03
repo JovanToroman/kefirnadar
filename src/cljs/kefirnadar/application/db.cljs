@@ -18,4 +18,7 @@
                              :seeking-kombucha? true
                              :receive-by-post? true
                              :receive-in-person? true}
-                   :show-filters? false}}})
+                   :show-filters? false}
+         :registracija {:form-data {:imejl ""
+                                    :lozinka ""
+                                    :korisnicko-ime ""}}}})

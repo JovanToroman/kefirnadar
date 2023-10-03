@@ -19,8 +19,6 @@
 (def cli-options
   [["-p" "--profile PROFILE" "The profile to use" :default :dev :parse-fn keyword]])
 
-(repl/set-refresh-dirs "src/clj/kefirnadar/application")
-
 (defn stop-server []
   (when (some? (postgres/datasource))
     (postgres/stop!))
@@ -29,9 +27,9 @@
     (reset! server nil)))
 
 (defn start-server []
-  (stop-server)
   (reset! server
-    (kit/run-server (reload/wrap-reload #'web/app) {:port 8088 :legacy-return-value? false})))
+    (kit/run-server (reload/wrap-reload #'web/app)
+      {:port 8088 :legacy-return-value? false})))
 
 (defn init-db! []
   (try (postgres/start! (slurp (io/reader (io/resource "data/schema.sql"))))
@@ -42,8 +40,12 @@
                                     (:profile (mount/args)))
                                   "contains Postgresql config. Exception message: " (.getMessage e))))))
 
+(defn start-server-and-db []
+  (start-server)
+  (init-db!))
+
 (defn reload-namespaces []
-  (repl/refresh :after 'kefirnadar.configuration.server/start-server))
+  (repl/refresh :after 'kefirnadar.configuration.server/start-server-and-db))
 
 (defn -main [& args]
   (let [opts (:options (cli/parse-opts args cli-options))]

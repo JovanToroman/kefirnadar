@@ -1,10 +1,15 @@
 CREATE TABLE IF NOT EXISTS korisnik (
 id_korisnika SERIAL,
 facebook_user_id VARCHAR ( 30 ),
-ime VARCHAR ( 30 ) NOT NULL,
-prezime VARCHAR ( 50 ) NOT NULL,
+ime VARCHAR ( 30 ),
+prezime VARCHAR ( 50 ),
+korisnicko_ime VARCHAR ( 30 ),
+aktivacioni_kod VARCHAR ( 36 ),
+kod_za_resetovanje_lozinke VARCHAR ( 36 ),
+aktiviran BOOLEAN,
 phone_number VARCHAR ( 15 ),
 email VARCHAR ( 40 ),
+hes_lozinke VARCHAR ( 64 ),
 PRIMARY KEY(id_korisnika)
 );
 
