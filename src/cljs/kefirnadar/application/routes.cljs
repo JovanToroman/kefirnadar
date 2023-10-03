@@ -95,6 +95,13 @@
     {:name :route/nakon-resetovanja-lozinke
      :doc "Obaveštenje o uspešnom resetovanju lozinke"
      :public? true}]
+   ["kontakt"
+    {:name :route/kontakt
+     :public? true}]
+   ["nakon-slanja-kontakt-poruke"
+    {:name :route/nakon-slanja-kontakt-poruke
+     :doc "Obaveštenje o uspešnom slanju kontakt poruke"
+     :public? true}]
    ["thank-you"
     {:name :route/thank-you
      :doc "Thank you page"

@@ -111,3 +111,9 @@
       (not (password/check lozinka hes_lozinke)) (r/bad-request {:greska :pogresna-lozinka})
       :else (r/ok {:korisnik (prilagodi-korisnika-za-frontend korisnik)}))
     (r/bad-request {:greska :korisnik-ne-postoji})))
+
+(defn posalji-kontakt-poruku
+  [{{{:keys [imejl poruka]} :body} :parameters}]
+  (imejl/posalji-imejl "info@kefirnadar.rs" "Poruka od korisnika"
+    (imejl/kontakt-poruka imejl poruka))
+  (r/ok))

@@ -52,4 +52,7 @@
                                           :ad/sharing-milk-type? boolean?
                                           :ad/sharing-water-type? boolean?
                                           :ad/sharing-kombucha? boolean?
-                                          #_#_:user-id string?}}}}]])
+                                          #_#_:user-id string?}}}}]
+   ["/posalji-kontakt-poruku" {:post {:handler h/posalji-kontakt-poruku
+                                      :parameters {:body {(ds/opt :imejl) string?
+                                                          (ds/opt :poruka) string?}}}}]])

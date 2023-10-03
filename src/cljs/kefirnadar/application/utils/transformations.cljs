@@ -1,6 +1,6 @@
 (ns kefirnadar.application.utils.transformations
   (:require [cuerdas.core :as cuerdas]
-            [clojure.string :as str]))
+            [cuerdas.core :as str]))
 
 (defn remove-reserved-characters [text]
   (cuerdas/replace text #"[\\^$.|?*+()\[\]{}]" ""))

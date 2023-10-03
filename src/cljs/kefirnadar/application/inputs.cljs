@@ -4,7 +4,7 @@
             [kefirnadar.application.utils.transformations :as transform]
             [applied-science.js-interop :as j]
             [kefirnadar.application.styles :as styles]
-            [clojure.string :as str]))
+            [cuerdas.core :as str]))
 
 (defn extract-input-value
   [event]
@@ -64,7 +64,7 @@
           :or {id "dropdownMenuButton1"
                placeholder-disabled? false}}]
       (let [[css] (styles/use-styletron)
-            filtered-options (if (str/blank? @search-text)
+            filtered-options (if (or (nil? @search-text) (str/blank? @search-text))
                                options
                                (filter (fn [{:keys [title title-cleaned]}]
                                          (or (re-find
@@ -179,5 +179,19 @@
               :type "text"
               :placeholder "Ime koje će se prikazivati pored vaših oglasa"}]
      (when (and (some? vrednost) (false? ispravno?))
+       [:p.text-danger {:className (css (:error styles/styles-map))}
+        tekst-greske])]))
+
+(defn text-area [{:keys [vrednost on-change tekst-greske ispravno? natpis placeholder]}]
+  (let [[css] (styles/use-styletron)]
+    [:div.form-group
+     (when-not (or (nil? natpis) (str/blank? natpis))
+       [:label {:className (css (:label styles/styles-map))} natpis])
+     [:textarea {:className (css (:input-field styles/styles-map))
+                 :value vrednost
+                 :on-change on-change
+                 :type "text"
+                 :placeholder placeholder}]
+     (when (false? ispravno?)
        [:p.text-danger {:className (css (:error styles/styles-map))}
         tekst-greske])]))

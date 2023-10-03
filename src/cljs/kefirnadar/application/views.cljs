@@ -421,12 +421,14 @@
 (defn slanje-imejla-za-resetovanje-lozinke
   []
   (if (not @(subscribe [::auth/authenticated?]))
-    (let [imejl @(subscribe [::subs/polje-forme-za-slanje-imejla-za-resetovanje-lozinke :imejl])]
+    (let [imejl @(subscribe [::subs/polje-forme-za-slanje-imejla-za-resetovanje-lozinke :imejl])
+          imejl-validan @(subscribe [::subs/provera-forme-za-slanje-imejla-za-resetovanje-lozinke :imejl])]
       [:div.col-md-6
        [inputs/imejl {:vrednost imejl
                       :on-change #(dispatch [::events/azuriraj-formu-za-slanje-imejla-za-resetovanje-lozinke
                                              :imejl (inputs/extract-input-value %)])
-                      :tekst-greske "Unesite ispravnu imejl adresu"}]
+                      :tekst-greske "Unesite ispravnu imejl adresu"
+                      :ispravno? imejl-validan}]
        [inputs/dugme {:oznaka "Pošalji imejl za resetovanje lozinke"
                       :on-click #(dispatch [::auth/posalji-imejl-za-resetovanje-lozinke imejl])}]])
     [:div.alert.alert-primary {:role "alert"} "Već ste prijavljeni. Ne možete resetovati lozinku dok se ne odjavite."]))
@@ -463,6 +465,29 @@
 (defn nakon-resetovanja-lozinke []
   [:h1 "Uspešno ste resetovali lozinku."])
 
+(defn kontakt-strana []
+  (let [imejl @(subscribe [::subs/polje-kontakt-forme :imejl])
+        imejl-ispravan? @(subscribe [::subs/provera-polja-kontakt-forme :imejl])
+        poruka @(subscribe [::subs/polje-kontakt-forme :poruka])
+        poruka-ispravna? @(subscribe [::subs/provera-polja-kontakt-forme :poruka])]
+    [:div.col-md-6
+     [:h1.mb-5 "Napišite nam poruku"]
+     [inputs/imejl {:vrednost imejl
+                    :on-change #(dispatch [::events/azuriraj-kontakt-formu :imejl (inputs/extract-input-value %)])
+                    :tekst-greske "Unesite ispravnu imejl adresu"
+                    :ispravno? imejl-ispravan?}]
+     [inputs/text-area {:vrednost poruka
+                        :on-change #(dispatch [::events/azuriraj-kontakt-formu :poruka (inputs/extract-input-value %)])
+                        :tekst-greske "Poruka ne sme biti prazna i mora sadržati barem 20 karaktera."
+                        :ispravno? poruka-ispravna?
+                        :natpis "Poruka: "
+                        :placeholder "Ovde napišite vašu poruku"}]
+     [inputs/dugme {:oznaka "Pošalji poruku"
+                    :on-click #(dispatch [::events/posalji-kontakt-poruku {:imejl imejl :poruka poruka}])}]]))
+
+(defn nakon-slanja-kontakt-poruke []
+  [:h1 "Uspešno ste poslali poruku."])
+
 (defn- panels [panel-name]
   (case panel-name
     :route/home [home]
@@ -479,12 +504,15 @@
     :route/nakon-slanja-imejla-za-resetovanje-lozinke [nakon-slanja-imejla-za-resetovanje-lozinke]
     :route/resetovanje-lozinke [resetovanje-lozinke]
     :route/nakon-resetovanja-lozinke [nakon-resetovanja-lozinke]
+    :route/kontakt [kontakt-strana]
+    :route/nakon-slanja-kontakt-poruke [nakon-slanja-kontakt-poruke]
     [:div]))
 
 (defn login-page []
   [:div
    [:h1.mb-5.text-center "Prijavljivanje"]
-   [:button.btn.btn-primary.col-md-12.mb-3
+   ;; fb prijava privremeno onesposobljena
+   #_[:button.btn.btn-primary.col-md-12.mb-3
     {:on-click #(auth/log-user-in (:facebook auth/auth-methods))}
     [:i.fa-brands.fa-facebook.fa-xl.mr-3] "Prijavi se pomoću Fejsbuka"]
    [:button.btn.btn-secondary.col-md-12.mb-3
@@ -506,7 +534,8 @@
       [:ul.navbar-nav
        ; more menu items can be added here
        [:li.nav-item.active
-        [:a.nav-link {:href "/"} "Početna"]]]
+        [:a.nav-link {:href "/"} "Početna"]
+        [:a.nav-link {:href "/kontakt"} "Kontakt"]]]
       (when authenticated?
         [:a.ml-auto.navbar-nav {:href "/odjava"} "Odjavi me"])]
      ;; CONTENT

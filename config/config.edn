@@ -6,4 +6,8 @@
                    :user #ref [:secrets :postgres :main :user]
                    :password #ref [:secrets :postgres :main :password]
                    :minimumIdle 5
-                   :maximumPoolSize 30}}}
+                   :maximumPoolSize 30}}
+ :imejl {:host #ref [:secrets :imejl :host]
+         :korisnik #ref [:secrets :imejl :korisnik]
+         :lozinka #ref [:secrets :imejl :lozinka]
+         :port #ref [:secrets :imejl :port]}}

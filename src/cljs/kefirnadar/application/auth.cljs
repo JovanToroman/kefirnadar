@@ -196,11 +196,16 @@
     {::fx/api {:uri (route-utils/url-for "/api/auth/posalji-imejl-za-resetovanje-lozinke")
                :method :post
                :params {:imejl imejl}
-               :on-success [::posalji-imejl-za-resetovanje-lozinke-uspeh]}}))
+               :on-success [::posalji-imejl-za-resetovanje-lozinke-uspeh]
+               :on-error [::posalji-imejl-za-resetovanje-lozinke-neuspeh]}}))
 
 (reg-event-fx ::posalji-imejl-za-resetovanje-lozinke-uspeh trim-v
   (fn [_ _]
     {:kefirnadar.application.events/load-route! {:data {:name :route/nakon-slanja-imejla-za-resetovanje-lozinke}}}))
+
+(reg-event-db ::posalji-imejl-za-resetovanje-lozinke-neuspeh trim-v
+  (fn [db _]
+    (assoc-in db [:ads :slanje-imejla-za-resetovanje-lozinke :form-data-validation :imejl] false)))
 
 (reg-event-fx ::resetuj-lozinku trim-v
   (fn [{:keys [db]} [kod-za-resetovanje-lozinke lozinka]]

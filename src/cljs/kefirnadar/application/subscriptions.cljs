@@ -35,6 +35,10 @@
   (fn [db [_ id]]
     (get-in db [:ads :slanje-imejla-za-resetovanje-lozinke :form-data id])))
 
+(reg-sub ::provera-forme-za-slanje-imejla-za-resetovanje-lozinke
+  (fn [db [_ id]]
+    (get-in db [:ads :slanje-imejla-za-resetovanje-lozinke :form-data-validation id])))
+
 (reg-sub ::polje-forme-za-resetovanje-lozinke
   (fn [db [_ id]]
     (get-in db [:ads :resetovanje-lozinke :form-data id])))
@@ -42,6 +46,14 @@
 (reg-sub ::provera-forme-za-resetovanje-lozinke
   (fn [db [_ id]]
     (get-in db [:ads :resetovanje-lozinke :form-data-validation id])))
+
+(reg-sub ::polje-kontakt-forme
+  (fn [db [_ id]]
+    (get-in db [:ads :kontakt :podaci-forme id])))
+
+(reg-sub ::provera-polja-kontakt-forme
+  (fn [db [_ id]]
+    (get-in db [:ads :kontakt :provera-podataka-forme id])))
 
 (reg-sub ::kod-greske
   (fn [db [_ stranica]]

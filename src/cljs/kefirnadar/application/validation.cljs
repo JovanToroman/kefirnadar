@@ -33,7 +33,8 @@
     :quantity (and (< input 101) (> input 0))
     :lozinka (reg-matcher password-regex input)
     :nova-lozinka (reg-matcher password-regex input)
-    :korisnicko-ime (and (string? input) (not (str/blank? input)) (> (count input) 4))))
+    :korisnicko-ime (and (string? input) (not (str/blank? input)) (> (count input) 4))
+    :poruka (and (string? input) (not (str/blank? input)) (> (count input) 19))))
 
 (defn either-or-form-field-valid?
   "Check whether at least one option was selected"

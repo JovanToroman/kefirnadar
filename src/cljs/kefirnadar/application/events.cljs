@@ -5,9 +5,9 @@
             [kefirnadar.application.validation :as validation]
             [kefirnadar.application.utils.route :as route-utils]
             [kefirnadar.application.specs :as specs]
-            [kefirnadar.application.auth :as auth]
             [kefirnadar.common.utils :refer-macros [-m]]
-            [reitit.frontend.easy :as rfe]))
+            [reitit.frontend.easy :as rfe]
+            [taoensso.timbre :as log]))
 
 (defn validate-and-create-ad
   [{db :db} [form-info id-korisnika]]
@@ -104,27 +104,45 @@
   (fn [db [_ id val]]
     (assoc-in db [:ads :resetovanje-lozinke :form-data id] val)))
 
-(defn fetch-ads
-  [_ [^::specs/filters filters ^::specs/pagination-info pagination-info]]
-  {::fx/api {:uri (route-utils/url-for "/api/list" :query (merge filters pagination-info) :path {})
-             :method :get
-             :on-success [::fetch-ads-success]
-             :on-error [::fetch-ads-fail]}})
+(reg-event-db ::azuriraj-kontakt-formu
+  (fn [db [_ id val]]
+    (assoc-in db [:ads :kontakt :podaci-forme id] val)))
 
-(reg-event-fx ::fetch-ads trim-v fetch-ads)
+(reg-event-fx ::posalji-kontakt-poruku trim-v
+  (fn [{:keys [db]} [kontakt-podaci]]
+    (let [rezultat-provere (validation/validate-form-info kontakt-podaci)]
+      (if (validation/forma-validna? rezultat-provere)
+      {:db (update-in db [:ads :kontakt :provera-podataka-forme] dissoc :poruka)
+       ::fx/api {:uri "/api/posalji-kontakt-poruku"
+                 :method :post
+                 :params kontakt-podaci
+                 :on-success [::posalji-kontakt-poruku-uspeh]
+                 :on-error [::posalji-kontakt-poruku-neuspeh]}}
+      {:db (assoc-in db [:ads :kontakt :provera-podataka-forme] rezultat-provere)}))))
 
-(defn fetch-ads-success
-  "Stores fetched ads in the app db."
-  [db [{:keys [ads ads-count]}]]
-  (assoc-in db [:ads :seeking :filtered-ads] (-m ads ads-count)))
+(reg-event-fx ::posalji-kontakt-poruku-uspeh
+  (fn [_ _]
+    {:kefirnadar.application.events/load-route! {:data {:name :route/nakon-slanja-kontakt-poruke}}}))
 
-(defn fetch-ads-fail
-  "Failed to fetch the ads, render error page"
-  [_ _]
-  #_{::load-route! {:data {:name :route/error}}})
+(reg-event-db ::posalji-kontakt-poruku-neuspeh
+  (fn [db _]
+    (assoc-in db [:ads :kontakt :provera-podataka-forme :poruka] false)))
 
-(reg-event-db ::fetch-ads-success trim-v fetch-ads-success)
-(reg-event-db ::fetch-ads-fail trim-v fetch-ads-fail)
+
+(reg-event-fx ::fetch-ads trim-v
+  (fn [_ [^::specs/filters filters ^::specs/pagination-info pagination-info]]
+    {::fx/api {:uri (route-utils/url-for "/api/list" :query (merge filters pagination-info) :path {})
+               :method :get
+               :on-success [::fetch-ads-success]
+               :on-error [::fetch-ads-fail]}}))
+
+(reg-event-db ::fetch-ads-success trim-v
+  (fn [db [{:keys [ads ads-count]}]]
+    (assoc-in db [:ads :seeking :filtered-ads] (-m ads ads-count))))
+
+(reg-event-db ::fetch-ads-fail trim-v
+  (fn [_ odgovor]
+    (log/error "Greška u uzimanju oglasa: " odgovor)))
 
 (reg-event-db ::store-ads-pagination-info trim-v
   (fn [db [action pagination-info]]

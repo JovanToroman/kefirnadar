@@ -1,6 +1,6 @@
 (ns kefirnadar.configuration.dev-preload
   (:require
-    [clojure.string :as str]
+    [cuerdas.core :as str]
     [taoensso.timbre :as timbre]))
 
 (comment "This namespace was copied over from another project and I am not certain that we need it. We should check this.")
@@ -54,7 +54,7 @@
   ([data] (prefix-output-fn nil data))
   ([_opts data]                                             ; For partials
    (let [{:keys [level ?ns-str ?file ?line]} data]
-     (str (str/upper-case (name level)) " " "[" (or ?ns-str ?file "?") ":" (or ?line "?") "] - "))))
+     (str (str/upper (name level)) " " "[" (or ?ns-str ?file "?") ":" (or ?line "?") "] - "))))
 
 (timbre/set-level! :debug)
 (timbre/merge-config! {:output-fn prefix-output-fn
