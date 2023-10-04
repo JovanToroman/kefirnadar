@@ -4,11 +4,13 @@
     [clojure.tools.cli :as cli]
     [kefirnadar.application.async :as async]
     [kefirnadar.application.web :as web]
+    [kefirnadar.configuration.config :as config]
     [kefirnadar.configuration.postgres :as postgres]
     [clojure.tools.namespace.repl :as repl]
     [mount.core :as mount]
     [org.httpkit.server :as kit]
     [ring.middleware.reload :as reload]
+    [nrepl.server :as nrepl]
     [taoensso.timbre :as log])
   (:gen-class)
   (:import (org.postgresql.util PSQLException)))
@@ -56,4 +58,6 @@
   (log/info "Starting local server")
   (start-server)
   (log/info "Local server started on port 8088")
+  (log/info "Starting NREPL server on port " @config/nrepl-port)
+  (nrepl/start-server :port @config/nrepl-port)
   (async/remove-old-ads-thread true))

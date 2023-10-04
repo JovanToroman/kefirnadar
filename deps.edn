@@ -27,7 +27,8 @@
         org.clojure/tools.namespace {:mvn/version "1.4.1"}
         reagent-utils/reagent-utils {:mvn/version "0.3.8"}
         crypto-password/crypto-password {:mvn/version "0.3.0"}
-        com.draines/postal {:mvn/version "2.0.5"}}
+        com.draines/postal {:mvn/version "2.0.5"}
+        nrepl/nrepl {:mvn/version "1.1.0-alpha1"}}
  :aliases {:dev {:extra-paths ["src/dev"]
                  :extra-deps {http-kit/http-kit {:mvn/version "2.5.3"}
                               ring/ring-devel {:mvn/version "1.9.5"}

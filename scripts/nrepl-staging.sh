@@ -1,0 +1,2 @@
+# ssh -4 -vNL 7888:localhost:7888 deploy@staging.omnicode.co.za # not stable; use only if you cannot setup autossh
+autossh -M 0 -o "ServerAliveInterval 5" -o "ServerAliveCountMax 3" -v -i ~/.ssh/id_rsa -CNL 7888:localhost:7888 deploy@staging.kefirnadar.rs

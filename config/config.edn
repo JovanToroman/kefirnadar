@@ -10,4 +10,5 @@
  :imejl {:host #ref [:secrets :imejl :host]
          :korisnik #ref [:secrets :imejl :korisnik]
          :lozinka #ref [:secrets :imejl :lozinka]
-         :port #ref [:secrets :imejl :port]}}
+         :port #ref [:secrets :imejl :port]}
+ :nrepl {:port 7888}}

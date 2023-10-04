@@ -9,9 +9,9 @@
 ;; region queries
 (defn get-expired-ads
   []
-  (postgres/execute-transaction! {:select [:ad_id]
-                                  :from [:ad]
-                                  :where [:< :ad.created_on [:raw ["NOW() - INTERVAL '30 days'"]]]}))
+  (postgres/execute-query! {:select [:ad_id]
+                            :from [:ad]
+                            :where [:< :ad.created_on [:raw ["NOW() - INTERVAL '30 days'"]]]}))
 
 (defn get-ads
   [{:keys [page-number page-size regions seeking-milk-type? seeking-water-type? seeking-kombucha? receive-by-post?

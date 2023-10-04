@@ -2,8 +2,7 @@
   (:require [kefirnadar.configuration.server :as server]))
 
 (defn start []
-  (server/init-db!)
-  (server/start-server))
+  (server/start-server-and-db))
 
 (defn stop []
   (server/stop-server))
