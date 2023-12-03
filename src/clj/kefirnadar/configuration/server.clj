@@ -60,4 +60,4 @@
   (log/info "Local server started on port 8088")
   (log/info "Starting NREPL server on port " @config/nrepl-port)
   (nrepl/start-server :port @config/nrepl-port)
-  (async/remove-old-ads-thread true))
+  #_(async/remove-old-ads-thread true))
