@@ -24,8 +24,15 @@ quantity INTEGER,
 sharing_milk_type BOOLEAN,
 sharing_water_type BOOLEAN,
 sharing_kombucha BOOLEAN,
+broj_telefona VARCHAR ( 15 ),
+imejl VARCHAR ( 40 ),
 PRIMARY KEY(ad_id),
 CONSTRAINT fk_korisnik
       FOREIGN KEY(id_korisnika)
 	  REFERENCES korisnik(id_korisnika)
 );
+
+UPDATE public.ad
+SET imejl = korisnik.email
+FROM public.korisnik
+WHERE public.korisnik.id_korisnika = ad.id_korisnika;

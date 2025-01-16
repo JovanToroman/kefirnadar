@@ -20,6 +20,7 @@
     - { src: "../target/kefirnadar.jar", dest: "{{ project_dir }}/build/target/kefirnadar.jar" }
     - { src: "../resources/public/js/main.js", dest: "{{ project_dir }}/public/js/main.js" }
     - { src: "../resources/public/index.html", dest: "{{ project_dir }}/public/index.html" }
+    - { src: "../resources/public/images", dest: "{{ project_dir }}/public" }
 
 - name: Copy kefirnadar service definition
   template: 

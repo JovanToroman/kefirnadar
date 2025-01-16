@@ -54,7 +54,19 @@ application/edn;
 }
 
 server {
-            listen 80;
+  listen      80;
+  server_name blog.kefirnadar.rs;
+  return      302 https://$server_name$request_uri;
+}
+
+server {
+  listen      80;
+  server_name www.blog.kefirnadar.rs;
+  return      302 https://blog.kefirnadar.rs$request_uri;
+}
+
+server {
+            listen 443;
             root /var/www/html/wordpress/public_html;
             index index.php index.html;
             server_name blog.kefirnadar.rs;

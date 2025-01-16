@@ -162,11 +162,12 @@
        [:p.text-danger {:className (css (:error styles/styles-map))}
         tekst-greske])]))
 
-(defn dugme [{:keys [oznaka on-click]}]
+(defn dugme [{:keys [oznaka on-click tip] :or {tip "button"}}]
   (let [[css] (styles/use-styletron)]
     [:button.btn.btn-outline-primary
      {:className (css (:btn styles/styles-map))
-      :on-click on-click}
+      :on-click on-click
+      :type tip}
      oznaka]))
 
 (defn korisnicko-ime [{:keys [vrednost on-change tekst-greske ispravno?]}]

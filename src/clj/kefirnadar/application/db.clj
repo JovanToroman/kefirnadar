@@ -13,37 +13,37 @@
                             :from [:ad]
                             :where [:< :ad.created_on [:raw ["NOW() - INTERVAL '30 days'"]]]}))
 
-(defn get-ads
+(defn dohvati-oglase
   [{:keys [page-number page-size regions seeking-milk-type? seeking-water-type? seeking-kombucha? receive-by-post?
            receive-in-person?]}]
-  (let [offset (* (dec page-number) page-size)
-        where-clause (cond-> []
-                       (seq regions) (conj [:in :ad.region regions])
-                       (some true? [seeking-milk-type? seeking-water-type? seeking-kombucha?])
-                       (conj (cond-> [:or]
-                               seeking-milk-type? (conj [:= :ad.sharing_milk_type true])
-                               seeking-water-type? (conj [:= :ad.sharing_water_type true])
-                               seeking-kombucha? (conj [:= :ad.sharing_kombucha true])))
-                       (some true? [receive-by-post? receive-in-person?])
-                       (conj (cond-> [:or]
-                               receive-by-post? (conj [:= :ad.send_by_post true])
-                               receive-in-person? (conj [:= :ad.share_in_person true]))))]
-    (log/debug "Where clause: " (with-out-str (pprint/pprint where-clause)))
+  (let [odmik (* (dec page-number) page-size)
+        where-klauzula (cond-> []
+                         (seq regions) (conj [:in :ad.region regions])
+                         (some true? [seeking-milk-type? seeking-water-type? seeking-kombucha?])
+                         (conj (cond-> [:or]
+                                 seeking-milk-type? (conj [:= :ad.sharing_milk_type true])
+                                 seeking-water-type? (conj [:= :ad.sharing_water_type true])
+                                 seeking-kombucha? (conj [:= :ad.sharing_kombucha true])))
+                         (some true? [receive-by-post? receive-in-person?])
+                         (conj (cond-> [:or]
+                                 receive-by-post? (conj [:= :ad.send_by_post true])
+                                 receive-in-person? (conj [:= :ad.share_in_person true]))))]
+    (log/debug "Where klauzula: " (with-out-str (pprint/pprint where-klauzula)))
     (log/spy :debug
       {:ads (postgres/execute-query!
               (cond-> {:select [:created_on :korisnicko_ime :region :send_by_post :share_in_person
-                                :quantity :phone_number :email :ad_id :sharing_milk_type :sharing_water_type
+                                :quantity :broj_telefona :imejl :ad_id :sharing_milk_type :sharing_water_type
                                 :sharing_kombucha :korisnik.id_korisnika]
                        :from [:ad]
-                       :join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
+                       :left-join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
                        :limit page-size
-                       :offset offset
+                       :offset odmik
                        :order-by [[:ad.created_on :desc]]}
-                (seq where-clause) (assoc :where (into [:and] where-clause))))
+                (seq where-klauzula) (assoc :where (into [:and] where-klauzula))))
        :ads-count (:count (postgres/execute-one!
                             (cond-> {:select [:%count.*]
                                      :from [:ad]}
-                              (seq where-clause) (assoc :where (into [:and] where-clause)))))})))
+                              (seq where-klauzula) (assoc :where (into [:and] where-klauzula)))))})))
 
 (defn dohvati-korisnika
   [id-korisnika]
@@ -91,12 +91,24 @@
 ;; endregion
 
 ;; region transactions
-(defn add-ad
-  [ad-info]
-  (log/debug "add-ad: " ad-info)
+(defn dodaj-oglas
+  [oglas]
+  (log/debug "dodaj-oglas: " oglas)
   (postgres/execute-transaction! {:insert-into [:ad]
-                                  :columns (vec (keys ad-info))
-                                  :values [(vec (vals ad-info))]}))
+                                  :columns (vec (keys oglas))
+                                  :values [(vec (vals oglas))]}))
+
+(defn izbrisi-oglas
+  [id-oglasa]
+  (log/debug "izbrisi-oglas: " id-oglasa)
+  (postgres/execute-transaction! {:delete-from [:ad]
+                                  :where [:= :ad.ad_id id-oglasa]}))
+
+(defn izbrisi-oglas-korisnika
+  [id-korisnika]
+  (log/debug "izbrisi-oglas-korisnika: " id-korisnika)
+  (postgres/execute-transaction! {:delete-from [:ad]
+                                  :where [:= :ad.id_korisnika id-korisnika]}))
 
 (defn remove-old-ads
   [ad-ids]
@@ -123,21 +135,21 @@
   (log/debug "Dodajem korisnika: " imejl)
   (postgres/execute-transaction!
     {:insert-into [:korisnik]
-     :columns     [:email :hes_lozinke :korisnicko_ime :aktivacioni_kod :aktiviran]
-     :values      [[imejl (password/encrypt lozinka) korisnicko-ime aktivacioni-kod false]]})
+     :columns [:email :hes_lozinke :korisnicko_ime :aktivacioni_kod :aktiviran]
+     :values [[imejl (password/encrypt lozinka) korisnicko-ime aktivacioni-kod false]]})
   (dohvati-korisnika-po-imejlu imejl))
 
 (defn aktiviraj-korisnika
   [aktivacioni-kod]
   (postgres/execute-transaction! {:update [:korisnik]
-                                  :set    {:aktivacioni_kod "" :aktiviran true}
-                                  :where  [:= :aktivacioni_kod aktivacioni-kod]}))
+                                  :set {:aktivacioni_kod "" :aktiviran true}
+                                  :where [:= :aktivacioni_kod aktivacioni-kod]}))
 
 (defn resetuj-lozinku
   [kod-za-resetovanje-lozinke nova-lozinka]
   (postgres/execute-transaction! {:update [:korisnik]
-                                  :set    {:kod_za_resetovanje_lozinke "" :hes_lozinke (password/encrypt nova-lozinka)}
-                                  :where  [:= :kod_za_resetovanje_lozinke kod-za-resetovanje-lozinke]}))
+                                  :set {:kod_za_resetovanje_lozinke "" :hes_lozinke (password/encrypt nova-lozinka)}
+                                  :where [:= :kod_za_resetovanje_lozinke kod-za-resetovanje-lozinke]}))
 ;; endregion
 
 
@@ -149,16 +161,6 @@
 
   ;; get user
   (dohvati-facebook-korisnika "testuserid")
-
-  (mapv (fn [no]
-          (add-ad {:send_by_post false,
-                   :region "Ada",
-                   :created_on [:now],
-                   :id_korisnika 1
-                   :quantity 22,
-                   :share_in_person true
-                   :sharing_water_type true}))
-    (range 100000 100010))
 
   ;; get info for a specific ad
   (postgres/execute-query!

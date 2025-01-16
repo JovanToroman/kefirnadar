@@ -5,7 +5,7 @@
     [kefirnadar.application.subscriptions :as subs]
     [kefirnadar.application.styles :as styles]
     [kefirnadar.application.inputs :as inputs]
-    [re-frame.core :refer [dispatch subscribe]]
+    [re-frame.core :refer [dispatch dispatch-sync subscribe]]
     [kefirnadar.application.regions :as regions]
     [kefirnadar.application.utils.transformations :as transform]
     [kefirnadar.common.utils :refer-macros [-m]]
@@ -104,7 +104,7 @@
 
 
 
-(defn share-grains-form []
+(defn dodaj-oglas-forma []
   (let [form-info @(subscribe [::subs/sharing-form-data])
         [css] (styles/use-styletron)
         id-korisnika @(subscribe [::auth/user-id])
@@ -143,7 +143,7 @@
                    sharing_water_type (conj "vodeni kefir")
                    sharing_kombucha (conj "kombuhu"))))
 
-(defn phone-number [show-phone-number? phone-number ad-id]
+(defn broj-telefona-prikaz [show-phone-number? phone-number ad-id]
   (if show-phone-number?
     [:strong.ml-1.mr-1 phone-number]
     [:button.btn.btn-sm.btn-info.ml-1.mr-1.mb-1
@@ -151,7 +151,7 @@
       #(dispatch [::events/set-ads-meta ad-id :show-phone-number? true])}
      "Prikaži broj"]))
 
-(defn prikaz-imejla [show-email? email ad-id]
+(defn imejl-prikaz [show-email? email ad-id]
   (if show-email?
     [:strong.ml-1.mr-1 email]
     [:button.btn.btn-sm.btn-info.ml-1.mr-1
@@ -160,28 +160,31 @@
      "Prikaži imejl adresu"]))
 
 (defn ad-row
-  [css {:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id]
-        :korisnik/keys [korisnicko_ime phone_number email]}]
-  (let [show-phone-number? @(subscribe [::subs/ads-meta ad_id :show-phone-number?])
-        show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
-    [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)
-                                         :className (css {:line-height 2})}
-     [:h3.row korisnicko_ime]
-     [:p.row "Ovaj delilac deli " [:strong.ml-1.mr-1
-                                   (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
-                                   (cond
-                                     (and send_by_post share_in_person) " ličnim preuzimanjem i poštom,"
-                                     send_by_post " samo poštom,"
-                                     share_in_person " samo ličnim preuzimanjem,")]
-      "nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
-      (cond
-        (and (not (str/empty-or-nil? email)) (not (str/empty-or-nil? phone_number)))
-        [:<> "telefonom na " [phone-number show-phone-number? phone_number ad_id]
-         "ili elektronskom poštom na " [prikaz-imejla show-email? email ad_id]]
+  [css]
+  (fn [{:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id
+                  broj_telefona imejl]
+        :korisnik/keys [korisnicko_ime]}]
+    (let [show-phone-number? @(subscribe [::subs/ads-meta ad_id :show-phone-number?])
+          show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
+      [:div.col-md-10.card.mb-4.pl-4.pt-4 {:key (random-uuid)
+                                           :className (css {:line-height 2})}
+       (when (some? korisnicko_ime)
+         [:h3.row korisnicko_ime])
+       [:p.row "Ovaj delilac deli " [:strong.ml-1.mr-1
+                                     (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
+                                     (cond
+                                       (and send_by_post share_in_person) " ličnim preuzimanjem i poštom,"
+                                       send_by_post " samo poštom,"
+                                       share_in_person " samo ličnim preuzimanjem,")]
+        "nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
+        (cond
+          (and (not (str/blank? imejl)) (not (str/blank? broj_telefona)))
+          [:<> "telefonom na " [broj-telefona-prikaz show-phone-number? broj_telefona ad_id]
+           "ili elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]]
 
-        (not (str/empty-or-nil? phone_number)) [:<> "telefonom na "
-                                         [phone-number show-phone-number? phone_number ad_id]]
-        (not (str/empty-or-nil? email)) [:<> "elektronskom poštom na " [prikaz-imejla show-email? email ad_id]])]]))
+          (not (str/blank? broj_telefona)) [:<> "telefonom na "
+                                           [broj-telefona-prikaz show-phone-number? broj_telefona ad_id]]
+          (not (str/blank? imejl)) [:<> "elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]])]])))
 
 (defn region-filter []
   (let [[css] (styles/use-styletron)
@@ -237,8 +240,8 @@
 (defn ads-list
   "List of all ads."
   []
-  (let [ads @(subscribe [::subs/filtered-ads])
-        ads-count @(subscribe [::subs/ads-count])
+  (let [oglasi @(subscribe [::subs/filtered-ads])
+        broj-oglasa @(subscribe [::subs/ads-count])
         {:keys [page-number page-size]} @(subscribe [::subs/ads-pagination-info])
         show-filters? @(subscribe [::subs/show-filters?])
         filters @(subscribe [::subs/filters])
@@ -248,22 +251,22 @@
       "Filteri"]
      (when show-filters?
        [filters-view])
-     [:h3 "Broj oglasa: " ads-count]
+     [:h3 "Broj oglasa: " broj-oglasa]
      (cond
        ;; iz nekog razloga ne mozemo koristiti css direktno unutar komponenata
-       (seq ads) [:div (into [:<>] (map (partial ad-row css)) ads)
-                  (pagination/pagination
-                    {:change-page-redirect-url-fn (fn [page-number page-size]
-                                                    (rfe/href :route/seeking {} (merge
-                                                                                  {:page-number page-number
-                                                                                   :page-size page-size}
-                                                                                  filters)))
-                     :page-number page-number
-                     :page-size page-size
-                     :total-count ads-count
-                     :label "Paginacija oglasa"})]
-       (some? ads) [:p "Trenutno niko ne deli zrnca sa izabranim filterima. Probajte da promenite filtere."]
-       :else "Greska")]))
+       (seq oglasi) [:div (doall (map (ad-row css) oglasi))
+                     (pagination/pagination
+                       {:change-page-redirect-url-fn (fn [page-number page-size]
+                                                       (rfe/href :route/seeking {} (merge
+                                                                                     {:page-number page-number
+                                                                                      :page-size page-size}
+                                                                                     filters)))
+                        :page-number page-number
+                        :page-size page-size
+                        :total-count broj-oglasa
+                        :label "Paginacija oglasa"})]
+       (some? oglasi) [:p "Trenutno niko ne deli zrnca sa izabranim filterima. Probajte da promenite filtere."]
+       :else "Greška")]))
 
 
 (defn home []
@@ -376,18 +379,17 @@
           lozinka @(subscribe [::subs/polje-forme-prijave :lozinka])
           kod-greske @(subscribe [::subs/kod-greske :prijava])
           aktivacioni-kod-poslat? @(subscribe [::subs/aktivacioni-kod-poslat?])]
-      [:div.col-md-6.align-items-center
+      [:form.col-md-6.align-items-center {:on-submit #(dispatch-sync [::auth/prijava {:imejl imejl :lozinka lozinka} %])}
        [inputs/imejl {:vrednost imejl
                       :on-change #(dispatch [::events/azuriraj-formu-prijave :imejl (inputs/extract-input-value %)])
                       :tekst-greske "Unesite ispravnu imejl adresu"
                       :ispravno? imejl-validan?}]
        [inputs/lozinka {:vrednost lozinka
                         :on-change #(dispatch [::events/azuriraj-formu-prijave :lozinka (inputs/extract-input-value %)])}]
-       [inputs/dugme {:oznaka "Prijavi se"
-                      :on-click #(dispatch [::auth/prijava {:imejl imejl
-                                                            :lozinka lozinka}])}]
+       [inputs/dugme {:tip "submit"
+                      :oznaka "Prijavi se"}]
        [:a.link-primary.row {:href (rfe/href :route/slanje-imejla-za-resetovanje-lozinke {} (when (not (str/blank? imejl))
-                                                                                          {:imejl imejl}))}
+                                                                                              {:imejl imejl}))}
         "Zaboravili ste lozinku?"]
        [:a.link-primary.row {:href (rfe/href :route/registracija)}
         "Nemate nalog? Registrujte se!"]
@@ -491,7 +493,7 @@
 (defn- panels [panel-name]
   (case panel-name
     :route/home [home]
-    :route/sharing [share-grains-form]
+    :route/sharing [dodaj-oglas-forma]
     :route/seeking [ads-list]
     :route/thank-you [thank-you]
     :route/error [error]
@@ -526,23 +528,20 @@
   (let [{{panel-name :name public? :public?} :data} @(subscribe [::subs/active-route])
         [css] (styles/use-styletron)
         authenticated? @(subscribe [::auth/authenticated?])
-        authentication-required? (and (not authenticated?) (not public?))]
+        ;; temporarily don't require authentication
+        authentication-required? false                      ;;(and (not authenticated?) (not public?)) onesposobio sam prijavu radi veće upotrebe aplikacije
+        ]
     [:div.container
-     ;; NAVBAR
-     [:nav.navbar.navbar-expand-lg.navbar-light.bg-light
+     [:nav.navbar.navbar-expand-lg.navbar-light
       [:a.navbar-brand {:href "/"} "Kefir na Dar"]
-      [:ul.navbar-nav
-       ; more menu items can be added here
-       [:li.nav-item.active
-        [:a.nav-link {:href "/"} "Početna"]
-        [:a.nav-link {:href "/kontakt"} "Kontakt"]]]
-      (when authenticated?
-        [:a.ml-auto.navbar-nav {:href "/odjava"} "Odjavi me"])]
-     ;; CONTENT
+      [:nav.ml-auto
+       [:a.mr-2 {:href "/kontakt"} "Kontakt"]
+       (if authenticated?
+         [:a {:href "/odjava"} "Odjavi me"]
+         [:a {:href "/prijava"} "Prijavi se"])]]
      [:div.d-flex.flex-column.justify-content-center.align-items-center
-      {:className (css (:main-panel styles/styles-map))}
+      {:className (css {:min-height "80vh"})}
       (if authentication-required?
         [login-page]
         [panels panel-name authenticated?])]
-     ;; FOOTER
-     [:p.copyright-text.mt-5.d-flex.justify-content-center "Copyright © 2022-2023 All Rights Reserved by Do Brave Plus Software"]]))
+     [:p.copyright-text.mt-5.d-flex.justify-content-center "Copyright © 2022-2025 All Rights Reserved by Do Brave Plus Software"]]))

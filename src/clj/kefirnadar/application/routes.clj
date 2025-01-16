@@ -1,6 +1,7 @@
 (ns kefirnadar.application.routes
   (:require [kefirnadar.application.handlers :as h]
             [spec-tools.data-spec :as ds]
+            [clojure.spec.alpha :as s]
             [kefirnadar.application.specs :as specs]
             [kefirnadar.common.specs :as specs-common]
             [kefirnadar.common.utils]))
@@ -31,8 +32,8 @@
     ["/resetuj-lozinku" {:post {:handler h/resetuj-lozinku
                                 :parameters {:body {:kod-za-resetovanje-lozinke string?
                                                     :nova-lozinka string?}}}}]]
-   ["/list"
-    {:get {:handler h/get-ads
+   ["/oglasi"
+    {:get {:handler h/dohvati-oglase
            :parameters {:query {(ds/opt :page-number) pos-int?
                                 (ds/opt :page-size) ::specs/page-size
                                 (ds/opt :regions) ::specs-common/regions
@@ -41,8 +42,9 @@
                                 (ds/opt :seeking-kombucha?) boolean?
                                 (ds/opt :receive-by-post?) boolean?
                                 (ds/opt :receive-in-person?) boolean?}}}}]
-   ["/create" {:post {:handler h/create-ad
-                      :parameters {:body {:korisnik/id int?
+   ["/oglas"
+    ["/dodaj" {:post {:handler h/postavi-oglas
+                      :parameters {:body {:korisnik/id (s/nilable int?)
                                           :ad/region string?
                                           :ad/post? boolean?
                                           :ad/pick-up? boolean?
@@ -51,8 +53,7 @@
                                           (ds/opt :ad/email) string?
                                           :ad/sharing-milk-type? boolean?
                                           :ad/sharing-water-type? boolean?
-                                          :ad/sharing-kombucha? boolean?
-                                          #_#_:user-id string?}}}}]
+                                          :ad/sharing-kombucha? boolean?}}}}]]
    ["/posalji-kontakt-poruku" {:post {:handler h/posalji-kontakt-poruku
                                       :parameters {:body {(ds/opt :imejl) string?
                                                           (ds/opt :poruka) string?}}}}]])

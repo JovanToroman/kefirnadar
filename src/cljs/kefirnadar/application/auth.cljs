@@ -165,7 +165,8 @@
     (assoc-in db [:ads :aktiviraj-korisnika :greska] greska)))
 
 (reg-event-fx ::prijava trim-v
-  (fn [{:keys [db]} [^::specs/podaci-korisnika podaci-korisnika]]
+  (fn [{:keys [db]} [^::specs/podaci-korisnika podaci-korisnika js-event]]
+    (j/call js-event :preventDefault)
     (let [validation-info (validation/validate-form-info podaci-korisnika)]
       (if (validation/forma-validna? validation-info)
         {::fx/api {:uri (route-utils/url-for "/api/auth/prijava")

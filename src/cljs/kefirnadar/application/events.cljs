@@ -15,7 +15,7 @@
     (if (validation/sharing-form-valid? validation-info :region :quantity)
       (let [{:keys [region post? pick-up? quantity phone-number email sharing-milk-type?
                     sharing-water-type? sharing-kombucha?]} form-info
-            body {:uri "/api/create"
+            body {:uri "/api/oglas/dodaj"
                   :method :post
                   :params {:ad/region region
                            :ad/email email
@@ -131,7 +131,7 @@
 
 (reg-event-fx ::fetch-ads trim-v
   (fn [_ [^::specs/filters filters ^::specs/pagination-info pagination-info]]
-    {::fx/api {:uri (route-utils/url-for "/api/list" :query (merge filters pagination-info) :path {})
+    {::fx/api {:uri (route-utils/url-for "/api/oglasi" :query (merge filters pagination-info) :path {})
                :method :get
                :on-success [::fetch-ads-success]
                :on-error [::fetch-ads-fail]}}))

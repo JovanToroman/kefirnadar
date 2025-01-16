@@ -1,5 +1,6 @@
 (ns kefirnadar.configuration.core
-  (:require [kefirnadar.configuration.config :as config]
+  (:require [applied-science.js-interop :as j]
+            [kefirnadar.configuration.config :as config]
             [kefirnadar.configuration.events :as events]
             [kefirnadar.application.styles :as styles]
             [kefirnadar.application.views :as views]
@@ -9,9 +10,9 @@
 
 (defn mount-root []
   (re-frame/clear-subscription-cache!)
-  (reagent-dom/render
-    (styles/provider {:main-view views/main-panel})
-    (.getElementById js/document "app"))
+  (let [app (j/call js/document :getElementById "app")]
+    (reagent-dom/render (styles/provider {:main-view views/main-panel}) app)
+    (j/call js/Object :assign (j/get app :style) (clj->js (:app styles/styles-map))))
   (timbre/info "App version:" config/version))
 
 (defn ^:after-load re-render

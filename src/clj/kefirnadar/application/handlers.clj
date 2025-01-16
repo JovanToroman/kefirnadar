@@ -7,36 +7,36 @@
             [cuerdas.core :as str]
             [kefirnadar.application.imejl :as imejl]))
 
-(defn get-ads
-  "This handler returns active ads."
+(defn dohvati-oglase
   [{params :params}]
   (log/debug "'get-ads' params: " params)
   (let [params (coerce-common/coerce-regions params)]
-    (r/ok (db/get-ads params))))
+    (r/ok (db/dohvati-oglase params))))
 
 (defn prilagodi-korisnika-za-frontend [korisnik]
   (update-keys korisnik (comp keyword str/kebab)))
 
-(defn create-ad
-  "Creates ad."
+(defn postavi-oglas
   [{:keys [parameters]}]
   (let [id-korisnika (get-in parameters [:body :korisnik/id])
-        entity-body {:id_korisnika id-korisnika
-                     :region (get-in parameters [:body :ad/region])
-                     :send_by_post (get-in parameters [:body :ad/post?] false)
-                     :share_in_person (get-in parameters [:body :ad/pick-up?] false)
-                     :quantity (get-in parameters [:body :ad/quantity])
-                     :created_on [:now]                     ;; Postgresql internal function
-                     :sharing_milk_type (get-in parameters [:body :ad/sharing-milk-type?])
-                     :sharing_water_type (get-in parameters [:body :ad/sharing-water-type?])
-                     :sharing_kombucha (get-in parameters [:body :ad/sharing-kombucha?])}
-        phone-number (get-in parameters [:body :ad/phone-number])
-        email (get-in parameters [:body :ad/email])
-        {:keys [next.jdbc/update-count]} (db/add-ad entity-body)]
-    (when (not (str/blank? email))
-      (db/azuriraj-korisnika [:id_korisnika id-korisnika] :email email))
-    (when (not (str/blank? phone-number))
-      (db/azuriraj-korisnika [:id_korisnika id-korisnika] :phone_number phone-number))
+        broj-telefona (get-in parameters [:body :ad/phone-number])
+        imejl (get-in parameters [:body :ad/email])
+        entity-body (cond-> {:id_korisnika id-korisnika
+                             :region (get-in parameters [:body :ad/region])
+                             :send_by_post (get-in parameters [:body :ad/post?] false)
+                             :share_in_person (get-in parameters [:body :ad/pick-up?] false)
+                             :quantity (get-in parameters [:body :ad/quantity])
+                             :created_on [:now]             ;; Postgresql internal function
+                             :sharing_milk_type (get-in parameters [:body :ad/sharing-milk-type?])
+                             :sharing_water_type (get-in parameters [:body :ad/sharing-water-type?])
+                             :sharing_kombucha (get-in parameters [:body :ad/sharing-kombucha?])}
+                      (some? broj-telefona) (assoc :broj_telefona broj-telefona)
+                      (some? imejl) (assoc :imejl imejl))
+        {:keys [next.jdbc/update-count]} (db/dodaj-oglas entity-body)]
+    ;;(when (not (str/blank? email))
+    ;;  (db/azuriraj-korisnika [:id_korisnika id-korisnika] :email email))
+    ;;(when (not (str/blank? phone-number))
+    ;;  (db/azuriraj-korisnika [:id_korisnika id-korisnika] :phone_number phone-number))
     (if (= update-count 1)
       (r/ok {:oglas entity-body
              :korisnik (prilagodi-korisnika-za-frontend (db/dohvati-korisnika id-korisnika))})
@@ -50,7 +50,7 @@
 
 (defn dodaj-korisnika
   [{{{:keys [imejl korisnicko-ime] :as params} :body} :parameters {origin "origin"} :headers}]
-  (let [korisnik-postoji?       (some? (db/dohvati-korisnika-po-imejlu imejl))
+  (let [korisnik-postoji? (some? (db/dohvati-korisnika-po-imejlu imejl))
         korisnicko-ime-zauzeto? (some? (db/dohvati-korisnika-po-korisnickom-imenu korisnicko-ime))]
     (cond
       korisnik-postoji? (r/bad-request {:greska :imejl-vec-iskoriscen})
