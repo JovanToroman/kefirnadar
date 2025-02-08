@@ -9,7 +9,6 @@
     [kefirnadar.application.regions :as regions]
     [kefirnadar.application.utils.transformations :as transform]
     [kefirnadar.common.utils :refer-macros [-m]]
-    [kefirnadar.application.specs :as specs]
     [kefirnadar.application.auth :as auth]
     [kefirnadar.application.pagination :as pagination]
     [kefirnadar.application.ui-components :as components]
@@ -44,26 +43,26 @@
                    :tekst-greske "Molimo vas da unesete ispravan način kontakta"
                    :ispravno? valid?})))
 
-(defn post-toggle [id]
-  (let [value (subscribe [::subs/form-field id])
+(defn post-toggle []
+  (let [value (subscribe [::subs/form-field :post?])
         [css] (styles/use-styletron)]
     [:div.form-group {:className (css (:input-wrapper styles/styles-map))}
      [:label {:className (css (:label styles/styles-map))} "Razmena poštom?"]
      [:input {:className (css (:input-field styles/styles-map))
-              :on-change #(dispatch [::events/update-sharing-form id (inputs/extract-checkbox-state %)])
+              :on-change #(dispatch [::events/update-sharing-form :post? (inputs/extract-checkbox-state %)])
               :type "checkbox"
               :checked @value}]]))
 
 
-(defn pick-up-toggle [id]
-  (let [value (subscribe [::subs/form-field id])
+(defn pick-up-toggle []
+  (let [value (subscribe [::subs/form-field :pick-up?])
         [css] (styles/use-styletron)
-        valid? @(subscribe [::subs/form-validation id])]
+        valid? @(subscribe [::subs/form-validation :pick-up?])]
     [:<>
      [:div.form-group {:className (css (:input-wrapper styles/styles-map))}
       [:label {:className (css (:label styles/styles-map))} "Razmena uživo?"]
       [:input {:className (css (:input-field styles/styles-map))
-               :on-change #(dispatch [::events/update-sharing-form id (inputs/extract-checkbox-state %)])
+               :on-change #(dispatch [::events/update-sharing-form :pick-up? (inputs/extract-checkbox-state %)])
                :type "checkbox"
                :checked @value}]]
      (when (and (some? value) (false? valid?))
@@ -123,8 +122,8 @@
         [email-input :email]]
        [:div.mt-5
         [:p {:className (css (:p styles/styles-map))} "Kako ćete deliti zrnca? (jedan način deljenja je obavezan)"]
-        [post-toggle :post?]
-        [pick-up-toggle :pick-up?]]
+        [post-toggle]
+        [pick-up-toggle]]
        [:div.mt-5
         [:p {:className (css (:p styles/styles-map))} "Koju vrstu zrnaca delite? (jedna vrsta zrnaca je obavezna)"]
         [form-grains-kinds-toggles]]
@@ -159,7 +158,7 @@
       #(dispatch [::events/set-ads-meta ad-id :show-email? true])}
      "Prikaži imejl adresu"]))
 
-(defn ad-row
+(defn oglas
   [css]
   (fn [{:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id
                   broj_telefona imejl]
@@ -185,6 +184,62 @@
           (not (str/blank? broj_telefona)) [:<> "telefonom na "
                                            [broj-telefona-prikaz show-phone-number? broj_telefona ad_id]]
           (not (str/blank? imejl)) [:<> "elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]])]])))
+
+(defn akciona-dugmad-moj-oglas [css id-oglasa]
+  [:div.row
+   ;; TODO: maybe implement editing
+   #_[:button.btn.btn-primary.mr-2 {:className (css {:width "140pt"})
+                                  :on-click #(dispatch [::events/izmeni-oglas id-oglasa])}
+    "Izmeni oglas"]
+
+   [:button.btn.btn-danger {:className (css {:width "140pt"})
+                                  :on-click #(dispatch [::events/izbrisi-oglas id-oglasa])}
+    "Izbriši oglas"]])
+
+(defn moj-oglas [css]
+  (fn [{:ad/keys [ad_id send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha
+                  broj_telefona imejl created_on quantity]}]
+    [:div.col-md-8.card.mb-4.p-4 {:key (random-uuid)
+                                  :className (css {:line-height 2})}
+
+     [:div.row
+      [:label {:className (css (:label styles/styles-map)) :for "datum-objave"} "Datum objave"]
+      [:p {:id "datum-objave"} (transform/format-date created_on)]]
+
+     (when (some? imejl)
+       [:div.row
+        [:label {:className (css (:label styles/styles-map)) :for "imejl-adresa"} "Imejl adresa"]
+        [:p {:id "imejl-adresa"} imejl]])
+
+     (when (some? broj_telefona)
+       [:div.row
+        [:label {:className (css (:label styles/styles-map)) :for "broj-telefona"} "Broj telefona"]
+        [:p {:id "broj-telefona"} broj_telefona]])
+
+     [:div.row
+      [:label {:className (css (:label styles/styles-map)) :for "način-slanja"} "Način slanja"]
+      [:p {:id "način-slanja"} (str/join ", "
+                                 (cond-> []
+                                   (true? send_by_post) (conj "Slanje poštom")
+                                   (true? share_in_person) (conj "Lično preuzimanje")))]]
+
+     [:div.row
+      [:label {:className (css (:label styles/styles-map)) :for "kultura-koju-delim"} "Kultura koju delim"]
+      [:p {:id "kultura-koju-delim"} (str/join ", "
+                                       (cond-> []
+                                         (true? sharing_milk_type) (conj "Zrnca mlečnog kefira")
+                                         (true? sharing_water_type) (conj "Zrnca vodenog kefira")
+                                         (true? sharing_kombucha) (conj "SCOBY za kombuhu")))]]
+
+     [:div.row
+      [:label {:className (css (:label styles/styles-map)) :for "količina"} "Količina"]
+      [:p {:id "količina"} quantity]]
+
+     [:div.row
+      [:label {:className (css (:label styles/styles-map)) :for "opština"} "Opština"]
+      [:p {:id "opština"} region]]
+
+     [akciona-dugmad-moj-oglas css ad_id]]))
 
 (defn region-filter []
   (let [[css] (styles/use-styletron)
@@ -254,7 +309,7 @@
      [:h3 "Broj oglasa: " broj-oglasa]
      (cond
        ;; iz nekog razloga ne mozemo koristiti css direktno unutar komponenata
-       (seq oglasi) [:div (doall (map (ad-row css) oglasi))
+       (seq oglasi) [:div (doall (map (oglas css) oglasi))
                      (pagination/pagination
                        {:change-page-redirect-url-fn (fn [page-number page-size]
                                                        (rfe/href :route/seeking {} (merge
@@ -273,33 +328,11 @@
   [:<>
    [:h1 "Da li želite da podelite ili dobijete kefirna zrnca?"]
    [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
-    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/sharing}}])}
+    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])}
     "Delim"]
    [:button.btn.btn-outline-primary.col-md-5
-    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/seeking}}])}
+    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])}
     "Tražim"]])
-
-
-#_(defn grains-kind [^::specs/user-action user-action]
-  (let [route-to-load (case user-action
-                        :sharing :route/share-grains-form
-                        :seeking :route/search-for-grains)]
-    [:<>
-     [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
-      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                            :path-params {:grains-kind "milk-type"}}])
-       :value "milk-type"}
-      "Mlečni"]
-     [:button.btn.btn-outline-primary.col-md-5.mb-5
-      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                            :path-params {:grains-kind "water-type"}}])
-       :value "water-type"}
-      "Vodeni"]
-     [:button.btn.btn-outline-primary.col-md-5
-      {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name route-to-load}
-                                                            :path-params {:grains-kind "kombucha"}}])
-       :value "kombucha"}
-      "Kombuha"]]))
 
 (defn thank-you []
   [:<>
@@ -490,11 +523,23 @@
 (defn nakon-slanja-kontakt-poruke []
   [:h1 "Uspešno ste poslali poruku."])
 
+(defn moji-oglasi []
+  (let [[css] (styles/use-styletron)
+        moji-oglasi @(subscribe [::subs/moji-oglasi])]
+    (if (seq moji-oglasi)
+      [:div.col-md-12.d-flex.flex-column.min-vh-100.align-items-center
+       (doall (map (moj-oglas css) moji-oglasi))]
+      [:div
+       [:h1 "Nemate nijedan postavljen oglas. Zašto ne postavite jedan sada?"]
+       [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
+        {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])}
+        "Podeli zrnca"]])))
+
 (defn- panels [panel-name]
   (case panel-name
     :route/home [home]
-    :route/sharing [dodaj-oglas-forma]
-    :route/seeking [ads-list]
+    :route/delim [dodaj-oglas-forma]
+    :route/trazim [ads-list]
     :route/thank-you [thank-you]
     :route/error [error]
     :route/privacy-policy [privacy-policy]
@@ -508,6 +553,7 @@
     :route/nakon-resetovanja-lozinke [nakon-resetovanja-lozinke]
     :route/kontakt [kontakt-strana]
     :route/nakon-slanja-kontakt-poruke [nakon-slanja-kontakt-poruke]
+    :route/moji-oglasi [moji-oglasi]
     [:div]))
 
 (defn login-page []
@@ -525,7 +571,7 @@
     "Napravi novi nalog"]])
 
 (defn main-panel []
-  (let [{{panel-name :name public? :public?} :data} @(subscribe [::subs/active-route])
+  (let [{{panel-name :name _public? :public?} :data} @(subscribe [::subs/active-route])
         [css] (styles/use-styletron)
         authenticated? @(subscribe [::auth/authenticated?])
         ;; temporarily don't require authentication
@@ -537,7 +583,8 @@
       [:nav.ml-auto
        [:a.mr-2 {:href "/kontakt"} "Kontakt"]
        (if authenticated?
-         [:a {:href "/odjava"} "Odjavi me"]
+         '([:a.mr-2 {:href "/moji-oglasi" :key "moji-oglasi"} "Moji oglasi"]
+           [:a {:href "/odjava" :key "odjavi-me"} "Odjavi me"])
          [:a {:href "/prijava"} "Prijavi se"])]]
      [:div.d-flex.flex-column.justify-content-center.align-items-center
       {:className (css {:min-height "80vh"})}

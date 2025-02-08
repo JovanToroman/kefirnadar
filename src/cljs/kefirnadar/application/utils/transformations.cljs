@@ -1,5 +1,6 @@
 (ns kefirnadar.application.utils.transformations
-  (:require [cuerdas.core :as cuerdas]
+  (:require [applied-science.js-interop :as j]
+            [cuerdas.core :as cuerdas]
             [cuerdas.core :as str]))
 
 (defn remove-reserved-characters [text]
@@ -18,3 +19,9 @@
               (str/replace "Š" "S")
               (str/replace "Ž" "Z")
               (str/replace "Đ" "Dj"))))
+
+(defn format-date
+  ([date]
+   (format-date date "sr-RS"))
+  ([date locale]
+   (j/call (js/Date. (js/Date.parse date)) :toLocaleDateString locale)))

@@ -25,11 +25,9 @@
         :controllers [{:identity identity
                        :start #(dispatch [::events/clean-db])}]
         :doc "Home page"}]
-   ["sharing" {:name :route/sharing
-               :doc "Form to share grains"}]
-   ["seeking"
-    {:name :route/seeking
-     :doc "Page where users browse existing grains ads"
+   ["delim" {:name :route/delim}]
+   ["tražim"
+    {:name :route/trazim
      :parameters {:query {(ds/opt :page-number) int?
                           (ds/opt :page-size) int?
                           (ds/opt :regions) ::specs-common/regions
@@ -46,6 +44,10 @@
                                (dispatch [::events/fetch-ads filters (-m page-number page-size)])
                                (dispatch [::events/update-filters filters])
                                (dispatch [::events/store-ads-pagination-info :seeking (-m page-number page-size)])))}]}]
+   ["moji-oglasi"
+    {:name :route/moji-oglasi
+     :controllers [{:start (fn []
+                             (dispatch [::events/moji-oglasi]))}]}]
    ["odjava"
     {:name :route/odjava
      :doc "Odjava korisnika"

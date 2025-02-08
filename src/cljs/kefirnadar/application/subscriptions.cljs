@@ -84,3 +84,7 @@
 (reg-sub ::aktivacioni-kod-poslat?
   (fn [db _]
     (get-in db [:auth :aktivacioni-kod-poslat?])))
+
+(reg-sub ::moji-oglasi
+  (fn [db _]
+    (get-in db [:ads :moji-oglasi :ads])))

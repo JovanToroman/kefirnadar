@@ -41,7 +41,8 @@
                                 (ds/opt :seeking-water-type?) boolean?
                                 (ds/opt :seeking-kombucha?) boolean?
                                 (ds/opt :receive-by-post?) boolean?
-                                (ds/opt :receive-in-person?) boolean?}}}}]
+                                (ds/opt :receive-in-person?) boolean?
+                                (ds/opt :id-korisnika) int?}}}}]
    ["/oglas"
     ["/dodaj" {:post {:handler h/postavi-oglas
                       :parameters {:body {:korisnik/id (s/nilable int?)
@@ -53,7 +54,9 @@
                                           (ds/opt :ad/email) string?
                                           :ad/sharing-milk-type? boolean?
                                           :ad/sharing-water-type? boolean?
-                                          :ad/sharing-kombucha? boolean?}}}}]]
+                                          :ad/sharing-kombucha? boolean?}}}}]
+    ["/izbrisi/{id-oglasa}" {:delete {:handler h/izbrisi-oglas
+                                      :parameters {:path {:id-oglasa int?}}}}]]
    ["/posalji-kontakt-poruku" {:post {:handler h/posalji-kontakt-poruku
                                       :parameters {:body {(ds/opt :imejl) string?
                                                           (ds/opt :poruka) string?}}}}]])

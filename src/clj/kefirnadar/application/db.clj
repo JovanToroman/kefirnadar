@@ -15,19 +15,24 @@
 
 (defn dohvati-oglase
   [{:keys [page-number page-size regions seeking-milk-type? seeking-water-type? seeking-kombucha? receive-by-post?
-           receive-in-person?]}]
-  (let [odmik (* (dec page-number) page-size)
+           receive-in-person? id-korisnika]}]
+  (let [odmik (when (and (some? page-number) (some? page-size))
+                (* (dec page-number) page-size))
         where-klauzula (cond-> []
                          (seq regions) (conj [:in :ad.region regions])
+
                          (some true? [seeking-milk-type? seeking-water-type? seeking-kombucha?])
                          (conj (cond-> [:or]
                                  seeking-milk-type? (conj [:= :ad.sharing_milk_type true])
                                  seeking-water-type? (conj [:= :ad.sharing_water_type true])
                                  seeking-kombucha? (conj [:= :ad.sharing_kombucha true])))
+
                          (some true? [receive-by-post? receive-in-person?])
                          (conj (cond-> [:or]
                                  receive-by-post? (conj [:= :ad.send_by_post true])
-                                 receive-in-person? (conj [:= :ad.share_in_person true]))))]
+                                 receive-in-person? (conj [:= :ad.share_in_person true])))
+
+                         (some? id-korisnika) (conj [:= :ad.id_korisnika id-korisnika]))]
     (log/debug "Where klauzula: " (with-out-str (pprint/pprint where-klauzula)))
     (log/spy :debug
       {:ads (postgres/execute-query!
@@ -36,9 +41,9 @@
                                 :sharing_kombucha :korisnik.id_korisnika]
                        :from [:ad]
                        :left-join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
-                       :limit page-size
-                       :offset odmik
                        :order-by [[:ad.created_on :desc]]}
+                (some? page-size) (assoc :limit page-size)
+                (some? odmik) (assoc :offset odmik)
                 (seq where-klauzula) (assoc :where (into [:and] where-klauzula))))
        :ads-count (:count (postgres/execute-one!
                             (cond-> {:select [:%count.*]
@@ -104,9 +109,9 @@
   (postgres/execute-transaction! {:delete-from [:ad]
                                   :where [:= :ad.ad_id id-oglasa]}))
 
-(defn izbrisi-oglas-korisnika
+(defn izbrisi-oglase-korisnika
   [id-korisnika]
-  (log/debug "izbrisi-oglas-korisnika: " id-korisnika)
+  (log/debug "izbrisi-oglase-korisnika: " id-korisnika)
   (postgres/execute-transaction! {:delete-from [:ad]
                                   :where [:= :ad.id_korisnika id-korisnika]}))
 
@@ -169,7 +174,10 @@
               :sharing_kombucha :korisnik.id_korisnika]
      :from [:ad]
      :join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
-     :where [:= :ad.ad_id 2]}))
+     :where [:= :ad.ad_id 2]})
+
+  (postgres/execute-query! {:select [:*]
+                            :from :korisnik}))
 
 (comment "Remove all ads"
   (postgres/execute-transaction! {:truncate [:ad]}))

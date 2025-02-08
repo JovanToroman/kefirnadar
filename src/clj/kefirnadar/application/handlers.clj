@@ -16,8 +16,7 @@
 (defn prilagodi-korisnika-za-frontend [korisnik]
   (update-keys korisnik (comp keyword str/kebab)))
 
-(defn postavi-oglas
-  [{:keys [parameters]}]
+(defn postavi-oglas [{:keys [parameters]}]
   (let [id-korisnika (get-in parameters [:body :korisnik/id])
         broj-telefona (get-in parameters [:body :ad/phone-number])
         imejl (get-in parameters [:body :ad/email])
@@ -41,6 +40,11 @@
       (r/ok {:oglas entity-body
              :korisnik (prilagodi-korisnika-za-frontend (db/dohvati-korisnika id-korisnika))})
       (r/bad-request!))))
+
+(defn izbrisi-oglas [{:keys [parameters]}]
+  (let [id-oglasa (get-in parameters [:path :id-oglasa])]
+    (db/izbrisi-oglas id-oglasa)
+    (r/ok)))
 
 (defn potvrdi-fejsbuk-korisnika
   "Dodaje korisnika ako ne postoji u bazi"

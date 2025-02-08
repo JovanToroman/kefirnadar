@@ -144,6 +144,39 @@
   (fn [_ odgovor]
     (log/error "Greška u uzimanju oglasa: " odgovor)))
 
+(reg-event-fx ::moji-oglasi trim-v
+  (fn [{db :db} _]
+    (if-some [id-korisnika (get-in db [:auth :korisnik :id-korisnika])]
+      {::fx/api {:uri (route-utils/url-for "/api/oglasi" :query {:id-korisnika id-korisnika})
+                 :method :get
+                 :on-success [::moji-oglasi-uspeh]
+                 :on-error [::moji-oglasi-neuspeh]}}
+      ;; TODO: naći rešenje: kada osvežim stranicu ne mogu da dobijem id korisnika jer nije još učitan
+      {::load-route! {:data {:name :route/home}}})))
+
+(reg-event-db ::moji-oglasi-uspeh trim-v
+  (fn [db [{:keys [ads ads-count]}]]
+    (assoc-in db [:ads :moji-oglasi] (-m ads ads-count))))
+
+(reg-event-db ::moji-oglasi-neuspeh trim-v
+  (fn [_ odgovor]
+    (log/error "Greška u uzimanju oglasa: " odgovor)))
+
+(reg-event-fx ::izbrisi-oglas trim-v
+  (fn [_ [id-oglasa]]
+    {::fx/api {:uri (route-utils/url-for "/api/oglas/izbrisi/%s" :path [id-oglasa])
+               :method :delete
+               :on-success [::izbrisi-oglas-uspeh id-oglasa]
+               :on-error [::izbrisi-oglas-neuspeh]}}))
+
+(reg-event-db ::izbrisi-oglas-uspeh trim-v
+  (fn [db [id-oglasa]]
+    (update-in db [:ads :moji-oglasi :ads] #(remove (comp #{id-oglasa} :ad/ad_id) %))))
+
+(reg-event-db ::izbrisi-oglas-neuspeh trim-v
+  (fn [_ odgovor]
+    (log/error "Greška u brisanju oglasa: " odgovor)))
+
 (reg-event-db ::store-ads-pagination-info trim-v
   (fn [db [action pagination-info]]
     (assoc-in db [:ads action :pagination-info] pagination-info)))
