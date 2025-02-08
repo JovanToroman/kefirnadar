@@ -312,10 +312,10 @@
        (seq oglasi) [:div (doall (map (oglas css) oglasi))
                      (pagination/pagination
                        {:change-page-redirect-url-fn (fn [page-number page-size]
-                                                       (rfe/href :route/seeking {} (merge
-                                                                                     {:page-number page-number
-                                                                                      :page-size page-size}
-                                                                                     filters)))
+                                                       (rfe/href :route/trazim {} (merge
+                                                                                    {:page-number page-number
+                                                                                     :page-size page-size}
+                                                                                    filters)))
                         :page-number page-number
                         :page-size page-size
                         :total-count broj-oglasa

@@ -189,7 +189,7 @@
   (fn [{:keys [db]} [filters]]
     (let [{:keys [path-params]} (:active-route db)]
       {:db (assoc-in db [:ads :seeking :show-filters?] false)
-       ::load-route! {:data {:name :route/seeking}
+       ::load-route! {:data {:name :route/trazim}
                       :query-params filters
                       :path-params path-params}})))
 
