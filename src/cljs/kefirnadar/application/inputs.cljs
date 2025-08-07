@@ -15,18 +15,19 @@
   (j/get-in event [:target :checked]))
 
 (defn- render-options
-  [filtered-options active-value ^atom show-options?]
+  [filtered-options active-value ^atom show-options? css]
   (doall
     (for [{:keys [value title on-click]} filtered-options
           :let [is-active? (= active-value value)]]
       ^{:key value}
-      [:button.dropdown-item {:class (when is-active? "active")
+      [:button {:class (when is-active? "active")
                               :title title
                               :value (keyword value)
                               :on-click (fn [event]
                                           (on-click event)
                                           (swap! show-options? not))
-                              :type "button"}
+                              :type "button"
+                              :className (str (when is-active? "active") " dropdown-item " (css {:font-size "25px"}))}
        title])))
 
 (defn search-selector-dropdown
@@ -39,18 +40,19 @@
         [:div
          [:input.col-md-12.form-control
           {:id search-input-id
-           :placeholder "Unesite vrednost pomoću tastature"
+           :placeholder "Pretražite pomoću tastature"
            :type "text"
            :on-change (fn [event] (reset! search-text (j/get-in event [:target :value])))
            :value @search-text
-           :aria-label "Search"}]
+           :aria-label "Search"
+           :className (css {:font-size "23px"})}]
          [:i.fa.fa-keyboard {:aria-hidden "true"}]]
         [:div.dropdown-menu {:aria-labelledby id :className (css {:display "block"
                                                                   :height :300pt
                                                                   :overflow-y :scroll})}
          (if (seq filtered-options)
-           (render-options filtered-options active-value show-options?)
-           [:p "Nema rezultata"])]])}))
+           (render-options filtered-options active-value show-options? css)
+           [:p {:className (css {:font-size "25px"})} "Nema rezultata"])]])}))
 
 (defn search-selector [_]
   (let [search-text (r/atom "")
@@ -59,10 +61,8 @@
                  active-value
                  placeholder
                  aria-labelledby
-                 id
-                 placeholder-disabled?]
-          :or {id "dropdownMenuButton1"
-               placeholder-disabled? false}}]
+                 id]
+          :or {id "dropdownMenuButton1"}}]
       (let [[css] (styles/use-styletron)
             filtered-options (if (or (nil? @search-text) (str/blank? @search-text))
                                options
@@ -98,13 +98,13 @@
                                     :padding "13px 15px"
                                     :width "100%"
                                     :border "solid 1px rgba(12, 12, 12, 0.5)"
-                                    :font-size "14px"
+                                    :font-size "25px"
                                     :line-height "normal"})}
             (seq aria-labelledby) (assoc :aria-labelledby aria-labelledby))
 
-          (if title
-            title
-            [:span placeholder])]
+          [:span {:className (css {:font-size "25px"})} (if (some? title)
+                                                          title
+                                                          placeholder)]]
 
          (when @show-options?
            [search-selector-dropdown {:search-input-id search-input-id
@@ -116,39 +116,43 @@
                                       :show-options? show-options?}])]))))
 
 (defn checkbox [label value on-change]
-  (let [[css] (styles/use-styletron)]
-    [:div.form-group {:className (css (:input-wrapper styles/styles-map))}
-     [:label {:className (css (:label styles/styles-map))} label]
-     [:input {:className (css (:input-field styles/styles-map))
-              :on-change on-change
-              :type "checkbox"
-              :checked value}]]))
+  (let [[css] (styles/use-styletron)
+        check-id (str "check-" (random-uuid))]
+    [:div.form-check.form-switch.mb-4 {:className (css {:line-height "100%"})}
+     [:label.form-check-label {:className (css {:color "#757575"
+                                                :font-size "30px"
+                                                :margin-left "20px"})
+                               :for check-id}
+      label]
+     [:input.form-check-input {:className (css {:transform "scale(1.5)"})
+                               :on-change on-change
+                               :type "checkbox"
+                               :checked value
+                               :id check-id}]]))
 
 (defn imejl [{:keys [vrednost on-change tekst-greske ispravno?]}]
   (let [[css] (styles/use-styletron)]
     [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} "Imejl adresa:"]
-     [:input {:className (css (:input-field styles/styles-map))
-              :value vrednost
-              :on-change on-change
-              :type "text"
-              :placeholder "xxxx@xxxx.xxx"}]
-     (when (and (some? vrednost) (false? ispravno?))
+     [:label {:className (css {:color "#757575"
+                               :font-size "25px"})}
+      "Imejl adresa:"]
+     [:input.form-control.form-control-lg {:value vrednost
+                                           :on-change on-change
+                                           :type "text"
+                                           :placeholder "xxxx@xxxx.xxx"}]
+     (when (false? ispravno?)
        [:p.text-danger {:className (css (:error styles/styles-map))}
         tekst-greske])]))
 
-(defn broj-telefona [{:keys [vrednost on-change tekst-greske ispravno?]}]
+(defn broj-telefona [{:keys [vrednost on-change]}]
   (let [[css] (styles/use-styletron)]
-    [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} "Broj telefona:"]
-     [:input {:className (css (:input-field styles/styles-map))
-              :value vrednost
-              :on-change on-change
-              :type "text"
-              :placeholder "06x-xxxx-xxxx"}]
-     (when (and (some? vrednost) (false? ispravno?))
-       [:p.text-danger {:className (css (:error styles/styles-map))}
-        tekst-greske])]))
+    [:div.form-group.mb-3
+     [:label {:className (css {:color "#757575"
+                               :font-size "25px"})} "Broj telefona:"]
+     [:input.form-control.form-control-lg {:value vrednost
+                                           :on-change on-change
+                                           :type "text"
+                                           :placeholder "06x-xxxx-xxxx"}]]))
 
 (defn lozinka [{:keys [vrednost on-change tekst-greske ispravno? natpis] :or {natpis "Lozinka: "}}]
   (let [[css] (styles/use-styletron)]
@@ -162,13 +166,16 @@
        [:p.text-danger {:className (css (:error styles/styles-map))}
         tekst-greske])]))
 
-(defn dugme [{:keys [oznaka on-click tip] :or {tip "button"}}]
-  (let [[css] (styles/use-styletron)]
-    [:button.btn.btn-outline-primary
-     {:className (css (:btn styles/styles-map))
-      :on-click on-click
-      :type tip}
-     oznaka]))
+(defn dugme [{:keys [oznaka on-click tip onemoguceno? nivo class-name velicina] :or {tip "button" nivo "prvi-oivicen"}}]
+  [:button
+   (cond-> {:className (cond-> "btn"
+                         (= nivo "prvi-oivicen") (str " btn-outline-primary")
+                         (= velicina :velika) (str " btn-lg")
+                         (some? class-name) (str " " class-name))
+            :on-click on-click
+            :type tip}
+     onemoguceno? (assoc :disabled true))
+   oznaka])
 
 (defn korisnicko-ime [{:keys [vrednost on-change tekst-greske ispravno?]}]
   (let [[css] (styles/use-styletron)]

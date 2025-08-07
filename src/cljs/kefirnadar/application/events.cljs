@@ -12,20 +12,18 @@
 (defn validate-and-create-ad
   [{db :db} [form-info id-korisnika]]
   (let [validation-info (validation/either-or-update-validation (validation/validate-form-info form-info))]
-    (if (validation/sharing-form-valid? validation-info :region :quantity)
-      (let [{:keys [region post? pick-up? quantity phone-number email sharing-milk-type?
-                    sharing-water-type? sharing-kombucha?]} form-info
+    (if (validation/sharing-form-valid? validation-info)
+      (let [{:keys [oblast kontakt nacin-deljenja vrsta-kulture]} form-info
             body {:uri "/api/oglas/dodaj"
                   :method :post
-                  :params {:ad/region region
-                           :ad/email email
-                           :ad/phone-number phone-number
-                           :ad/post? post?
-                           :ad/pick-up? pick-up?
-                           :ad/quantity quantity
-                           :ad/sharing-milk-type? sharing-milk-type?
-                           :ad/sharing-water-type? sharing-water-type?
-                           :ad/sharing-kombucha? sharing-kombucha?
+                  :params {:ad/oblast oblast
+                           :ad/imejl (:imejl kontakt)
+                           :ad/broj-telefona (:broj-telefona kontakt)
+                           :ad/slanje? (:slanje? nacin-deljenja)
+                           :ad/preuzimanje? (:preuzimanje? nacin-deljenja)
+                           :ad/deli-mlecni? (:deli-mlecni? vrsta-kulture)
+                           :ad/deli-vodeni? (:deli-vodeni? vrsta-kulture)
+                           :ad/deli-kombucu? (:deli-kombucu? vrsta-kulture)
                            :korisnik/id id-korisnika}
                   :on-success [::validate-and-create-ad-success]}]
         {::fx/api body})
@@ -36,6 +34,14 @@
 (reg-event-fx ::validate-and-create-ad-success trim-v
   (fn [_ _]
     {::load-route! {:data {:name :route/thank-you}}}))
+
+(reg-event-db ::oznaci-polje-kao-nepotvrdjeno trim-v
+  (fn [db [kljuc-polja]]
+    (assoc-in db [:ads :sharing :form-data-validation kljuc-polja] false)))
+
+(reg-event-db ::oznaci-polje-kao-potvrdjeno trim-v
+  (fn [db [kljuc-polja]]
+    (assoc-in db [:ads :sharing :form-data-validation kljuc-polja] true)))
 
 ;; region routing
 (defn redirect!
@@ -77,7 +83,14 @@
 (reg-event-db
   ::update-sharing-form
   (fn [db [_ id val]]
-    (assoc-in db [:ads :sharing :form-data id] val)))
+    (if (map? val)
+      (update-in db [:ads :sharing :form-data id] merge val)
+      (assoc-in db [:ads :sharing :form-data id] val))))
+
+(reg-event-db
+  ::promeni-polje-za-unos-oglasa trim-v
+  (fn [db [odredisno-polje]]
+    (assoc-in db [:ads :sharing :trenutno-polje-za-unos-oglasa] odredisno-polje)))
 
 (reg-event-db
   ::store-sharing-form-validation-results

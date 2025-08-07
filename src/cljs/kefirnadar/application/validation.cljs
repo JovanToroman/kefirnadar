@@ -6,7 +6,7 @@
   "[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+")
 
 
-(def phone-number-regex-str
+(def broj-telefona-regex-str
   "[06|+][0-9]{1,5}[/-\\s]*[0-9]{1,4}[/-\\s]*[0-9]{2,4}[/-\\s]*[0-9]{2,4}[\\s]*[0-9]{2,4}[\\s]*")
 
 (def password-regex
@@ -18,23 +18,29 @@
     (some? ((fnil matcher "") input))))
 
 
-(defn field-validation [id input]
-  (case id
-    :firstname (and (not (str/blank? input)) (seq input) (str/letters? input))
-    :lastname (and (not (str/blank? input)) (seq input) (str/letters? input))
+(defn potvrdi-vrednost-polja [kljuc-polja vrednost-polja]
+  (case kljuc-polja
+    :firstname (and (not (str/blank? vrednost-polja)) (seq vrednost-polja) (str/letters? vrednost-polja))
+    :lastname (and (not (str/blank? vrednost-polja)) (seq vrednost-polja) (str/letters? vrednost-polja))
     ;; TODO: unify these two by using imejl only
-    :email (reg-matcher email-regex-str input)
-    :imejl (reg-matcher email-regex-str input)
-    :region (and (string? input) (not (str/blank? input)))
-    (:post? :pick-up?) (true? input)
-    (:sharing-milk-type? :sharing-water-type? :sharing-kombucha?) (true? input)
-    :phone-number (reg-matcher phone-number-regex-str input)
-    :broj-telefona (reg-matcher phone-number-regex-str input)
-    :quantity (and (< input 101) (> input 0))
-    :lozinka (reg-matcher password-regex input)
-    :nova-lozinka (reg-matcher password-regex input)
-    :korisnicko-ime (and (string? input) (not (str/blank? input)) (> (count input) 4))
-    :poruka (and (string? input) (not (str/blank? input)) (> (count input) 19))))
+    :imejl (reg-matcher email-regex-str vrednost-polja)
+    (:slanje? :preuzimanje?) (true? vrednost-polja)
+    (:deli-mlecni? :deli-vodeni? :deli-kombucu?) (true? vrednost-polja)
+    :broj-telefona (reg-matcher broj-telefona-regex-str vrednost-polja)
+    :lozinka (reg-matcher password-regex vrednost-polja)
+    :nova-lozinka (reg-matcher password-regex vrednost-polja)
+    :korisnicko-ime (and (string? vrednost-polja) (not (str/blank? vrednost-polja)) (> (count vrednost-polja) 4))
+    :poruka (and (string? vrednost-polja) (not (str/blank? vrednost-polja)) (> (count vrednost-polja) 19))
+
+    :oblast (and (string? vrednost-polja) (not (str/blank? vrednost-polja)))
+
+    :kontakt (or (reg-matcher email-regex-str (:imejl vrednost-polja))
+               (reg-matcher broj-telefona-regex-str (:broj-telefona vrednost-polja)))
+
+    :nacin-deljenja (or (true? (:slanje? vrednost-polja)) (true? (:preuzimanje? vrednost-polja)))
+
+    :vrsta-kulture (or (true? (:deli-mlecni? vrednost-polja)) (true? (:deli-vodeni? vrednost-polja))
+                     (true? (:deli-kombucu? vrednost-polja)))))
 
 (defn either-or-form-field-valid?
   "Check whether at least one option was selected"
@@ -43,30 +49,26 @@
           (true? (get validation-info form-id)))
     form-ids))
 
-;; TODO: check if these two validation steps can be unified
 (defn sharing-form-valid?
   "Is the whole sharing form valid?"
-  [validation-info & form-ids]
-  (and (every? #(get validation-info %) form-ids)
-    (either-or-form-field-valid? validation-info :post? :pick-up?)
-    (either-or-form-field-valid? validation-info :phone-number :email)
-    (either-or-form-field-valid? validation-info :sharing-milk-type? :sharing-water-type? :sharing-kombucha?)))
+  [validation-info]
+  (every? true? (vals validation-info)))
 
-(defn- either-or-update-validation
+(defn either-or-update-validation
   "Some fields require at least one option to be selected. Mark all related fields as valid if at least one of them is"
   [validation-info]
   (cond-> validation-info
-    (either-or-form-field-valid? validation-info :post? :pick-up?) (assoc :post? true :pick-up? true)
-    (either-or-form-field-valid? validation-info :email :phone-number) (assoc :email true :phone-number true)
-    (either-or-form-field-valid? validation-info :sharing-milk-type? :sharing-water-type? :sharing-kombucha?)
-    (assoc :sharing-milk-type? true :sharing-water-type? true :sharing-kombucha? true)))
+    (either-or-form-field-valid? validation-info :slanje? :preuzimanje?) (assoc :slanje? true :preuzimanje? true)
+    (either-or-form-field-valid? validation-info :imejl :broj-telefona) (assoc :imejl true :broj-telefona true)
+    (either-or-form-field-valid? validation-info :deli-mlecni? :deli-vodeni? :deli-kombucu?)
+    (assoc :deli-mlecni? true :deli-vodeni? true :deli-kombucu? true)))
 
 (defn validate-form-info
   "Validates form field info and stores results in app db, upon which error messages are then displayed"
   [form-info]
   (->> form-info
     (map (fn [[form-field-key form-field-value]]
-           [form-field-key (field-validation form-field-key form-field-value)]))
+           [form-field-key (potvrdi-vrednost-polja form-field-key form-field-value)]))
     (into {})))
 
 (defn forma-validna?

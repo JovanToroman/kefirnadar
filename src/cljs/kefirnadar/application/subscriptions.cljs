@@ -7,6 +7,8 @@
 
 (reg-sub ::sharing-form-data (fn [db _] (get-in db [:ads :sharing :form-data])))
 
+(reg-sub ::trenutno-polje-za-unos-oglasa (fn [db _] (get-in db [:ads :sharing :trenutno-polje-za-unos-oglasa])))
+
 (reg-sub ::form-field
   (fn [db [_ id]]
     (get-in db [:ads :sharing :form-data id])))

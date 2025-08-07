@@ -46,15 +46,14 @@
    ["/oglas"
     ["/dodaj" {:post {:handler h/postavi-oglas
                       :parameters {:body {:korisnik/id (s/nilable int?)
-                                          :ad/region string?
-                                          :ad/post? boolean?
-                                          :ad/pick-up? boolean?
-                                          :ad/quantity number?
-                                          (ds/opt :ad/phone-number) string?
-                                          (ds/opt :ad/email) string?
-                                          :ad/sharing-milk-type? boolean?
-                                          :ad/sharing-water-type? boolean?
-                                          :ad/sharing-kombucha? boolean?}}}}]
+                                          :ad/oblast string?
+                                          :ad/slanje? (s/nilable boolean?)
+                                          :ad/preuzimanje? (s/nilable boolean?)
+                                          :ad/broj-telefona (s/nilable string?)
+                                          :ad/imejl (s/nilable string?)
+                                          :ad/deli-mlecni? (s/nilable boolean?)
+                                          :ad/deli-vodeni? (s/nilable boolean?)
+                                          :ad/deli-kombucu? (s/nilable boolean?)}}}}]
     ["/izbrisi/{id-oglasa}" {:delete {:handler h/izbrisi-oglas
                                       :parameters {:path {:id-oglasa int?}}}}]]
    ["/posalji-kontakt-poruku" {:post {:handler h/posalji-kontakt-poruku

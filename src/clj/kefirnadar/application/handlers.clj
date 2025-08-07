@@ -18,17 +18,16 @@
 
 (defn postavi-oglas [{:keys [parameters]}]
   (let [id-korisnika (get-in parameters [:body :korisnik/id])
-        broj-telefona (get-in parameters [:body :ad/phone-number])
-        imejl (get-in parameters [:body :ad/email])
+        broj-telefona (get-in parameters [:body :ad/broj-telefona])
+        imejl (get-in parameters [:body :ad/imejl])
         entity-body (cond-> {:id_korisnika id-korisnika
-                             :region (get-in parameters [:body :ad/region])
-                             :send_by_post (get-in parameters [:body :ad/post?] false)
-                             :share_in_person (get-in parameters [:body :ad/pick-up?] false)
-                             :quantity (get-in parameters [:body :ad/quantity])
+                             :region (get-in parameters [:body :ad/oblast])
+                             :send_by_post (get-in parameters [:body :ad/slanje?] false)
+                             :share_in_person (get-in parameters [:body :ad/preuzimanje?] false)
                              :created_on [:now]             ;; Postgresql internal function
-                             :sharing_milk_type (get-in parameters [:body :ad/sharing-milk-type?])
-                             :sharing_water_type (get-in parameters [:body :ad/sharing-water-type?])
-                             :sharing_kombucha (get-in parameters [:body :ad/sharing-kombucha?])}
+                             :sharing_milk_type (get-in parameters [:body :ad/deli-mlecni?])
+                             :sharing_water_type (get-in parameters [:body :ad/deli-vodeni?])
+                             :sharing_kombucha (get-in parameters [:body :ad/deli-kombucu?])}
                       (some? broj-telefona) (assoc :broj_telefona broj-telefona)
                       (some? imejl) (assoc :imejl imejl))
         {:keys [next.jdbc/update-count]} (db/dodaj-oglas entity-body)]

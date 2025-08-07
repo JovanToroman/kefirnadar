@@ -19,7 +19,7 @@
   (let [odmik (when (and (some? page-number) (some? page-size))
                 (* (dec page-number) page-size))
         where-klauzula (cond-> []
-                         (seq regions) (conj [:in :ad.region regions])
+                         (and (seq regions) (some (comp not str/blank?) regions)) (conj [:in :ad.region regions])
 
                          (some true? [seeking-milk-type? seeking-water-type? seeking-kombucha?])
                          (conj (cond-> [:or]

@@ -1,17 +1,8 @@
 (ns kefirnadar.application.db)
 
 (def default-db
-  {:ads {:sharing {:form-data {:firstname ""
-                               :lastname ""
-                               :region nil
-                               :post? false
-                               :pick-up? false
-                               :quantity 0
-                               :phone-number ""
-                               :email ""
-                               :sharing-milk-type? false
-                               :sharing-water-type? false
-                               :sharing-kombucha? false}}
+  {:ads {:sharing {:form-data {}
+                   :trenutno-polje-za-unos-oglasa :oblast}
          :seeking {:filters {:regions #{}
                              :seeking-milk-type? true
                              :seeking-water-type? true
