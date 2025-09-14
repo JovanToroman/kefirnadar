@@ -17,9 +17,28 @@
 
         gtag('config', 'G-9X95EQ2X86');
     </script>
-    <!--    <script crossorigin="anonymous"-->
-    <!--            src="https://connect.facebook.net/sr_RS/sdk.js#xfbml=1&version=v16.0&appId=1869115913469264&autoLogAppEvents=1"-->
-    <!--            nonce="uw2Nzuzt"></script>-->
+
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId      : '1869115913469264',
+                cookie     : true,
+                xfbml      : true,
+                version    : 'v23.0'
+            });
+
+            FB.AppEvents.logPageView();
+
+        };
+
+        (function(d, s, id){
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) {return;}
+            js = d.createElement(s); js.id = id;
+            js.src = "https://connect.facebook.net/en_US/sdk.js";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));
+    </script>
 </head>
 <body>
 <div id="app"></div>

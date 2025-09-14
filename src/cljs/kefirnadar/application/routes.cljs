@@ -65,7 +65,11 @@
      :public? true}]
    ["prijava"
     {:name :route/prijava
-     :doc "Prijava korisnika"
+     :doc "Sve mogućnosti prijave"
+     :public? true}]
+   ["prijava-osnovna"
+    {:name :route/prijava-osnovna
+     :doc "Prijava imajlom i lozinkom"
      :public? true}]
    ["aktiviraj-korisnika/{aktivacioni-kod}"
     {:name :route/aktiviraj-korisnika
@@ -112,9 +116,9 @@
     {:name :route/error
      :doc "error page"
      :controllers [{:identity identity}]}]
-   ["privacy-policy"
-    {:name :route/privacy-policy
-     :doc "privacy policy"
+   ["politika-privatnosti"
+    {:name :route/politika-privatnosti
+     :doc "politika privatnosti"
      :public? true
      :controllers [{:identity identity}]}]])
 

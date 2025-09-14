@@ -53,6 +53,7 @@
   (let [opts (:options (cli/parse-opts args cli-options))]
     (log/info "Arguments: " opts)
     (mount/start-with-args opts))
+  (log/set-level! :info)
   (log/info "Establishing DB connection")
   (init-db!)
   (log/info "Starting local server")

@@ -76,7 +76,8 @@
     (let [user-cookie (get-user-cookie-info)
           auth-data (assoc user-cookie :korisnik korisnik)]
       (set-user-cookie-info! auth-data)
-      {:dispatch [::set-auth-data auth-data]})))
+      {:dispatch [::set-auth-data auth-data]
+       :kefirnadar.application.events/load-route! {:data {:name :route/home}}})))
 
 (reg-event-db ::ensure-user-fail trim-v (fn [db _] db))
 

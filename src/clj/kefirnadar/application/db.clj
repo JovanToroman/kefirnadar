@@ -164,6 +164,8 @@
                                   :columns [:facebook_user_id :ime :prezime]
                                   :values [["testuserid" "ime" "prezime"]]})
 
+  (postgres/execute-transaction! {:delete-from [:korisnik]
+                                  :where [:= :korisnik.id_korisnika 20]})
   ;; get user
   (dohvati-facebook-korisnika "testuserid")
 

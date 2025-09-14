@@ -1,6 +1,6 @@
 (ns kefirnadar.application.events
   (:require [kefirnadar.application.fx :as fx]
-            [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-fx trim-v]]
+            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx trim-v]]
             [kefirnadar.application.db :as db]
             [kefirnadar.application.validation :as validation]
             [kefirnadar.application.utils.route :as route-utils]

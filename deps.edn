@@ -11,6 +11,7 @@
         metosin/ring-http-response {:mvn/version "0.9.4"}
         ring-cors/ring-cors {:mvn/version "0.1.13"}
         http-kit/http-kit {:mvn/version "2.8.0"}
+        clj-http/clj-http {:mvn/version "3.13.1"}
         ring/ring {:mvn/version "1.12.2"}
         com.google.javascript/closure-compiler-unshaded {:mvn/version "v20240317"}
         cljs-http/cljs-http {:mvn/version "0.1.48"}

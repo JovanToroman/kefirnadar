@@ -1,7 +1,8 @@
 (ns kefirnadar.application.imejl
-  (:require [postal.core :as email]
+  (:require [clojure.data.json :as json]
             [hiccup.core :as h]
             [kefirnadar.configuration.config :as config]
+            [clj-http.client :as http]
             [taoensso.timbre :as log]))
 
 (defn aktivacioni-imejl [url]
@@ -25,18 +26,18 @@
      [:p "Poruka: " poruka]]))
 
 (defn posalji-imejl
-  [to tema sadrzaj]
-  (log/debugf "Šaljem imejl poruku na %s sa temom %s" to tema)
-  (let [{:keys [code]} (email/send-message {:host @config/smtp-host
-                                            :user @config/smtp-korisnik
-                                            :pass @config/smtp-lozinka
-                                            :port @config/smtp-port
-                                            :tls true}
-                         {:from "kefirnadar@gmail.com"
-                          :to [to]
-                          :subject tema
-                          :body [{:type "text/html; charset=utf-8"
-                                  :content sadrzaj}]})]
-    (log/debug (if (= code 0)
+  [imejl-primaoca tema sadrzaj]
+  (log/debugf "Šaljem imejl poruku koristeći MailJet na %s sa temom %s" imejl-primaoca tema)
+  (let [{:keys [body]} (http/post "https://api.mailjet.com/v3.1/send"
+                                  {:basic-auth [@config/api-kljuc @config/api-tajna]
+                                   :body (json/write-str {:Messages
+                                                          [{:From {:Email @config/adresa-posiljaoca :Name "Kefir na dar"}
+                                                            :To [{:Email imejl-primaoca}]
+                                                            :Subject tema
+                                                            :TextPart sadrzaj
+                                                            :HtmlPart sadrzaj}]})
+                                   :throw-exceptions false})
+        {[{:keys [Status]}] :Messages} (json/read-str body :key-fn keyword)]
+    (log/debug (if (= Status "success")
                  "Poruka poslata uspešno"
                  "Poruka nije poslata jer je došlo do greške"))))
