@@ -77,7 +77,7 @@
           auth-data (assoc user-cookie :korisnik korisnik)]
       (set-user-cookie-info! auth-data)
       {:dispatch [::set-auth-data auth-data]
-       :kefirnadar.application.events/load-route! {:data {:name :route/home}}})))
+       :kefirnadar.application.events/load-route! {:data {:name :route/pocetna}}})))
 
 (reg-event-db ::ensure-user-fail trim-v (fn [db _] db))
 
@@ -137,7 +137,7 @@
 (reg-event-fx ::obradi-odjavu-korisnika trim-v
   (fn [_ _]
     {:dispatch [::unset-auth-data]
-     :kefirnadar.application.events/load-route! {:data {:name :route/home}}}))
+     :kefirnadar.application.events/load-route! {:data {:name :route/pocetna}}}))
 
 (reg-event-fx ::posalji-aktivacioni-kod-uspeh trim-v
   (fn [db _]
@@ -186,7 +186,7 @@
                                         :korisnik korisnik})]
       (set-user-cookie-info! auth-data)
       {:dispatch [::set-auth-data auth-data]
-       :kefirnadar.application.events/load-route! {:data {:name :route/home}}})))
+       :kefirnadar.application.events/load-route! {:data {:name :route/pocetna}}})))
 
 (reg-event-db ::prijava-neuspeh trim-v
   (fn [db [{:keys [greska]}]]

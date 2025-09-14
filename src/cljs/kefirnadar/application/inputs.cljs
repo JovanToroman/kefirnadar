@@ -132,10 +132,8 @@
 
 (defn imejl [{:keys [vrednost on-change tekst-greske ispravno?]}]
   (let [[css] (styles/use-styletron)]
-    [:div.form-group
-     [:label {:className (css {:color "#757575"
-                               :font-size "25px"})}
-      "Imejl adresa:"]
+    [:div.form-group.mb-3
+     [:label {:className (css {:color "#757575" :font-size "25px"})} "Imejl adresa:"]
      [:input.form-control.form-control-lg {:value vrednost
                                            :on-change on-change
                                            :type "text"
@@ -156,8 +154,8 @@
 
 (defn lozinka [{:keys [vrednost on-change tekst-greske ispravno? natpis] :or {natpis "Lozinka: "}}]
   (let [[css] (styles/use-styletron)]
-    [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} natpis]
+    [:div.form-group.mb-3
+     [:label {:className (css {:color "#757575" :font-size "25px"})} natpis]
      [:input {:className (css (:input-field styles/styles-map))
               :value vrednost
               :on-change on-change
@@ -167,7 +165,7 @@
         tekst-greske])]))
 
 (defn dugme [{:keys [oznaka on-click tip onemoguceno? nivo class-name velicina] :or {tip "button" nivo "prvi-oivicen"}}]
-  [:button
+  [:button.mb-3
    (cond-> {:className (cond-> "btn"
                          (= nivo "prvi-oivicen") (str " btn-outline-primary")
                          (= velicina :velika) (str " btn-lg")
@@ -179,8 +177,8 @@
 
 (defn korisnicko-ime [{:keys [vrednost on-change tekst-greske ispravno?]}]
   (let [[css] (styles/use-styletron)]
-    [:div.form-group
-     [:label {:className (css (:label styles/styles-map))} "Korisnicko ime:"]
+    [:div.form-group.mb-3
+     [:label {:className (css {:color "#757575" :font-size "25px"})} "Korisnicko ime:"]
      [:input {:className (css (:input-field styles/styles-map))
               :value vrednost
               :on-change on-change

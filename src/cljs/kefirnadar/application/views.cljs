@@ -371,13 +371,13 @@
   [:<>
    [:h1.mb-5 "Hvala vam što delite kefir zrnca"]
    [:button.btn.btn-outline-success.mb-5
-    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])}
+    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/pocetna}}])}
     "Početna stranica"]])
 
 (defn error []
   [:<>
    [:h1 "Trenutno nema korisnika koji dele zrnca u izabranom regionu."]
-   [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/home}}])}
+   [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/pocetna}}])}
     "Početna stranica"]])
 
 (defn politika-privatnosti
@@ -689,6 +689,7 @@
      [greska-resetovanja-lozinke kod-greske]]))
 
 (defn nakon-resetovanja-lozinke []
+  (js/setTimeout #(dispatch [::events/dispatch-load-route! {:data {:name :route/prijava-osnovna}}]) 2500)
   [:h1 "Uspešno ste resetovali lozinku."])
 
 (defn kontakt-strana []
@@ -742,7 +743,7 @@
 
 (defn- panels [panel-name]
   (case panel-name
-    :route/home [home]
+    :route/pocetna [home]
     :route/delim [dodaj-oglas-forma]
     :route/trazim [ads-list]
     :route/thank-you [thank-you]
@@ -772,20 +773,31 @@
         authentication-required? false                      ;;(and (not authenticated?) (not public?)) onesposobio sam prijavu radi veće upotrebe aplikacije
         ]
     [:div.container
-     [:nav.navbar.navbar-expand-lg.navbar-light
+     [:nav.navbar.navbar-expand-lg.navbar-light.bg-light.rounded
       [:div.container-fluid
        [:a.navbar-brand {:href "/"} "Kefir na Dar"]
-       [:ul.navbar-nav
-        [:li.nav-item
-         [:a.nav-link.mr-2 {:href "/kontakt"} "Kontakt"]]
-        [:li.nav-item
+       [:button.navbar-toggler {:type "button" :data-bs-toggle "collapse" :data-bs-target "#navbarSupportedContent"
+                                :aria-controls "navbarSupportedContent" :aria-expanded "false"
+                                :aria-label "Toggle navigation"}
+        [:span.navbar-toggler-icon]]
+       [:div#navbarSupportedContent.collapse.navbar-collapse
+        [:ul.navbar-nav.me-auto.mb-2.mb-lg-0
+         [:li.nav-item
+          [:a.nav-link.active {:aria-current "page" :href "#"} "Početna"]]
+         [:li.nav-item
+          [:a.nav-link.mr-2 {:href "/kontakt"} "Kontakt"]]]
+        [:ul.navbar-nav.ms-auto.mb-2.mb-lg-0.justify-content-end
          (if authenticated?
-           `(~(when-not (str/blank? identifikator-korisnika)
-               [:a.nav-link "Prijavljeni ste kao " [:strong identifikator-korisnika]])
-             [:a.nav-link.mr-2 {:href "/moji-oglasi" :key "moji-oglasi"} "Moji oglasi"]
-             [:a.nav-link {:href "/odjava" :key "odjavi-me"} "Odjavi me"])
-           [:a.nav-link {:href "/prijava"} "Prijavi se"])]]]]
-     [:div.d-flex.flex-column.justify-content-center.align-items-center
+           [:<>
+            (when-not (str/blank? identifikator-korisnika)
+              [:li.nav-item.ms-auto [:a.nav-link "Prijavljeni ste kao " [:strong identifikator-korisnika]]])
+            [:li.nav-item.dropdown.ms-auto
+             [:a#navbarDropdown.nav-link.dropdown-toggle {:href "#" :role "button" :data-bs-toggle "dropdown" :aria-expanded "false"} "Moj profil"]
+             [:ul.dropdown-menu {:aria-labelledby "navbarDropdown"}
+              [:li [:a.dropdown-item {:href "/moji-oglasi" :key "moji-oglasi"} "Moji oglasi"]]]]
+            [:li.nav-item.ms-auto [:a.nav-link {:href "/odjava" :key "odjavi-me"} "Odjavi me"]]]
+           [:li.nav-item.ms-auto [:a.nav-link {:href "/prijava"} "Prijavi se"]])]]]]
+     [:div.d-flex.flex-column.justify-content-center.align-items-center.pt-5
       {:className (css {:min-height "80vh"})}
       (if authentication-required?
         [stranica-za-prijavu]

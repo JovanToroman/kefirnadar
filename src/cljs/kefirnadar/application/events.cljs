@@ -165,7 +165,7 @@
                  :on-success [::moji-oglasi-uspeh]
                  :on-error [::moji-oglasi-neuspeh]}}
       ;; TODO: naći rešenje: kada osvežim stranicu ne mogu da dobijem id korisnika jer nije još učitan
-      {::load-route! {:data {:name :route/home}}})))
+      {::load-route! {:data {:name :route/pocetna}}})))
 
 (reg-event-db ::moji-oglasi-uspeh trim-v
   (fn [db [{:keys [ads ads-count]}]]

@@ -21,7 +21,7 @@
   ["/" {:coercion reitit.coercion.spec/coercion
         :controllers [{:identity identity
                        :start #(dispatch [::auth/ucitaj-korisnika])}]}
-   ["" {:name :route/home
+   ["" {:name :route/pocetna
         :controllers [{:identity identity
                        :start #(dispatch [::events/clean-db])}]
         :doc "Home page"}]
@@ -91,7 +91,7 @@
      :public? true}]
    ["resetovanje-lozinke/{kod-za-resetovanje-lozinke}"
     {:name :route/resetovanje-lozinke
-     :doc "Ruta za aktiviranje novokreiranog korisničkog naloga"
+     :doc "Ruta za resetovanje lozinke"
      :controllers [{:parameters {:path [:kod-za-resetovanje-lozinke]}
                     :start (fn [{{:keys [kod-za-resetovanje-lozinke]} :path}]
                              (dispatch [::events/azuriraj-formu-za-resetovanje-lozinke
