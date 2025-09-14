@@ -127,8 +127,8 @@
       (log/debug "Dodajem korisnika: " userID)
       (let [[ime prezime] (str/split name #" " 2)]
         (postgres/execute-transaction! {:insert-into [:korisnik]
-                                        :columns [:facebook_user_id :ime :prezime]
-                                        :values [[userID ime prezime]]})))
+                                        :columns [:facebook_user_id :ime :prezime :datum_registracije]
+                                        :values [[userID ime prezime [:now]]]})))
     (dohvati-facebook-korisnika userID)))
 
 (defn azuriraj-korisnika [[id-kolona id-vrednost] kolona vrednost]
@@ -140,8 +140,8 @@
   (log/debug "Dodajem korisnika: " imejl)
   (postgres/execute-transaction!
     {:insert-into [:korisnik]
-     :columns [:email :hes_lozinke :korisnicko_ime :aktivacioni_kod :aktiviran]
-     :values [[imejl (password/encrypt lozinka) korisnicko-ime aktivacioni-kod false]]})
+     :columns [:email :hes_lozinke :korisnicko_ime :aktivacioni_kod :aktiviran :datum_registracije]
+     :values [[imejl (password/encrypt lozinka) korisnicko-ime aktivacioni-kod false [:now]]]})
   (dohvati-korisnika-po-imejlu imejl))
 
 (defn aktiviraj-korisnika

@@ -190,7 +190,7 @@
 
 (defn text-area [{:keys [vrednost on-change tekst-greske ispravno? natpis placeholder]}]
   (let [[css] (styles/use-styletron)]
-    [:div.form-group
+    [:div.form-group.mb-3
      (when-not (or (nil? natpis) (str/blank? natpis))
        [:label {:className (css (:label styles/styles-map))} natpis])
      [:textarea {:className (css (:input-field styles/styles-map))

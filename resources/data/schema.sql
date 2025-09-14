@@ -1,4 +1,5 @@
 CREATE TABLE IF NOT EXISTS korisnik (
+datum_registracije TIMESTAMP,
 id_korisnika SERIAL,
 facebook_user_id VARCHAR ( 30 ),
 ime VARCHAR ( 30 ),
