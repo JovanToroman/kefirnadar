@@ -12,7 +12,7 @@
   (re-frame/clear-subscription-cache!)
   (let [app (j/call js/document :getElementById "app")]
     (reagent-dom/render (styles/provider {:main-view views/main-panel}) app)
-    (j/call js/Object :assign (j/get app :style) (clj->js (:app styles/styles-map))))
+    (j/call js/Object :assign (j/get app :style) (clj->js {:min-height "100vh"})))
   (timbre/info "App version:" config/version))
 
 (defn ^:after-load re-render

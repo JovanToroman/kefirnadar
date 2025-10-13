@@ -359,11 +359,11 @@
 
 (defn home []
   [:<>
-   [:h1 "Da li želite da podelite ili dobijete kefirna zrnca?"]
-   [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
+   [:h1.text-center "Da li želite da podelite ili dobijete kefirna zrnca?"]
+   [:button.btn.btn-outline-primary.col-5.mb-5.mt-5
     {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])}
     "Delim"]
-   [:button.btn.btn-outline-primary.col-md-5
+   [:button.btn.btn-outline-primary.col-5
     {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])}
     "Tražim"]])
 
@@ -775,7 +775,8 @@
     [:div.container
      [:nav.navbar.navbar-expand-lg.navbar-light.bg-light.rounded
       [:div.container-fluid
-       [:a.navbar-brand {:href "/"} "Kefir na Dar"]
+       [:a.navbar-brand {:href "/"}
+        [:img {:src "/images/logo.png" :className (css {:width "10em" :height "10em"})}]]
        [:button.navbar-toggler {:type "button" :data-bs-toggle "collapse" :data-bs-target "#navbarSupportedContent"
                                 :aria-controls "navbarSupportedContent" :aria-expanded "false"
                                 :aria-label "Toggle navigation"}
@@ -783,9 +784,11 @@
        [:div#navbarSupportedContent.collapse.navbar-collapse
         [:ul.navbar-nav.me-auto.mb-2.mb-lg-0
          [:li.nav-item
-          [:a.nav-link.active {:aria-current "page" :href "#"} "Početna"]]
+          [:a.nav-link.active {:aria-current "page" :href "/"} "Početna"]]
          [:li.nav-item
-          [:a.nav-link.mr-2 {:href "/kontakt"} "Kontakt"]]]
+          [:a.nav-link.active {:aria-current "page" :href "https://blog.kefirnadar.rs/"} "Blog"]]
+         [:li.nav-item
+          [:a.nav-link.mr-2.active {:href "/kontakt"} "Kontakt"]]]
         [:ul.navbar-nav.ms-auto.mb-2.mb-lg-0.justify-content-end
          (if authenticated?
            [:<>
@@ -795,8 +798,8 @@
              [:a#navbarDropdown.nav-link.dropdown-toggle {:href "#" :role "button" :data-bs-toggle "dropdown" :aria-expanded "false"} "Moj profil"]
              [:ul.dropdown-menu {:aria-labelledby "navbarDropdown"}
               [:li [:a.dropdown-item {:href "/moji-oglasi" :key "moji-oglasi"} "Moji oglasi"]]]]
-            [:li.nav-item.ms-auto [:a.nav-link {:href "/odjava" :key "odjavi-me"} "Odjavi me"]]]
-           [:li.nav-item.ms-auto [:a.nav-link {:href "/prijava"} "Prijavi se"]])]]]]
+            [:li.nav-item.ms-auto [:a.nav-link.active {:href "/odjava" :key "odjavi-me"} "Odjavi me"]]]
+           [:li.nav-item.ms-auto [:a.nav-link.active {:href "/prijava"} "Prijavi se"]])]]]]
      [:div.d-flex.flex-column.justify-content-center.align-items-center.pt-5
       {:className (css {:min-height "80vh"})}
       (if authentication-required?

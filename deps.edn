@@ -13,6 +13,8 @@
         http-kit/http-kit {:mvn/version "2.8.0"}
         clj-http/clj-http {:mvn/version "3.13.1"}
         ring/ring {:mvn/version "1.12.2"}
+        ;; bumping closue compiler above certain version creates issues with java version that was used to compile it.
+        ;; this effectively prevented me from bumping shadow-cljs and bumping other deps gave different issues as well.
         com.google.javascript/closure-compiler-unshaded {:mvn/version "v20240317"}
         cljs-http/cljs-http {:mvn/version "0.1.48"}
         funcool/cuerdas {:mvn/version "2023.11.09-407"}

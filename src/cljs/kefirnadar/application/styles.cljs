@@ -80,6 +80,4 @@
                          :outline "none"
                          :font-size "15px"
                          :padding "8px 10px"
-                         :transition "all 0.3s ease"}
-                 :app {:background-image (str/format "url('%s/images/background.jpeg')" config/site-url)
-                       :background-size "cover" :min-height "100vh"}})
+                         :transition "all 0.3s ease"}})
