@@ -38,7 +38,7 @@
      (fn [{:keys [search-input-id search-text id css filtered-options active-value show-options?]}]
        [:<>
         [:div
-         [:input.col-md-12.form-control
+         [:input.col-12.form-control
           {:id search-input-id
            :placeholder "Pretražite pomoću tastature"
            :type "text"

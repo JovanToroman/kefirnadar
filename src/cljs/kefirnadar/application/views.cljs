@@ -194,7 +194,7 @@
         :korisnik/keys [korisnicko_ime]}]
     (let [show-broj-telefona? @(subscribe [::subs/ads-meta ad_id :show-broj-telefona?])
           show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
-      [:div.col-md-12.card.mb-4.p-4 {:key (random-uuid)
+      [:div.col-12.card.mb-4.p-4 {:key (random-uuid)
                                       :className (css {:line-height 2})}
        (when (some? korisnicko_ime)
          [:h3.row korisnicko_ime])
@@ -228,7 +228,7 @@
 (defn moj-oglas [css]
   (fn [{:ad/keys [ad_id send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha
                   broj_telefona imejl created_on quantity]}]
-    [:div.col-md-8.card.mb-4.p-4 {:key (random-uuid)
+    [:div.col-8.card.mb-4.p-4 {:key (random-uuid)
                                   :className (css {:line-height 2})}
 
      [:div.row
@@ -342,7 +342,7 @@
      [:h3 "Broj oglasa: " broj-oglasa]
      (cond
        ;; iz nekog razloga ne mozemo koristiti css direktno unutar komponenata
-       (seq oglasi) [:div.col-md-8 (doall (map (oglas css) oglasi))
+       (seq oglasi) [:div.col-8 (doall (map (oglas css) oglasi))
                      (pagination/pagination
                        {:change-page-redirect-url-fn (fn [page-number page-size]
                                                        (rfe/href :route/trazim {} (merge
@@ -358,14 +358,32 @@
 
 
 (defn home []
-  [:<>
-   [:h1.text-center "Da li želite da podelite ili dobijete kefirna zrnca?"]
-   [:button.btn.btn-outline-primary.col-5.mb-5.mt-5
-    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])}
-    "Delim"]
-   [:button.btn.btn-outline-primary.col-5
-    {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])}
-    "Tražim"]])
+  (let [[css] (styles/use-styletron)]
+    [:div.row.flex-lg-row-reverse.align-items-center.g-5
+     [:div.col-10.col-sm-8.col-lg-6
+      [:img.d-block.mx-lg-auto.img-fluid {:src "/images/heroj-slika.png"
+                                          :alt "srbija-širi-kefir"
+                                          :width "700"
+                                          :height "500"
+                                          :loading "lazy"}]]
+     [:div.col-lg-6
+      [:h1.display-5.fw-bold.lh-1.mb-3 "Dobrodošli u Kefir na dar"]
+      [:p.lead (str "Kefir na dar je jedina aplikacija u Srbiji i regionu za deljenje zrnaca mlečnog i vodenog kefira "
+                 "i kombuhe. Ako ne znate kako da dobijete zrnca, možete nam se slobodno obratiti putem stranice ")
+       [:a {:href (rfe/href :route/kontakt) :className (css {:text-decoration "none"})} "Kontakt"]
+       ". Ako želite da sačuvate oglase koje postavite tako da im možete pristupiti kasnije, predlažemo da se "
+       [:a {:href (rfe/href :route/registracija) :className (css {:text-decoration "none"})}
+        "registrujete"]
+       (str " pre postavljanja oglasa. Ako nemate vremena za gubljenje i želite što pre da dođete do svoje kulture,"
+         " pritisnite dugme ispod i stupite u kontakt sa nekim od naših delilaca. "
+         "Srećno fermentisanje! \uD83E\uDD73 \uD83E\uDD5B")]
+      [:div.d-grid.gap-2.d-md-flex.justify-content-md-start
+       [:button.btn.btn-primary.btn-lg.px-4.me-md-2
+        {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])}
+        "Podeli kulturu"]
+       [:button.btn.btn-outline-secondary.btn-lg.px-4
+        {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])}
+        "Nađi kulturu"]]]]))
 
 (defn thank-you []
   [:<>
@@ -451,8 +469,8 @@
     [:h4 "Tehnologije praćenja i kolačići"]
     [:p "Koristimo kolačiće i slične tehnologije praćenja da bismo pratili aktivnosti na našoj Usluzi i čuvali određene informacije. Tehnologije praćenja koje se koriste su svetionici, oznake i skripte za prikupljanje i praćenje informacija i za poboljšanje i analizu naše Usluge. Tehnologije koje koristimo mogu uključivati:"]
     [:ul
-     [:li [:strong "Kolačići ili kolačići pregledača."] "&nbsp;Kolačić je mala datoteka koja se postavlja na vaš uređaj. Možete dati uputstvo svom pregledaču da odbije sve kolačiće ili da naznači kada se kolačić šalje. Međutim, ako ne prihvatite kolačiće, možda nećete moći da koristite neke delove naše Usluge. Osim ako niste podesili podešavanje Vašeg pregledača tako da odbija kolačiće, naša Usluga može da koristi kolačiće."]
-     [:li [:strong "Veb svetionici."] "&nbsp;Određeni delovi naše Usluge i naši imejlovi mogu da sadrže male elektronske datoteke poznate kao veb svetionici (takođe poznati kao prozirni gifovi, pikselne oznake i jednopikselni gifovi) koji omogućavaju Kompaniji, na primer, da broji korisnike koji su posetili te stranice ili otvorili imejl i za druge povezane statistike veb stranice (na primer, beleženje popularnosti određenog odeljka i provera integriteta sistema i servera)."]]
+     [:li [:strong "Kolačići ili kolačići pregledača."] " Kolačić je mala datoteka koja se postavlja na vaš uređaj. Možete dati uputstvo svom pregledaču da odbije sve kolačiće ili da naznači kada se kolačić šalje. Međutim, ako ne prihvatite kolačiće, možda nećete moći da koristite neke delove naše Usluge. Osim ako niste podesili podešavanje Vašeg pregledača tako da odbija kolačiće, naša Usluga može da koristi kolačiće."]
+     [:li [:strong "Veb svetionici."] " Određeni delovi naše Usluge i naši imejlovi mogu da sadrže male elektronske datoteke poznate kao veb svetionici (takođe poznati kao prozirni gifovi, pikselne oznake i jednopikselni gifovi) koji omogućavaju Kompaniji, na primer, da broji korisnike koji su posetili te stranice ili otvorili imejl i za druge povezane statistike veb stranice (na primer, beleženje popularnosti određenog odeljka i provera integriteta sistema i servera)."]]
     [:p "Kolačići mogu biti „trajni“ ili „sesijski“ kolačići. Trajni kolačići ostaju na Vašem ličnom računaru ili mobilnom uređaju kada ste van mreže, dok se sesijski kolačići brišu čim zatvorite Vaš veb pregledač. Više o kolačićima možete saznati u članku" [:a {:href "https://www.termsfeed.com/blog/cookies/#What_Are_Cookies" :target "_blank"} "TermsFeed veb-sajta"] "."]
     [:p "Koristimo i sesijske i trajne kolačiće u svrhe navedene u nastavku:"]
     [:ul
@@ -478,7 +496,7 @@
      [:li
       [:p [:strong "Da bismo pružili i održavali našu Uslugu"] ", uključujući praćenje korišćenja naše Usluge."]]
      [:li
-      [:p [:strong "Da bismo upravljali vašim nalogom:"] "&nbsp;da bismo upravljali vašom registracijom kao korisnika Usluge. Lični podaci koje pružate mogu vam omogućiti pristup različitim funkcionalnostima Usluge koje su vam dostupne kao registrovanom korisniku."]]
+      [:p [:strong "Da bismo upravljali vašim nalogom:"] " da bismo upravljali vašom registracijom kao korisnika Usluge. Lični podaci koje pružate mogu vam omogućiti pristup različitim funkcionalnostima Usluge koje su vam dostupne kao registrovanom korisniku."]]
      [:li
       [:p [:strong "Za izvršenje ugovora:"] "razvoj, usklađenost i sprovođenje ugovora o kupovini proizvoda, predmeta ili usluga koje ste kupili ili bilo kog drugog ugovora sa nama putem Usluge."]]
      [:li
@@ -493,11 +511,11 @@
       [:p [:strong "U druge svrhe"] ": Možemo koristiti Vaše podatke u druge svrhe, kao što su analiza podataka, identifikovanje trendova korišćenja, određivanje efikasnosti naših promotivnih kampanja i za procenu i poboljšanje naše Usluge, proizvoda, usluga, marketinga i vašeg iskustva."]]]
     [:p "Možemo deliti Vaše lične podatke u sledećim situacijama:"]
     [:ul
-     [:li [:strong "Sa Pružaocima usluga:"] "&nbsp;Možemo deliti Vaše lične podatke sa Pružaocima usluga radi praćenja i analize korišćenja naše Usluge, kako bismo Vas kontaktirali."]
-     [:li [:strong "Za poslovne transfere:"] "&nbsp;Možemo deliti ili preneti Vaše lične podatke u vezi sa ili tokom pregovora o bilo kakvom spajanju, prodaji imovine Kompanije, finansiranju ili akviziciji celog ili dela Našeg poslovanja drugoj kompaniji."]
-     [:li [:strong "Sa Pridruženim licima:"] "&nbsp;Možemo deliti Vaše podatke sa Našim Pridruženim Licima, u kom slučaju ćemo zahtevati od tih Pridruženih Lica da poštuju ovu Politiku privatnosti. Pridružena lica uključuju našu matičnu kompaniju i sve druge podružnice, partnere u zajedničkom ulaganju ili druge kompanije koje kontrolišemo ili koje su pod zajedničkom kontrolom sa nama."]
-     [:li [:strong "Sa poslovnim partnerima:"] "&nbsp;Možemo deliti vaše podatke sa našim poslovnim partnerima kako bismo vam ponudili određene proizvode, usluge ili promocije."]
-     [:li [:strong "Sa drugim korisnicima:"] "&nbsp;Kada delite lične podatke ili na drugi način komunicirate u javnim prostorima sa drugim korisnicima, takve informacije mogu videti svi korisnici i mogu biti javno distribuirane van njih. Ako komunicirate sa drugim korisnicima ili se registrujete putem usluge društvenih medija treće strane, vaši kontakti na usluzi društvenih medija treće strane mogu videti vaše ime, profil, slike i opis vaše aktivnosti. Slično tome, drugi korisnici će moći da vide opise Vaših aktivnosti, komuniciraju sa Vama i vide Vaš profil."]
+     [:li [:strong "Sa Pružaocima usluga:"] " Možemo deliti Vaše lične podatke sa Pružaocima usluga radi praćenja i analize korišćenja naše Usluge, kako bismo Vas kontaktirali."]
+     [:li [:strong "Za poslovne transfere:"] " Možemo deliti ili preneti Vaše lične podatke u vezi sa ili tokom pregovora o bilo kakvom spajanju, prodaji imovine Kompanije, finansiranju ili akviziciji celog ili dela Našeg poslovanja drugoj kompaniji."]
+     [:li [:strong "Sa Pridruženim licima:"] " Možemo deliti Vaše podatke sa Našim Pridruženim Licima, u kom slučaju ćemo zahtevati od tih Pridruženih Lica da poštuju ovu Politiku privatnosti. Pridružena lica uključuju našu matičnu kompaniju i sve druge podružnice, partnere u zajedničkom ulaganju ili druge kompanije koje kontrolišemo ili koje su pod zajedničkom kontrolom sa nama."]
+     [:li [:strong "Sa poslovnim partnerima:"] " Možemo deliti vaše podatke sa našim poslovnim partnerima kako bismo vam ponudili određene proizvode, usluge ili promocije."]
+     [:li [:strong "Sa drugim korisnicima:"] " Kada delite lične podatke ili na drugi način komunicirate u javnim prostorima sa drugim korisnicima, takve informacije mogu videti svi korisnici i mogu biti javno distribuirane van njih. Ako komunicirate sa drugim korisnicima ili se registrujete putem usluge društvenih medija treće strane, vaši kontakti na usluzi društvenih medija treće strane mogu videti vaše ime, profil, slike i opis vaše aktivnosti. Slično tome, drugi korisnici će moći da vide opise Vaših aktivnosti, komuniciraju sa Vama i vide Vaš profil."]
      [:li [:strong "Uz Vaš pristanak"] ": Možemo otkriti Vaše lične podatke u bilo koju drugu svrhu uz Vaš pristanak."]]
     [:h3 "Čuvanje Vaših ličnih podataka"]
     [:p "Kompanija će čuvati Vaše Lične podatke samo onoliko dugo koliko je potrebno za svrhe navedene u ovoj Politici privatnosti. Čuvati ćemo i koristiti Vaše Lične podatke u meri u kojoj je to neophodno da bismo ispunili naše zakonske obaveze (na primer, ako smo dužni da čuvamo vaše podatke da bismo se pridržavali važećih zakona), rešavali sporove i sprovodili naše pravne sporazume i politike."]
@@ -540,9 +558,9 @@
     [:p "Ako imate bilo kakvih pitanja o ovoj Politici privatnosti, možete nas kontaktirati:"]
     [:ul
      [:li
-      [:p "E-poštom:&nbsp;info@kefirnadar.rs"]]
+      [:p "E-poštom: info@kefirnadar.rs"]]
      [:li
-      [:p "Posetom ove stranice na našoj veb stranici:&nbsp;" [:a {:href "https://kefirnadar.rs/kontakt" :target "_blank" :rel "external nofollow noopener"} "https://kefirnadar.rs/kontakt"]]]]]])
+      [:p "Posetom ove stranice na našoj veb stranici: " [:a.nav-link.mr-2.active {:href "/kontakt"} "Kontakt"]]]]]])
 
 (defn greska-registracije [kod-greske]
   (let [[css] (styles/use-styletron)]
@@ -562,7 +580,7 @@
           lozinka @(subscribe [::subs/polje-forme-registracije :lozinka])
           lozinka-validna? @(subscribe [::subs/provera-forme-registracije :lozinka])
           kod-greske @(subscribe [::subs/kod-greske :registracija])]
-      [:div.col-md-6
+      [:div.col-6
        [inputs/korisnicko-ime {:vrednost korisnicko-ime
                                :on-change #(dispatch [::events/azuriraj-formu-registracije :korisnicko-ime
                                                       (inputs/extract-input-value %)])
@@ -603,7 +621,7 @@
           lozinka @(subscribe [::subs/polje-forme-prijave :lozinka])
           kod-greske @(subscribe [::subs/kod-greske :prijava])
           aktivacioni-kod-poslat? @(subscribe [::subs/aktivacioni-kod-poslat?])]
-      [:form.col-md-6.align-items-center {:on-submit #(dispatch-sync [::auth/prijava {:imejl imejl :lozinka lozinka} %])}
+      [:form.col-6.align-items-center {:on-submit #(dispatch-sync [::auth/prijava {:imejl imejl :lozinka lozinka} %])}
        [inputs/imejl {:vrednost imejl
                       :on-change #(dispatch [::events/azuriraj-formu-prijave :imejl (inputs/extract-input-value %)])
                       :tekst-greske "Unesite ispravnu imejl adresu"
@@ -649,7 +667,7 @@
   (if (not @(subscribe [::auth/authenticated?]))
     (let [imejl @(subscribe [::subs/polje-forme-za-slanje-imejla-za-resetovanje-lozinke :imejl])
           imejl-validan @(subscribe [::subs/provera-forme-za-slanje-imejla-za-resetovanje-lozinke :imejl])]
-      [:div.col-md-6
+      [:div.col-6
        [inputs/imejl {:vrednost imejl
                       :on-change #(dispatch [::events/azuriraj-formu-za-slanje-imejla-za-resetovanje-lozinke
                                              :imejl (inputs/extract-input-value %)])
@@ -676,7 +694,7 @@
         nova-lozinka @(subscribe [::subs/polje-forme-za-resetovanje-lozinke :nova-lozinka])
         nova-lozinka-validna? @(subscribe [::subs/provera-forme-za-resetovanje-lozinke :nova-lozinka])
         kod-greske @(subscribe [::subs/kod-greske :resetovanje-lozinke])]
-    [:div.col-md-6
+    [:div.col-6
      [inputs/lozinka {:vrednost nova-lozinka
                       :on-change #(dispatch [::events/azuriraj-formu-za-resetovanje-lozinke
                                              :nova-lozinka (inputs/extract-input-value %)])
@@ -697,7 +715,7 @@
         imejl-ispravan? @(subscribe [::subs/provera-polja-kontakt-forme :imejl])
         poruka @(subscribe [::subs/polje-kontakt-forme :poruka])
         poruka-ispravna? @(subscribe [::subs/provera-polja-kontakt-forme :poruka])]
-    [:div.col-md-6
+    [:div.col-6
      [:h1.mb-5 "Napišite nam poruku"]
      [inputs/imejl {:vrednost imejl
                     :on-change #(dispatch [::events/azuriraj-kontakt-formu :imejl (inputs/extract-input-value %)])
@@ -719,11 +737,11 @@
   (let [[css] (styles/use-styletron)
         moji-oglasi @(subscribe [::subs/moji-oglasi])]
     (if (seq moji-oglasi)
-      [:div.col-md-12.d-flex.flex-column.min-vh-100.align-items-center
+      [:div.col-12.d-flex.flex-column.min-vh-100.align-items-center
        (doall (map (moj-oglas css) moji-oglasi))]
       [:div
        [:h1 "Nemate nijedan postavljen oglas. Zašto ne postavite jedan sada?"]
-       [:button.btn.btn-outline-primary.col-md-5.mb-5.mt-5
+       [:button.btn.btn-outline-primary.col-5.mb-5.mt-5
         {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])}
         "Podeli zrnca"]])))
 
@@ -731,13 +749,13 @@
   [:div
    [:h1.mb-5.text-center "Prijavljivanje"]
    ;; fb prijava privremeno onesposobljena
-   [:button.btn.btn-primary.col-md-12.mb-3.mr-3
+   [:button.btn.btn-primary.col-12.mb-3.mr-3
     {:on-click #(auth/log-user-in (:facebook auth/auth-methods))}
     [:i.fa-brands.fa-facebook.fa-xl] " Prijavi se pomoću Fejsbuka"]
-   [:button.btn.btn-secondary.col-md-12.mb-3
+   [:button.btn.btn-secondary.col-12.mb-3
     {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/prijava-osnovna}}])}
     "Prijavi se pomoću imejla i lozinke"]
-   [:button.btn.btn-outline-secondary.col-md-12
+   [:button.btn.btn-outline-secondary.col-12
     {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/registracija}}])}
     "Napravi novi nalog"]])
 
@@ -784,11 +802,13 @@
        [:div#navbarSupportedContent.collapse.navbar-collapse
         [:ul.navbar-nav.me-auto.mb-2.mb-lg-0
          [:li.nav-item
-          [:a.nav-link.active {:aria-current "page" :href "/"} "Početna"]]
+          [:a.nav-link.active {:aria-current "page" :href (rfe/href :route/pocetna)} "Početna"]]
          [:li.nav-item
           [:a.nav-link.active {:aria-current "page" :href "https://blog.kefirnadar.rs/"} "Blog"]]
          [:li.nav-item
-          [:a.nav-link.mr-2.active {:href "/kontakt"} "Kontakt"]]]
+          [:a.nav-link.mr-2.active {:href (rfe/href :route/kontakt)} "Kontakt"]]
+         [:li.nav-item
+          [:a.nav-link.mr-2.active {:href (rfe/href :route/politika-privatnosti)} "Politika privatnosti"]]]
         [:ul.navbar-nav.ms-auto.mb-2.mb-lg-0.justify-content-end
          (if authenticated?
            [:<>
@@ -797,9 +817,9 @@
             [:li.nav-item.dropdown.ms-auto
              [:a#navbarDropdown.nav-link.dropdown-toggle {:href "#" :role "button" :data-bs-toggle "dropdown" :aria-expanded "false"} "Moj profil"]
              [:ul.dropdown-menu {:aria-labelledby "navbarDropdown"}
-              [:li [:a.dropdown-item {:href "/moji-oglasi" :key "moji-oglasi"} "Moji oglasi"]]]]
-            [:li.nav-item.ms-auto [:a.nav-link.active {:href "/odjava" :key "odjavi-me"} "Odjavi me"]]]
-           [:li.nav-item.ms-auto [:a.nav-link.active {:href "/prijava"} "Prijavi se"]])]]]]
+              [:li [:a.dropdown-item {:href (rfe/href :route/moji-oglasi) :key "moji-oglasi"} "Moji oglasi"]]]]
+            [:li.nav-item.ms-auto [:a.nav-link.active {:href (rfe/href :route/odjava) :key "odjavi-me"} "Odjavi me"]]]
+           [:li.nav-item.ms-auto [:a.nav-link.active {:href (rfe/href :route/prijava)} "Prijavi se"]])]]]]
      [:div.d-flex.flex-column.justify-content-center.align-items-center.pt-5
       {:className (css {:min-height "80vh"})}
       (if authentication-required?
