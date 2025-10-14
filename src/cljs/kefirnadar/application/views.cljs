@@ -357,17 +357,18 @@
        :else "Greška")]))
 
 
-(defn home []
+(defn pocetna []
   (let [[css] (styles/use-styletron)]
     [:div.row.flex-lg-row-reverse.align-items-center.g-5
      [:div.col-10.col-sm-8.col-lg-6
-      [:img.d-block.mx-lg-auto.img-fluid {:src "/images/heroj-slika.png"
+      [:img.d-block.mx-lg-auto.img-fluid {:src "/images/heroj.avif"
                                           :alt "srbija-širi-kefir"
                                           :width "700"
                                           :height "500"
                                           :loading "lazy"}]]
      [:div.col-lg-6
-      [:h1.display-5.fw-bold.lh-1.mb-3 "Dobrodošli u Kefir na dar"]
+      [:h1.display-5.fw-bold.lh-1.mb-3
+      "Dobrodošli u Kefir na dar, aplikaciju za deljenje i potražnju zrnaca mlečnog i vodenog kefira i kombuhe"]
       [:p.lead (str "Kefir na dar je jedina aplikacija u Srbiji i regionu za deljenje zrnaca mlečnog i vodenog kefira "
                  "i kombuhe. Ako ne znate kako da dobijete zrnca, možete nam se slobodno obratiti putem stranice ")
        [:a {:href (rfe/href :route/kontakt) :className (css {:text-decoration "none"})} "Kontakt"]
@@ -385,14 +386,14 @@
         {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])}
         "Nađi kulturu"]]]]))
 
-(defn thank-you []
+(defn zahvalnica []
   [:<>
    [:h1.mb-5 "Hvala vam što delite kefir zrnca"]
    [:button.btn.btn-outline-success.mb-5
     {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/pocetna}}])}
     "Početna stranica"]])
 
-(defn error []
+(defn greska []
   [:<>
    [:h1 "Trenutno nema korisnika koji dele zrnca u izabranom regionu."]
    [:button.btn.btn-outline-warning {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/pocetna}}])}
@@ -761,11 +762,11 @@
 
 (defn- panels [panel-name]
   (case panel-name
-    :route/pocetna [home]
+    :route/pocetna [pocetna]
     :route/delim [dodaj-oglas-forma]
     :route/trazim [ads-list]
-    :route/thank-you [thank-you]
-    :route/error [error]
+    :route/thank-you [zahvalnica]
+    :route/error [greska]
     :route/politika-privatnosti [politika-privatnosti]
     :route/registracija [registracija-korisnika]
     :route/aktiviraj-korisnika [aktiviraj-korisnika]
@@ -794,7 +795,7 @@
      [:nav.navbar.navbar-expand-lg.navbar-light.bg-light.rounded
       [:div.container-fluid
        [:a.navbar-brand {:href "/"}
-        [:img {:src "/images/logo.png" :className (css {:width "10em" :height "10em"})}]]
+        [:img {:src "/images/logo.avif" :className (css {:width "10em" :height "10em"})}]]
        [:button.navbar-toggler {:type "button" :data-bs-toggle "collapse" :data-bs-target "#navbarSupportedContent"
                                 :aria-controls "navbarSupportedContent" :aria-expanded "false"
                                 :aria-label "Toggle navigation"}

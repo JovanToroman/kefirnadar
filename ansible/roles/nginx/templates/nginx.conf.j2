@@ -5,6 +5,12 @@ server {
 }
 
 server {
+  listen      80;
+  server_name www.{{ nginx_server_name }};
+  return      301 https://$server_name$request_uri;
+}
+
+server {
   listen 443;
   root {{project_dir}}/public;
   gzip on;
@@ -62,7 +68,7 @@ server {
 server {
   listen      80;
   server_name www.blog.kefirnadar.rs;
-  return      302 https://blog.kefirnadar.rs$request_uri;
+  return      301 https://blog.kefirnadar.rs$request_uri;
 }
 
 server {
