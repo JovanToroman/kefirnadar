@@ -13,6 +13,10 @@
   (let [params (coerce-common/coerce-regions params)]
     (r/ok (db/dohvati-oglase params))))
 
+(defn dohvati-oglas [{:keys [parameters]}]
+  (let [id-oglasa (get-in parameters [:path :id-oglasa])]
+    (r/ok (db/dohvati-oglas id-oglasa))))
+
 (defn prilagodi-korisnika-za-frontend [korisnik]
   (update-keys korisnik (comp keyword str/kebab)))
 

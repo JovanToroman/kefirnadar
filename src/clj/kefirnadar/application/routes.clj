@@ -44,6 +44,8 @@
                                 (ds/opt :receive-in-person?) boolean?
                                 (ds/opt :id-korisnika) int?}}}}]
    ["/oglas"
+    ["/{id-oglasa}" {:get {:handler h/dohvati-oglas
+                           :parameters {:path {:id-oglasa int?}}}}]
     ["/dodaj" {:post {:handler h/postavi-oglas
                       :parameters {:body {:korisnik/id (s/nilable int?)
                                           :ad/oblast string?

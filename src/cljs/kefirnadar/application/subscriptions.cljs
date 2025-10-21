@@ -90,3 +90,7 @@
 (reg-sub ::moji-oglasi
   (fn [db _]
     (get-in db [:ads :moji-oglasi :ads])))
+
+(reg-sub ::oglas
+  (fn [db [_ id-oglasa]]
+    (get-in db [:oglas id-oglasa])))

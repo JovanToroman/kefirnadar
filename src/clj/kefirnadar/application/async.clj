@@ -14,7 +14,7 @@
         (let [old-ad-ids (map :ad/ad_id (q/get-expired-ads))]
           (if (empty? old-ad-ids)
             (log/info "No ads older than 30 days to retract.")
-            (q/remove-old-ads old-ad-ids)))
+            (q/ukloni-stare-oglase old-ad-ids)))
         (catch Exception e
           (log/info "Exception in retract-old-ads-thread:" e)))
       (Thread/sleep day-in-milliseconds))))

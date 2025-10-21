@@ -188,31 +188,43 @@
      "Prikaži imejl adresu"]))
 
 (defn oglas
-  [css]
-  (fn [{:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id
+  [css {:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id
                   broj_telefona imejl]
         :korisnik/keys [korisnicko_ime]}]
-    (let [show-broj-telefona? @(subscribe [::subs/ads-meta ad_id :show-broj-telefona?])
-          show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
-      [:div.col-12.card.mb-4.p-4 {:key (random-uuid)
-                                      :className (css {:line-height 2})}
-       (when (some? korisnicko_ime)
-         [:h3.row korisnicko_ime])
-       [:p "Ovaj delilac deli " [:strong.ml-1.mr-1
-                                     (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
-                                     (cond
-                                       (and send_by_post share_in_person) " ličnim preuzimanjem i poštom,"
-                                       send_by_post " samo poštom,"
-                                       share_in_person " samo ličnim preuzimanjem,")]
-        "nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
-        (cond
-          (and (not (str/blank? imejl)) (not (str/blank? broj_telefona)))
-          [:<> "telefonom na " [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]
-           " ili elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]]
+  (let [show-broj-telefona? @(subscribe [::subs/ads-meta ad_id :show-broj-telefona?])
+        show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
+    [:a {:href (rfe/href :route/oglas {:id-oglasa ad_id})
+         :className (css {:all "unset"})}
+     [:div.col-12.card.mb-4.p-4 {:key (random-uuid)
+                                 :className (css {:line-height 2})}
+      (when (some? korisnicko_ime)
+        [:h3.row korisnicko_ime])
+      [:p "Ovaj delilac deli " [:strong.ml-1.mr-1
+                                (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
+                                (cond
+                                  (and send_by_post share_in_person) " ličnim preuzimanjem i poštom, "
+                                  send_by_post " samo poštom, "
+                                  share_in_person " samo ličnim preuzimanjem, ")]
+       " nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
+       (cond
+         (and (not (str/blank? imejl)) (not (str/blank? broj_telefona)))
+         [:<> " telefonom na " [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]
+          " ili elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]]
 
-          (not (str/blank? broj_telefona)) [:<> "telefonom na "
-                                            [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]]
-          (not (str/blank? imejl)) [:<> "elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]])]])))
+         (not (str/blank? broj_telefona)) [:<> " telefonom na "
+                                           [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]]
+         (not (str/blank? imejl)) [:<> " elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]])]]]))
+
+(defn oglas-u-listi
+  [css]
+  (fn [podaci-oglasa]
+    [oglas css podaci-oglasa]))
+
+(defn pojedinacni-oglas
+  [id-oglasa]
+  (let [[css] (styles/use-styletron)
+        podaci-oglasa @(subscribe [::subs/oglas id-oglasa])]
+    [oglas css podaci-oglasa]))
 
 (defn akciona-dugmad-moj-oglas [css id-oglasa]
   [:div.row
@@ -325,9 +337,7 @@
                                        :on-click #(dispatch [::events/reset-filters])}
       "Resetuj filtere"]]))
 
-(defn ads-list
-  "List of all ads."
-  []
+(defn lista-oglasa []
   (let [oglasi @(subscribe [::subs/filtered-ads])
         broj-oglasa @(subscribe [::subs/ads-count])
         {:keys [page-number page-size]} @(subscribe [::subs/ads-pagination-info])
@@ -342,7 +352,7 @@
      [:h3 "Broj oglasa: " broj-oglasa]
      (cond
        ;; iz nekog razloga ne mozemo koristiti css direktno unutar komponenata
-       (seq oglasi) [:div.col-8 (doall (map (oglas css) oglasi))
+       (seq oglasi) [:div.col-8 (doall (map (oglas-u-listi css) oglasi))
                      (pagination/pagination
                        {:change-page-redirect-url-fn (fn [page-number page-size]
                                                        (rfe/href :route/trazim {} (merge
@@ -760,11 +770,11 @@
     {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/registracija}}])}
     "Napravi novi nalog"]])
 
-(defn- panels [panel-name]
+(defn- panels [panel-name {:keys [id-oglasa]}]
   (case panel-name
     :route/pocetna [pocetna]
     :route/delim [dodaj-oglas-forma]
-    :route/trazim [ads-list]
+    :route/trazim [lista-oglasa]
     :route/thank-you [zahvalnica]
     :route/error [greska]
     :route/politika-privatnosti [politika-privatnosti]
@@ -780,10 +790,11 @@
     :route/kontakt [kontakt-strana]
     :route/nakon-slanja-kontakt-poruke [nakon-slanja-kontakt-poruke]
     :route/moji-oglasi [moji-oglasi]
+    :route/oglas [pojedinacni-oglas id-oglasa]
     [:div]))
 
 (defn main-panel []
-  (let [{{panel-name :name _public? :public?} :data} @(subscribe [::subs/active-route])
+  (let [{{panel-name :name _public? :public?} :data :keys [path-params]} @(subscribe [::subs/active-route])
         [css] (styles/use-styletron)
         authenticated? @(subscribe [::auth/authenticated?])
         {:keys [ime prezime email]} @(subscribe [::auth/user-info])
@@ -825,5 +836,5 @@
       {:className (css {:min-height "80vh"})}
       (if authentication-required?
         [stranica-za-prijavu]
-        [panels panel-name authenticated?])]
+        [panels panel-name path-params])]
      [:p.copyright-text.mt-5.d-flex.justify-content-center "Copyright © 2022-2025 All Rights Reserved by Do Brave Plus Software"]]))

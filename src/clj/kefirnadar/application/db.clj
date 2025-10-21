@@ -13,6 +13,9 @@
                             :from [:ad]
                             :where [:< :ad.created_on [:raw ["NOW() - INTERVAL '30 days'"]]]}))
 
+(def kolone-oglasa [:created_on :korisnicko_ime :region :send_by_post :share_in_person :quantity :broj_telefona :imejl
+                    :ad_id :sharing_milk_type :sharing_water_type :sharing_kombucha :korisnik.id_korisnika])
+
 (defn dohvati-oglase
   [{:keys [page-number page-size regions seeking-milk-type? seeking-water-type? seeking-kombucha? receive-by-post?
            receive-in-person? id-korisnika]}]
@@ -36,9 +39,7 @@
     (log/debug "Where klauzula: " (with-out-str (pprint/pprint where-klauzula)))
     (log/spy :debug
       {:ads (postgres/execute-query!
-              (cond-> {:select [:created_on :korisnicko_ime :region :send_by_post :share_in_person
-                                :quantity :broj_telefona :imejl :ad_id :sharing_milk_type :sharing_water_type
-                                :sharing_kombucha :korisnik.id_korisnika]
+              (cond-> {:select kolone-oglasa
                        :from [:ad]
                        :left-join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
                        :order-by [[:ad.created_on :desc]]}
@@ -49,6 +50,14 @@
                             (cond-> {:select [:%count.*]
                                      :from [:ad]}
                               (seq where-klauzula) (assoc :where (into [:and] where-klauzula)))))})))
+
+(defn dohvati-oglas
+  [id-oglasa]
+  (postgres/execute-one!
+    {:select kolone-oglasa
+     :from [:ad]
+     :left-join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
+     :where [:= :ad.ad_id id-oglasa]}))
 
 (defn dohvati-korisnika
   [id-korisnika]
@@ -115,9 +124,9 @@
   (postgres/execute-transaction! {:delete-from [:ad]
                                   :where [:= :ad.id_korisnika id-korisnika]}))
 
-(defn remove-old-ads
+(defn ukloni-stare-oglase
   [ad-ids]
-  (log/debug "remove-old-ads: " ad-ids)
+  (log/debug "ukloni-stare-oglase: " ad-ids)
   (postgres/execute-transaction! {:delete-from [:ad]
                                   :where [:in :ad.ad_id ad-ids]}))
 

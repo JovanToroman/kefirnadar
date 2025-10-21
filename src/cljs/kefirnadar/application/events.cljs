@@ -142,18 +142,33 @@
     (assoc-in db [:ads :kontakt :provera-podataka-forme :poruka] false)))
 
 
-(reg-event-fx ::fetch-ads trim-v
+(reg-event-fx ::dohvati-oglase trim-v
   (fn [_ [^::specs/filters filters ^::specs/pagination-info pagination-info]]
     {::fx/api {:uri (route-utils/url-for "/api/oglasi" :query (merge filters pagination-info) :path {})
                :method :get
-               :on-success [::fetch-ads-success]
-               :on-error [::fetch-ads-fail]}}))
+               :on-success [::dohvati-oglase-uspeh]
+               :on-error [::dohvati-oglase-neuspeh]}}))
 
-(reg-event-db ::fetch-ads-success trim-v
+(reg-event-db ::dohvati-oglase-uspeh trim-v
   (fn [db [{:keys [ads ads-count]}]]
     (assoc-in db [:ads :seeking :filtered-ads] (-m ads ads-count))))
 
-(reg-event-db ::fetch-ads-fail trim-v
+(reg-event-db ::dohvati-oglase-neuspeh trim-v
+  (fn [_ odgovor]
+    (log/error "Greška u uzimanju oglasa: " odgovor)))
+
+(reg-event-fx ::dohvati-oglas trim-v
+  (fn [_ [id-oglasa]]
+    {::fx/api {:uri (route-utils/url-for "/api/oglas/%s" :path [id-oglasa])
+               :method :get
+               :on-success [::dohvati-oglas-uspeh id-oglasa]
+               :on-error [::dohvati-oglas-neuspeh]}}))
+
+(reg-event-db ::dohvati-oglas-uspeh trim-v
+  (fn [db [id-oglasa oglas]]
+    (assoc-in db [:oglas id-oglasa] oglas)))
+
+(reg-event-db ::dohvati-oglas-neuspeh trim-v
   (fn [_ odgovor]
     (log/error "Greška u uzimanju oglasa: " odgovor)))
 

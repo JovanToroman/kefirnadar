@@ -25,6 +25,10 @@
         :controllers [{:identity identity
                        :start #(dispatch [::events/clean-db])}]
         :doc "Home page"}]
+   ["oglas/{id-oglasa}" {:name :route/oglas
+                         :controllers [{:identity identity
+                                        :start (fn [{{:keys [id-oglasa]} :path-params}]
+                                                 (dispatch [::events/dohvati-oglas id-oglasa]))}]}]
    ["delim" {:name :route/delim}]
    ["tražim"
     {:name :route/trazim
@@ -41,7 +45,7 @@
                     :start (fn [{{:keys [page-number page-size] :or {page-number 1 page-size 10} :as query} :query}]
                              (let [query (coerce-common/coerce-regions query)
                                    filters (select-keys query (keys (get-in db/default-db [:ads :seeking :filters])))]
-                               (dispatch [::events/fetch-ads filters (-m page-number page-size)])
+                               (dispatch [::events/dohvati-oglase filters (-m page-number page-size)])
                                (dispatch [::events/update-filters filters])
                                (dispatch [::events/store-ads-pagination-info :seeking (-m page-number page-size)])))}]}]
    ["moji-oglasi"
