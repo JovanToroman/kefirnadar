@@ -6,3 +6,5 @@ rm -r resources/public/js
 shadow-cljs release production
 
 clj -T:build uber
+
+exit 0

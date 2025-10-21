@@ -159,7 +159,7 @@
 
 (reg-event-fx ::dohvati-oglas trim-v
   (fn [_ [id-oglasa]]
-    {::fx/api {:uri (route-utils/url-for "/api/oglas/%s" :path [id-oglasa])
+    {::fx/api {:uri (route-utils/url-for "/api/oglas/prikazi/%s" :path [id-oglasa])
                :method :get
                :on-success [::dohvati-oglas-uspeh id-oglasa]
                :on-error [::dohvati-oglas-neuspeh]}}))

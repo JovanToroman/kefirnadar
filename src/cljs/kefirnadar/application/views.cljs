@@ -194,7 +194,9 @@
   (let [show-broj-telefona? @(subscribe [::subs/ads-meta ad_id :show-broj-telefona?])
         show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
     [:a {:href (rfe/href :route/oglas {:id-oglasa ad_id})
-         :className (css {:all "unset"})}
+         :className (css {:all "unset"
+                          ":hover" {:color "black !important"
+                                    :cursor "pointer"}})}
      [:div.col-12.card.mb-4.p-4 {:key (random-uuid)
                                  :className (css {:line-height 2})}
       (when (some? korisnicko_ime)
