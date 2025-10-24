@@ -11,7 +11,7 @@
     - "{{ project_dir }}/public/js/"
 
 - name: Copy kefirnadar jar, public assets and config
-  copy:
+  synchronize:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
     owner: deploy

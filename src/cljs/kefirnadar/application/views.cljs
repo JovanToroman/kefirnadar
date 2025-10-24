@@ -194,12 +194,13 @@
         :korisnik/keys [korisnicko_ime]}]
   (let [show-broj-telefona? @(subscribe [::subs/ads-meta ad_id :show-broj-telefona?])
         show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
-    [:div.col-12.card.mb-4.p-4 {:key (random-uuid)
-                                :className (css {:line-height 2})}
+    [:div.col-12.card.mb-4.p-4.shadow {:key (random-uuid)
+                                       :className (css {:line-height 2})}
      [:a {:href (rfe/href :route/oglas {:id-oglasa ad_id})}
       [:h3 "Oglas " ad_id]]
      (when (some? korisnicko_ime)
        [:h5 "Ime korisnika: " korisnicko_ime])
+
      [:p "Ovaj delilac deli " [:strong.ml-1.mr-1
                                (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
                                (cond
