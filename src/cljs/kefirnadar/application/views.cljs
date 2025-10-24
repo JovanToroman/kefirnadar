@@ -1,5 +1,6 @@
 (ns kefirnadar.application.views
   (:require
+    [applied-science.js-interop :as j]
     [cuerdas.core :as str]
     [kefirnadar.application.events :as events]
     [kefirnadar.application.subscriptions :as subs]
@@ -189,33 +190,38 @@
 
 (defn oglas
   [css {:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id
-                  broj_telefona imejl]
+                  broj_telefona imejl created_on]
         :korisnik/keys [korisnicko_ime]}]
   (let [show-broj-telefona? @(subscribe [::subs/ads-meta ad_id :show-broj-telefona?])
         show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
-    [:a {:href (rfe/href :route/oglas {:id-oglasa ad_id})
-         :className (css {:all "unset"
-                          ":hover" {:color "black !important"
-                                    :cursor "pointer"}})}
-     [:div.col-12.card.mb-4.p-4 {:key (random-uuid)
-                                 :className (css {:line-height 2})}
-      (when (some? korisnicko_ime)
-        [:h3.row korisnicko_ime])
-      [:p "Ovaj delilac deli " [:strong.ml-1.mr-1
-                                (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
-                                (cond
-                                  (and send_by_post share_in_person) " ličnim preuzimanjem i poštom, "
-                                  send_by_post " samo poštom, "
-                                  share_in_person " samo ličnim preuzimanjem, ")]
-       " nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
-       (cond
-         (and (not (str/blank? imejl)) (not (str/blank? broj_telefona)))
-         [:<> " telefonom na " [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]
-          " ili elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]]
+    [:div.col-12.card.mb-4.p-4 {:key (random-uuid)
+                                :className (css {:line-height 2})}
+     [:a {:href (rfe/href :route/oglas {:id-oglasa ad_id})}
+      [:h3 "Oglas " ad_id]]
+     (when (some? korisnicko_ime)
+       [:h5 "Ime korisnika: " korisnicko_ime])
+     [:p "Ovaj delilac deli " [:strong.ml-1.mr-1
+                               (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
+                               (cond
+                                 (and send_by_post share_in_person) " ličnim preuzimanjem i poštom, "
+                                 send_by_post " samo poštom, "
+                                 share_in_person " samo ličnim preuzimanjem, ")]
+      " nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
+      (cond
+        (and (not (str/blank? imejl)) (not (str/blank? broj_telefona)))
+        [:<> " telefonom na " [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]
+         " ili elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]]
 
-         (not (str/blank? broj_telefona)) [:<> " telefonom na "
-                                           [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]]
-         (not (str/blank? imejl)) [:<> " elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]])]]]))
+        (not (str/blank? broj_telefona)) [:<> " telefonom na "
+                                          [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]]
+        (not (str/blank? imejl)) [:<> " elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]])]
+     (when (some? created_on)
+       [:span {:className (css {:font-size "0.9em"
+                                :color "grey"
+                                :font-weight "300"
+                                :text-style "italic"
+                                :margin-left "auto"})}
+        "Datum objave: " (j/call created_on :toLocaleString)])]))
 
 (defn oglas-u-listi
   [css]
