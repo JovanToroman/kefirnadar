@@ -603,7 +603,7 @@
           potvrda-lozinke @(subscribe [::subs/polje-forme-registracije :potvrda-lozinke])
           potvrda-lozinke-validna? @(subscribe [::subs/provera-forme-registracije :potvrda-lozinke])
           kod-greske @(subscribe [::subs/kod-greske :registracija])]
-      [:div.col-6
+      [:div.col-md-8
        [inputs/korisnicko-ime {:vrednost korisnicko-ime
                                :on-change #(dispatch [::events/azuriraj-formu-registracije :korisnicko-ime
                                                       (inputs/extract-input-value %)])

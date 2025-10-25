@@ -168,9 +168,14 @@
                                            :placeholder "06x-xxxx-xxxx"}]]))
 
 (defn- prikazi-lozinku [lozinka-prikazana? kljuc-unosa]
-  (if lozinka-prikazana?
-    [:button.btn {:on-click #(dispatch [::events/prikazi-lozinku kljuc-unosa false])} [:img {:src "/ikone/eye-slash.svg"}]]
-    [:button.btn {:on-click #(dispatch [::events/prikazi-lozinku kljuc-unosa true])} [:img {:src "/ikone/eye.svg"}]]))
+  (let [[css] (styles/use-styletron)]
+    (if lozinka-prikazana?
+      [:button.btn {:on-click #(dispatch [::events/prikazi-lozinku kljuc-unosa false])}
+       [:img {:src "/ikone/eye-slash.avif"
+              :className (css {:width "2em" :height "2em"})}]]
+      [:button.btn {:on-click #(dispatch [::events/prikazi-lozinku kljuc-unosa true])}
+       [:img {:src "/ikone/eye.avif"
+              :className (css {:width "2em" :height "2em"})}]])))
 
 (defn lozinka [{:keys [vrednost on-change tekst-greske ispravno? natpis] :or {natpis "Lozinka: "}}]
   (let [[css] (styles/use-styletron)
@@ -216,7 +221,7 @@
 (defn korisnicko-ime [{:keys [vrednost on-change tekst-greske ispravno?]}]
   (let [[css] (styles/use-styletron)]
     [:div.form-group.mb-3
-     [:label {:className (css {:color "#757575" :font-size "25px"})} "Korisnicko ime:"]
+     [:label {:className (css {:color "#757575" :font-size "25px"})} "Korisničko ime:"]
      [:input {:className (css (:input-field styles/styles-map))
               :value vrednost
               :on-change on-change
