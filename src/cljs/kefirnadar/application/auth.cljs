@@ -1,12 +1,12 @@
 (ns kefirnadar.application.auth
-  (:require [cuerdas.core :as str]
+  (:require [applied-science.js-interop :as j]
+            [cuerdas.core :as str]
+            [kefirnadar.application.fx :as fx]
             [kefirnadar.application.specs :as specs]
-            [applied-science.js-interop :as j]
             [kefirnadar.application.utils.route :as route-utils]
             [kefirnadar.application.validation :as validation]
-            [re-frame.core :refer [reg-event-db reg-event-fx trim-v reg-sub dispatch]]
+            [re-frame.core :refer [dispatch reg-event-db reg-event-fx reg-sub trim-v]]
             [reagent.cookies :as cookies]
-            [kefirnadar.application.fx :as fx]
             [taoensso.timbre :as log]))
 
 ;; region Kolacici
@@ -104,7 +104,7 @@
       (if (validation/forma-validna? validation-info)
         {::fx/api {:uri (route-utils/url-for "/api/auth/dodaj-korisnika")
                    :method :post
-                   :params podaci-korisnika
+                   :params (select-keys podaci-korisnika [:imejl :lozinka :korisnicko-ime])
                    :on-success [::dodaj-korisnika-uspeh]
                    :on-error [::dodaj-korisnika-neuspeh]}}
         {:db (assoc-in db [:ads :registracija :form-data-validation] validation-info)}))))

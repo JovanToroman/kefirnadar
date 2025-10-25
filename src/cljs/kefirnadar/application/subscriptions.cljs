@@ -1,5 +1,5 @@
 (ns kefirnadar.application.subscriptions
-  (:require [re-frame.core :refer [trim-v reg-event-db reg-event-fx reg-sub]]))
+  (:require [re-frame.core :refer [reg-event-db reg-event-fx reg-sub trim-v]]))
 
 (reg-sub ::active-route
   (fn [db _]
@@ -20,6 +20,10 @@
 (reg-sub ::polje-forme-registracije
   (fn [db [_ id]]
     (get-in db [:ads :registracija :form-data id])))
+
+(reg-sub ::prikazi-lozinku
+  (fn [db [_ kljuc-unosa]]
+    (get-in db [:registracija :prikazi-lozinku kljuc-unosa])))
 
 (reg-sub ::provera-forme-registracije
   (fn [db [_ id]]

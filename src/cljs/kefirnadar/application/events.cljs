@@ -1,11 +1,11 @@
 (ns kefirnadar.application.events
-  (:require [kefirnadar.application.fx :as fx]
-            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx trim-v]]
-            [kefirnadar.application.db :as db]
-            [kefirnadar.application.validation :as validation]
-            [kefirnadar.application.utils.route :as route-utils]
+  (:require [kefirnadar.application.db :as db]
+            [kefirnadar.application.fx :as fx]
             [kefirnadar.application.specs :as specs]
+            [kefirnadar.application.utils.route :as route-utils]
+            [kefirnadar.application.validation :as validation]
             [kefirnadar.common.utils :refer-macros [-m]]
+            [re-frame.core :refer [reg-event-db reg-event-fx reg-fx trim-v]]
             [reitit.frontend.easy :as rfe]
             [taoensso.timbre :as log]))
 
@@ -101,6 +101,10 @@
   ::azuriraj-formu-registracije
   (fn [db [_ id val]]
     (assoc-in db [:ads :registracija :form-data id] val)))
+
+(reg-event-db ::prikazi-lozinku trim-v
+  (fn [db [kljuc-unosa vrednost]]
+    (assoc-in db [:registracija :prikazi-lozinku kljuc-unosa] vrednost)))
 
 (reg-event-db
   ::azuriraj-formu-prijave

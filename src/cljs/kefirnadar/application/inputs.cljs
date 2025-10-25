@@ -1,10 +1,13 @@
 (ns kefirnadar.application.inputs
   "A place for all UI components which are generic and reusable"
-  (:require [reagent.core :as r]
-            [kefirnadar.application.utils.transformations :as transform]
-            [applied-science.js-interop :as j]
+  (:require [applied-science.js-interop :as j]
+            [cuerdas.core :as str]
+            [kefirnadar.application.events :as events]
             [kefirnadar.application.styles :as styles]
-            [cuerdas.core :as str]))
+            [kefirnadar.application.subscriptions :as subs]
+            [kefirnadar.application.utils.transformations :as transform]
+            [re-frame.core :refer [dispatch subscribe]]
+            [reagent.core :as r]))
 
 (defn extract-input-value
   [event]
@@ -142,6 +145,18 @@
        [:p.text-danger {:className (css (:error styles/styles-map))}
         tekst-greske])]))
 
+(defn potvrda-imejla [{:keys [vrednost on-change tekst-greske ispravno?]}]
+  (let [[css] (styles/use-styletron)]
+    [:div.form-group.mb-3
+     [:label {:className (css {:color "#757575" :font-size "25px"})} "Potvrdi imejl adresu:"]
+     [:input.form-control.form-control-lg {:value vrednost
+                                           :on-change on-change
+                                           :type "text"
+                                           :placeholder "Ponovite unesenu imejl adresu"}]
+     (when (false? ispravno?)
+       [:p.text-danger {:className (css (:error styles/styles-map))}
+        tekst-greske])]))
+
 (defn broj-telefona [{:keys [vrednost on-change]}]
   (let [[css] (styles/use-styletron)]
     [:div.form-group.mb-3
@@ -152,14 +167,37 @@
                                            :type "text"
                                            :placeholder "06x-xxxx-xxxx"}]]))
 
+(defn- prikazi-lozinku [lozinka-prikazana? kljuc-unosa]
+  (if lozinka-prikazana?
+    [:button.btn {:on-click #(dispatch [::events/prikazi-lozinku kljuc-unosa false])} [:img {:src "/ikone/eye-slash.svg"}]]
+    [:button.btn {:on-click #(dispatch [::events/prikazi-lozinku kljuc-unosa true])} [:img {:src "/ikone/eye.svg"}]]))
+
 (defn lozinka [{:keys [vrednost on-change tekst-greske ispravno? natpis] :or {natpis "Lozinka: "}}]
-  (let [[css] (styles/use-styletron)]
+  (let [[css] (styles/use-styletron)
+        lozinka-prikazana? @(subscribe [::subs/prikazi-lozinku :lozinka])]
     [:div.form-group.mb-3
      [:label {:className (css {:color "#757575" :font-size "25px"})} natpis]
-     [:input {:className (css (:input-field styles/styles-map))
-              :value vrednost
-              :on-change on-change
-              :type "password"}]
+     [:div.d-flex.gap-3
+      [:input {:className (css (:input-field styles/styles-map))
+               :value vrednost
+               :on-change on-change
+               :type (if lozinka-prikazana? "text" "password")}]
+      [prikazi-lozinku lozinka-prikazana? :lozinka]]
+     (when (and (some? vrednost) (false? ispravno?))
+       [:p.text-danger {:className (css (:error styles/styles-map))}
+        tekst-greske])]))
+
+(defn potvrda-lozinke [{:keys [vrednost on-change tekst-greske ispravno? natpis] :or {natpis "Potvrda lozinke: "}}]
+  (let [[css] (styles/use-styletron)
+        lozinka-prikazana? @(subscribe [::subs/prikazi-lozinku :potvrda-lozinke])]
+    [:div.form-group.mb-3
+     [:label {:className (css {:color "#757575" :font-size "25px"})} natpis]
+     [:div.d-flex.gap-3
+      [:input {:className (css (:input-field styles/styles-map))
+               :value vrednost
+               :on-change on-change
+               :type (if lozinka-prikazana? "text" "password")}]
+      [prikazi-lozinku lozinka-prikazana? :potvrda-lozinke]]
      (when (and (some? vrednost) (false? ispravno?))
        [:p.text-danger {:className (css (:error styles/styles-map))}
         tekst-greske])]))

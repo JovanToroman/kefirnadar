@@ -24,10 +24,12 @@
     :lastname (and (not (str/blank? vrednost-polja)) (seq vrednost-polja) (str/letters? vrednost-polja))
     ;; TODO: unify these two by using imejl only
     :imejl (reg-matcher email-regex-str vrednost-polja)
+    :potvrda-imejla (= (first vrednost-polja) (second vrednost-polja))
     (:slanje? :preuzimanje?) (true? vrednost-polja)
     (:deli-mlecni? :deli-vodeni? :deli-kombucu?) (true? vrednost-polja)
     :broj-telefona (reg-matcher broj-telefona-regex-str vrednost-polja)
     :lozinka (reg-matcher password-regex vrednost-polja)
+    :potvrda-lozinke (= (first vrednost-polja) (second vrednost-polja))
     :nova-lozinka (reg-matcher password-regex vrednost-polja)
     :korisnicko-ime (and (string? vrednost-polja) (not (str/blank? vrednost-polja)) (> (count vrednost-polja) 4))
     :poruka (and (string? vrednost-polja) (not (str/blank? vrednost-polja)) (> (count vrednost-polja) 19))

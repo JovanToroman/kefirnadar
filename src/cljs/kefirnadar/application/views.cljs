@@ -2,18 +2,18 @@
   (:require
     [applied-science.js-interop :as j]
     [cuerdas.core :as str]
-    [kefirnadar.application.events :as events]
-    [kefirnadar.application.subscriptions :as subs]
-    [kefirnadar.application.styles :as styles]
-    [kefirnadar.application.inputs :as inputs]
-    [kefirnadar.application.validation :as validation]
-    [re-frame.core :refer [dispatch dispatch-sync subscribe]]
-    [kefirnadar.application.regions :as regions]
-    [kefirnadar.application.utils.transformations :as transform]
-    [kefirnadar.common.utils :refer-macros [-m]]
     [kefirnadar.application.auth :as auth]
+    [kefirnadar.application.events :as events]
+    [kefirnadar.application.inputs :as inputs]
     [kefirnadar.application.pagination :as pagination]
+    [kefirnadar.application.regions :as regions]
+    [kefirnadar.application.styles :as styles]
+    [kefirnadar.application.subscriptions :as subs]
     [kefirnadar.application.ui-components :as components]
+    [kefirnadar.application.utils.transformations :as transform]
+    [kefirnadar.application.validation :as validation]
+    [kefirnadar.common.utils :refer-macros [-m]]
+    [re-frame.core :refer [dispatch dispatch-sync subscribe]]
     [reitit.frontend.easy :as rfe]))
 
 (defn region-select [id]
@@ -46,7 +46,7 @@
                                          :margin-top "30px"
                                          :transition "all 0.3s ease"})} "Molimo da izaberete region"])]))
 
-(defn email-input [kljuc-roditelja kljuc-polja]
+(defn unos-imejla [kljuc-roditelja kljuc-polja]
   (let [value (kljuc-polja @(subscribe [::subs/form-field kljuc-roditelja]))
         valid? @(subscribe [::subs/form-validation kljuc-roditelja])]
     (inputs/imejl {:vrednost value
@@ -144,7 +144,7 @@
                              {:vrednost (broj-telefona-form-id @(subscribe [::subs/form-field :kontakt]))
                               :on-change #(dispatch [::events/update-sharing-form :kontakt
                                                      {broj-telefona-form-id (inputs/extract-input-value %)}])}]
-                            [email-input :kontakt :imejl]]
+                            [unos-imejla :kontakt :imejl]]
                   :prethodno :oblast
                   :trenutno trenutno-polje
                   :naredno :nacin-deljenja}]
@@ -590,15 +590,18 @@
        :korisnicko-ime-zauzeto "Korisničko ime je zauzeto. Probajte drugo korisničko ime."
        nil)]))
 
-(defn registracija-korisnika
-  []
+(defn registracija-korisnika []
   (if (not @(subscribe [::auth/authenticated?]))
     (let [korisnicko-ime @(subscribe [::subs/polje-forme-registracije :korisnicko-ime])
           korisnicko-ime-validno? @(subscribe [::subs/provera-forme-registracije :korisnicko-ime])
           imejl @(subscribe [::subs/polje-forme-registracije :imejl])
+          potvrda-imejla @(subscribe [::subs/polje-forme-registracije :potvrda-imejla])
           imejl-validan? @(subscribe [::subs/provera-forme-registracije :imejl])
+          potvrda-imejla-validna? @(subscribe [::subs/provera-forme-registracije :potvrda-imejla])
           lozinka @(subscribe [::subs/polje-forme-registracije :lozinka])
           lozinka-validna? @(subscribe [::subs/provera-forme-registracije :lozinka])
+          potvrda-lozinke @(subscribe [::subs/polje-forme-registracije :potvrda-lozinke])
+          potvrda-lozinke-validna? @(subscribe [::subs/provera-forme-registracije :potvrda-lozinke])
           kod-greske @(subscribe [::subs/kod-greske :registracija])]
       [:div.col-6
        [inputs/korisnicko-ime {:vrednost korisnicko-ime
@@ -610,15 +613,27 @@
                       :on-change #(dispatch [::events/azuriraj-formu-registracije :imejl (inputs/extract-input-value %)])
                       :tekst-greske "Unesite ispravnu imejl adresu"
                       :ispravno? imejl-validan?}]
-       [inputs/lozinka {:vrednost lozinka
-                        :on-change #(dispatch [::events/azuriraj-formu-registracije :lozinka (inputs/extract-input-value
-                                                                                               %)])
-                        :tekst-greske "Unesite kompleksniju lozinku sa minimum osam karaktera koja sadrži makar jedan
+       [inputs/potvrda-imejla
+        {:vrednost potvrda-imejla
+         :on-change #(dispatch [::events/azuriraj-formu-registracije :potvrda-imejla (inputs/extract-input-value %)])
+         :tekst-greske "Unesite adresu koja odgovara adresi u prvom polju za unos imejla."
+         :ispravno? potvrda-imejla-validna?}]
+       [inputs/lozinka
+        {:vrednost lozinka
+         :on-change #(dispatch [::events/azuriraj-formu-registracije :lozinka (inputs/extract-input-value %)])
+         :tekst-greske "Unesite kompleksniju lozinku sa minimum osam karaktera koja sadrži makar jedan
                        broj, jedno veliko slovo i jedan poseban karakter"
-                        :ispravno? lozinka-validna?}]
+         :ispravno? lozinka-validna?}]
+       [inputs/potvrda-lozinke
+        {:vrednost potvrda-lozinke
+         :on-change #(dispatch [::events/azuriraj-formu-registracije :potvrda-lozinke (inputs/extract-input-value %)])
+         :tekst-greske "Ponovljena lozinka mora biti jednaka izvornoj"
+         :ispravno? potvrda-lozinke-validna?}]
        [inputs/dugme {:oznaka "Registruj se"
                       :on-click #(dispatch [::auth/dodaj-korisnika {:imejl imejl
+                                                                    :potvrda-imejla [imejl potvrda-imejla]
                                                                     :lozinka lozinka
+                                                                    :potvrda-lozinke [lozinka potvrda-lozinke]
                                                                     :korisnicko-ime korisnicko-ime}])}]
        [greska-registracije kod-greske]])
     "Već ste prijavljeni. Ne možete se registrovati opet dok se ne odjavite."))
