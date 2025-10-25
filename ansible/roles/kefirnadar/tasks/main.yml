@@ -14,8 +14,6 @@
   synchronize:
     src: "{{ item.src }}"
     dest: "{{ item.dest }}"
-    owner: deploy
-    group: deploy
   with_items:
     - { src: "../target/kefirnadar.jar", dest: "{{ project_dir }}/build/target/kefirnadar.jar" }
     - { src: "../resources/public/js/main.js", dest: "{{ project_dir }}/public/js/main.js" }
