@@ -131,5 +131,5 @@
 (defn posalji-kontakt-poruku
   [{{{:keys [imejl poruka]} :body} :parameters}]
   (imejl/posalji-imejl "info@kefirnadar.rs" "Poruka od korisnika"
-    (imejl/kontakt-poruka imejl poruka))
+    (imejl/kontakt-poruka imejl poruka) :reply-to imejl)
   (r/ok))
