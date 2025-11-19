@@ -1,7 +1,7 @@
 (ns kefirnadar.application.handlers
   (:require [crypto.password.pbkdf2 :as password]
             [cuerdas.core :as str]
-            [hiccup2.core :as h]
+            [hiccup.page :as hp]
             [kefirnadar.application.db :as db]
             [kefirnadar.application.imejl :as imejl]
             [kefirnadar.common.coercion :as coerce-common]
@@ -11,10 +11,9 @@
 
 (defn pocetna [_]
   (r/ok
-    (str
-      (h/html
-        (prikazi/glava)
-        (prikazi/pocetna-strana)))))
+    (hp/html5
+      (prikazi/glava)
+      (prikazi/pocetna-strana))))
 
 (defn dohvati-oglase
   [{params :params}]

@@ -177,6 +177,7 @@
                                   :where [:= :korisnik.id_korisnika 20]})
   ;; get user
   (dohvati-facebook-korisnika "testuserid")
+  (dohvati-korisnika-po-imejlu "toromanj+proba3@gmail.com")
 
   ;; get info for a specific ad
   (postgres/execute-query!
