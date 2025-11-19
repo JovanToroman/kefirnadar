@@ -2,8 +2,8 @@
   (:require
     [clojure.pprint :as pprint]
     [clojure.string :as str]
-    [kefirnadar.configuration.postgres :as postgres]
     [crypto.password.pbkdf2 :as password]
+    [kefirnadar.configuration.postgres :as postgres]
     [taoensso.timbre :as log]))
 
 ;; region queries
@@ -188,7 +188,12 @@
      :where [:= :ad.ad_id 2]})
 
   (postgres/execute-query! {:select [:*]
-                            :from :korisnik}))
+                            :from :korisnik})
+
+  (postgres/execute-query! {:select [:*]
+                            :from :ad})
+
+  (izbrisi-oglas 31))
 
 (comment "Remove all ads"
   (postgres/execute-transaction! {:truncate [:ad]}))

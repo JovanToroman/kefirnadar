@@ -1,11 +1,20 @@
 (ns kefirnadar.application.handlers
   (:require [crypto.password.pbkdf2 :as password]
-            [kefirnadar.application.db :as db]
-            [ring.util.http-response :as r]
-            [kefirnadar.common.coercion :as coerce-common]
-            [taoensso.timbre :as log]
             [cuerdas.core :as str]
-            [kefirnadar.application.imejl :as imejl]))
+            [hiccup2.core :as h]
+            [kefirnadar.application.db :as db]
+            [kefirnadar.application.imejl :as imejl]
+            [kefirnadar.common.coercion :as coerce-common]
+            [kefirnadar.common.prikazi :as prikazi]
+            [ring.util.http-response :as r]
+            [taoensso.timbre :as log]))
+
+(defn pocetna [_]
+  (r/ok
+    (str
+      (h/html
+        (prikazi/glava)
+        (prikazi/pocetna-strana)))))
 
 (defn dohvati-oglase
   [{params :params}]

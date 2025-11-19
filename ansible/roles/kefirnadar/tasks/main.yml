@@ -18,6 +18,7 @@
     - { src: "../target/kefirnadar.jar", dest: "{{ project_dir }}/build/target/kefirnadar.jar" }
     - { src: "../resources/public/js/main.js", dest: "{{ project_dir }}/public/js/main.js" }
     - { src: "../resources/public/index.html", dest: "{{ project_dir }}/public/index.html" }
+    - { src: "../resources/public/sitemap.xml", dest: "{{ project_dir }}/public/sitemap.xml" }
     - { src: "../resources/public/images", dest: "{{ project_dir }}/public" }
     - { src: "../resources/public/ikone", dest: "{{ project_dir }}/public" }
     - { src: "../resources/public/favicon.ico", dest: "{{ project_dir }}/public/favicon.ico" }

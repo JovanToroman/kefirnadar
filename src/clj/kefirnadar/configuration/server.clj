@@ -2,15 +2,16 @@
   (:require
     [clojure.java.io :as io]
     [clojure.tools.cli :as cli]
+    [clojure.tools.namespace.repl :as repl]
     [kefirnadar.application.async :as async]
     [kefirnadar.application.web :as web]
     [kefirnadar.configuration.config :as config]
     [kefirnadar.configuration.postgres :as postgres]
-    [clojure.tools.namespace.repl :as repl]
     [mount.core :as mount]
+    [nrepl.server :as nrepl]
     [org.httpkit.server :as kit]
     [ring.middleware.reload :as reload]
-    [nrepl.server :as nrepl]
+    [ring.middleware.resource :refer [wrap-resource]]
     [taoensso.timbre :as log])
   (:gen-class)
   (:import (org.postgresql.util PSQLException)))
@@ -30,7 +31,7 @@
 
 (defn start-server []
   (reset! server
-    (kit/run-server (reload/wrap-reload #'web/app)
+    (kit/run-server (wrap-resource (reload/wrap-reload #'web/app) "/public")
       {:port 8088 :legacy-return-value? false})))
 
 (defn init-db! []
