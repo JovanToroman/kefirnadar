@@ -17,13 +17,14 @@
   (let [matcher (partial re-matches (re-pattern regex-str))]
     (some? ((fnil matcher "") input))))
 
+(defn potvrdi-vrednost-imejla [imejl-adresa]
+  (reg-matcher email-regex-str imejl-adresa))
 
 (defn potvrdi-vrednost-polja [kljuc-polja vrednost-polja]
   (case kljuc-polja
     :firstname (and (not (str/blank? vrednost-polja)) (seq vrednost-polja) (str/letters? vrednost-polja))
     :lastname (and (not (str/blank? vrednost-polja)) (seq vrednost-polja) (str/letters? vrednost-polja))
-    ;; TODO: unify these two by using imejl only
-    :imejl (reg-matcher email-regex-str vrednost-polja)
+    :imejl (potvrdi-vrednost-imejla vrednost-polja)
     :potvrda-imejla (= (first vrednost-polja) (second vrednost-polja))
     (:slanje? :preuzimanje?) (true? vrednost-polja)
     (:deli-mlecni? :deli-vodeni? :deli-kombucu?) (true? vrednost-polja)

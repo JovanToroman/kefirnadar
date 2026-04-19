@@ -12,6 +12,7 @@
     [kefirnadar.application.ui-components :as components]
     [kefirnadar.application.utils.transformations :as transform]
     [kefirnadar.application.validation :as validation]
+    [kefirnadar.common.prikazi :as deljeni-prikazi]
     [kefirnadar.common.utils :refer-macros [-m]]
     [re-frame.core :refer [dispatch dispatch-sync subscribe]]
     [reitit.frontend.easy :as rfe]))
@@ -317,18 +318,21 @@
 
 (defn grains-kind-filter []
   (let [{:keys [seeking-milk-type? seeking-water-type? seeking-kombucha?]} @(subscribe [::subs/filters])
+        [css] (styles/use-styletron)
         on-change-factory (fn [id] #(dispatch [::events/update-filters (inputs/extract-checkbox-state %) id]))]
     [:<>
-     [:label "Vrsta zrnaca:"]
+     [:label {:className (css {:margin-bottom "20px"})} "Vrsta zrnaca:"]
      [inputs/checkbox "Mlečni" seeking-milk-type? (on-change-factory :seeking-milk-type?)]
      [inputs/checkbox "Vodeni" seeking-water-type? (on-change-factory :seeking-water-type?)]
      [inputs/checkbox "Kombuha" seeking-kombucha? (on-change-factory :seeking-kombucha?)]]))
 
 (defn delivery-filter []
   (let [{:keys [receive-by-post? receive-in-person?]} @(subscribe [::subs/filters])
+        [css] (styles/use-styletron)
         on-change-factory (fn [id] #(dispatch [::events/update-filters (inputs/extract-checkbox-state %) id]))]
     [:<>
-     [:label "Način preuzimanja:"]
+     [:label {:className (css {:margin-bottom "20px"})}
+      "Način preuzimanja:"]
      [inputs/checkbox "Slanje poštom" receive-by-post? (on-change-factory :receive-by-post?)]
      [inputs/checkbox "Lično preuzimanje" receive-in-person? (on-change-factory :receive-in-person?)]]))
 
@@ -339,7 +343,9 @@
      [region-filter]
      [grains-kind-filter]
      [delivery-filter]
-     [:button.btn.btn-primary.mr-2 {:className (css {:width "140pt"})
+     [:button.btn.btn-primary.mr-2 {:className (css {:width "140pt"
+                                                     :margin-right "10px"
+                                                     "@media screen and (max-width: 600px)" {:margin-bottom "10px"}})
                                     :on-click #(dispatch [::events/apply-filters filters])}
       "Primeni filtere"]
      [:button.btn.btn-outline-primary {:className (css {:width "140pt"})
@@ -377,33 +383,7 @@
 
 
 (defn pocetna []
-  (let [[css] (styles/use-styletron)]
-    [:div.row.flex-lg-row-reverse.align-items-center.g-5
-     [:div.col-10.col-sm-8.col-lg-6
-      [:img.d-block.mx-lg-auto.img-fluid {:src "/images/heroj.avif"
-                                          :alt "srbija-širi-kefir"
-                                          :width "700"
-                                          :height "500"
-                                          :loading "lazy"}]]
-     [:div.col-lg-6
-      [:h1.display-5.fw-bold.lh-1.mb-3
-      "Dobrodošli u Kefir na dar, aplikaciju za deljenje i potražnju zrnaca mlečnog i vodenog kefira i kombuhe"]
-      [:p.lead (str "Kefir na dar je jedina aplikacija u Srbiji i regionu za deljenje zrnaca mlečnog i vodenog kefira "
-                 "i kombuhe. Ako ne znate kako da dobijete zrnca, možete nam se slobodno obratiti putem stranice ")
-       [:a {:href (rfe/href :route/kontakt) :className (css {:text-decoration "none"})} "Kontakt"]
-       ". Ako želite da sačuvate oglase koje postavite tako da im možete pristupiti kasnije, predlažemo da se "
-       [:a {:href (rfe/href :route/registracija) :className (css {:text-decoration "none"})}
-        "registrujete"]
-       (str " pre postavljanja oglasa. Ako nemate vremena za gubljenje i želite što pre da dođete do svoje kulture,"
-         " pritisnite dugme ispod i stupite u kontakt sa nekim od naših delilaca. "
-         "Srećno fermentisanje! \uD83E\uDD73 \uD83E\uDD5B")]
-      [:div.d-grid.gap-2.d-md-flex.justify-content-md-start
-       [:button.btn.btn-primary.btn-lg.px-4.me-md-2
-        {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/delim}}])}
-        "Podeli kulturu"]
-       [:button.btn.btn-outline-secondary.btn-lg.px-4
-        {:on-click #(dispatch [::events/dispatch-load-route! {:data {:name :route/trazim}}])}
-        "Nađi kulturu"]]]]))
+  (deljeni-prikazi/pocetna-strana))
 
 (defn zahvalnica []
   [:<>
@@ -656,7 +636,7 @@
           lozinka @(subscribe [::subs/polje-forme-prijave :lozinka])
           kod-greske @(subscribe [::subs/kod-greske :prijava])
           aktivacioni-kod-poslat? @(subscribe [::subs/aktivacioni-kod-poslat?])]
-      [:form.col-6.align-items-center {:on-submit #(dispatch-sync [::auth/prijava {:imejl imejl :lozinka lozinka} %])}
+      [:form.col-lg-6.align-items-center {:on-submit #(dispatch-sync [::auth/prijava {:imejl imejl :lozinka lozinka} %])}
        [inputs/imejl {:vrednost imejl
                       :on-change #(dispatch [::events/azuriraj-formu-prijave :imejl (inputs/extract-input-value %)])
                       :tekst-greske "Unesite ispravnu imejl adresu"
@@ -702,14 +682,14 @@
   (if (not @(subscribe [::auth/authenticated?]))
     (let [imejl @(subscribe [::subs/polje-forme-za-slanje-imejla-za-resetovanje-lozinke :imejl])
           imejl-validan @(subscribe [::subs/provera-forme-za-slanje-imejla-za-resetovanje-lozinke :imejl])]
-      [:div.col-6
+      [:div.col-lg-6
        [inputs/imejl {:vrednost imejl
                       :on-change #(dispatch [::events/azuriraj-formu-za-slanje-imejla-za-resetovanje-lozinke
                                              :imejl (inputs/extract-input-value %)])
                       :tekst-greske "Unesite ispravnu imejl adresu"
                       :ispravno? imejl-validan}]
        [inputs/dugme {:oznaka "Pošalji imejl za resetovanje lozinke"
-                      :on-click #(dispatch [::auth/posalji-imejl-za-resetovanje-lozinke imejl])}]])
+                      :on-click #(dispatch [::auth/posalji-imejl-za-resetovanje-lozinke {:imejl imejl}])}]])
     [:div.alert.alert-primary {:role "alert"} "Već ste prijavljeni. Ne možete resetovati lozinku dok se ne odjavite."]))
 
 (defn nakon-slanja-imejla-za-resetovanje-lozinke []
@@ -749,9 +729,18 @@
   (let [imejl @(subscribe [::subs/polje-kontakt-forme :imejl])
         imejl-ispravan? @(subscribe [::subs/provera-polja-kontakt-forme :imejl])
         poruka @(subscribe [::subs/polje-kontakt-forme :poruka])
-        poruka-ispravna? @(subscribe [::subs/provera-polja-kontakt-forme :poruka])]
-    [:div.col-6
-     [:h1.mb-5 "Napišite nam poruku"]
+        poruka-ispravna? @(subscribe [::subs/provera-polja-kontakt-forme :poruka])
+        [css] (styles/use-styletron)]
+    [:div.mt-5
+     [:h1 "Napišite nam poruku"]
+     [:p.mb-5 {:className (css {:font-size "20pt"})}
+      (str "Molimo da kontakt formu koristite samo za pitanja tehničke prirode, primedbe, sugestije ili ako vam "
+        "treba pomoć sa izmenom, brisanjem ili dodavanjem oglasa ili ako ne možete da pristupite svom nalogu.") [:br]
+      (str "Ako želite da dobijete zrnca kefira, kontaktirajte nekoga od ljudi koji dele zrnca. Sve oglase "
+        "možete pogledati na stranici ")
+      [:a {:href "/tražim"} "tražim"] "." [:br]
+      "Ako, pak, imate pitanja u vezi sa spremanjem kefira i slično, posetite naš "
+      [:a {:href "https://blog.kefirnadar.rs/"} "blog"] "."]
      [inputs/imejl {:vrednost imejl
                     :on-change #(dispatch [::events/azuriraj-kontakt-formu :imejl (inputs/extract-input-value %)])
                     :tekst-greske "Unesite ispravnu imejl adresu"
@@ -856,9 +845,9 @@
               [:li [:a.dropdown-item {:href (rfe/href :route/moji-oglasi) :key "moji-oglasi"} "Moji oglasi"]]]]
             [:li.nav-item.ms-auto [:a.nav-link.active {:href (rfe/href :route/odjava) :key "odjavi-me"} "Odjavi me"]]]
            [:li.nav-item.ms-auto [:a.nav-link.active {:href (rfe/href :route/prijava)} "Prijavi se"]])]]]]
-     [:div.d-flex.flex-column.justify-content-center.align-items-center.pt-5
+     [:div.d-flex.flex-column.justify-content-center.align-items-center
       {:className (css {:min-height "80vh"})}
       (if authentication-required?
         [stranica-za-prijavu]
         [panels panel-name path-params])]
-     [:p.copyright-text.mt-5.d-flex.justify-content-center "Copyright © 2022-2025 All Rights Reserved by Do Brave Plus Software"]]))
+     [:p.copyright-text.mt-5.d-flex.justify-content-center "Copyright © 2022-2026 All Rights Reserved by Do Brave Plus Software"]]))

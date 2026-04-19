@@ -13,7 +13,13 @@
   (r/ok
     (hp/html5
       (prikazi/glava)
-      (prikazi/pocetna-strana))))
+      [:body
+       [:div#app.min-vh-100
+        [:div.container
+         (prikazi/navbar)
+         (prikazi/pocetna-strana)
+         (prikazi/footer)]]
+       (prikazi/skripte)])))
 
 (defn dohvati-oglase
   [{params :params}]

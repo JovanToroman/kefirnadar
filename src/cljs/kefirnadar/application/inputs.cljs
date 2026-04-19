@@ -121,7 +121,8 @@
 (defn checkbox [label value on-change]
   (let [[css] (styles/use-styletron)
         check-id (str "check-" (random-uuid))]
-    [:div.form-check.form-switch.mb-4 {:className (css {:line-height "100%"})}
+    [:div.form-check.form-switch.mb-4 {:className (css {:line-height "150%"
+                                                        :margin-left "10px"})}
      [:label.form-check-label {:className (css {:color "#757575"
                                                 :font-size "30px"
                                                 :margin-left "20px"})

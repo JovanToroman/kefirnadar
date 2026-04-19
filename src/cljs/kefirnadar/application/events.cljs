@@ -58,11 +58,11 @@
       (rfe/push-state name path-params))))
 
 (defn load-route! [{:keys [data path-params query-params replace params] :as _route}]
-  (redirect! {:name         (-> data :name)
-              :params       params
-              :path-params  path-params
+  (redirect! {:name (:name data)
+              :params params
+              :path-params path-params
               :query-params query-params
-              :replace      replace}))
+              :replace replace}))
 
 (reg-fx ::load-route! load-route!)
 
@@ -129,13 +129,13 @@
   (fn [{:keys [db]} [kontakt-podaci]]
     (let [rezultat-provere (validation/validate-form-info kontakt-podaci)]
       (if (validation/forma-validna? rezultat-provere)
-      {:db (update-in db [:ads :kontakt :provera-podataka-forme] dissoc :poruka)
-       ::fx/api {:uri "/api/posalji-kontakt-poruku"
-                 :method :post
-                 :params kontakt-podaci
-                 :on-success [::posalji-kontakt-poruku-uspeh]
-                 :on-error [::posalji-kontakt-poruku-neuspeh]}}
-      {:db (assoc-in db [:ads :kontakt :provera-podataka-forme] rezultat-provere)}))))
+        {:db (update-in db [:ads :kontakt :provera-podataka-forme] dissoc :poruka)
+         ::fx/api {:uri "/api/posalji-kontakt-poruku"
+                   :method :post
+                   :params kontakt-podaci
+                   :on-success [::posalji-kontakt-poruku-uspeh]
+                   :on-error [::posalji-kontakt-poruku-neuspeh]}}
+        {:db (assoc-in db [:ads :kontakt :provera-podataka-forme] rezultat-provere)}))))
 
 (reg-event-fx ::posalji-kontakt-poruku-uspeh
   (fn [_ _]
@@ -239,9 +239,10 @@
     (update-in db (cond-> [:ads :seeking :filters]
                     (some? filter-key) (conj filter-key)) (filters-update-functions filter-key) value)))
 
-(reg-event-db ::reset-filters
-  (fn [db _]
-    (assoc-in db [:ads :seeking :filters] (get-in db/default-db [:ads :seeking :filters]))))
+(reg-event-fx ::reset-filters
+  (fn [{:keys [db]} _]
+    {:db (assoc-in db [:ads :seeking :filters] db/default-filters)
+     :dispatch [::apply-filters db/default-filters]}))
 
 (reg-event-db ::set-ads-meta trim-v
   (fn [db [ad-id meta-key value]]

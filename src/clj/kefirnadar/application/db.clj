@@ -22,7 +22,9 @@
   (let [odmik (when (and (some? page-number) (some? page-size))
                 (* (dec page-number) page-size))
         where-klauzula (cond-> []
-                         (and (seq regions) (some (comp not str/blank?) regions)) (conj [:in :ad.region regions])
+                         ;; I left regions as a seq in order to support multiselect in the future
+                         (and (seq regions) (some (comp not str/blank?) regions))
+                         (conj [:like :ad.region (str "%" (first regions) "%")])
 
                          (some true? [seeking-milk-type? seeking-water-type? seeking-kombucha?])
                          (conj (cond-> [:or]

@@ -194,12 +194,15 @@
     (assoc-in db [:ads :prijava :greska] greska)))
 
 (reg-event-fx ::posalji-imejl-za-resetovanje-lozinke trim-v
-  (fn [_ [imejl]]
-    {::fx/api {:uri (route-utils/url-for "/api/auth/posalji-imejl-za-resetovanje-lozinke")
-               :method :post
-               :params {:imejl imejl}
-               :on-success [::posalji-imejl-za-resetovanje-lozinke-uspeh]
-               :on-error [::posalji-imejl-za-resetovanje-lozinke-neuspeh]}}))
+  (fn [{:keys [db]} [podaci-obrasca]]
+    (let [validation-info (validation/validate-form-info podaci-obrasca)]
+      (if (validation/forma-validna? validation-info)
+        {::fx/api {:uri (route-utils/url-for "/api/auth/posalji-imejl-za-resetovanje-lozinke")
+                   :method :post
+                   :params podaci-obrasca
+                   :on-success [::posalji-imejl-za-resetovanje-lozinke-uspeh]
+                   :on-error [::posalji-imejl-za-resetovanje-lozinke-neuspeh]}}
+        {:db (assoc-in db [:ads :slanje-imejla-za-resetovanje-lozinke :form-data-validation] validation-info)}))))
 
 (reg-event-fx ::posalji-imejl-za-resetovanje-lozinke-uspeh trim-v
   (fn [_ _]

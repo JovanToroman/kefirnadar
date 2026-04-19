@@ -37,3 +37,5 @@ UPDATE public.ad
 SET imejl = korisnik.email
 FROM public.korisnik
 WHERE public.korisnik.id_korisnika = ad.id_korisnika;
+
+CREATE INDEX IF NOT EXISTS idx_region ON ad(region);
