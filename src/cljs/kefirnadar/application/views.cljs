@@ -195,7 +195,7 @@
         :korisnik/keys [korisnicko_ime]}]
   (let [show-broj-telefona? @(subscribe [::subs/ads-meta ad_id :show-broj-telefona?])
         show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
-    [:div.col-12.card.mb-4.p-4.shadow {:key (random-uuid)
+    [:div.col-12.card.mb-4.p-4.shadow {:key ad_id
                                        :className (css {:line-height 2})}
      [:a {:href (rfe/href :route/oglas {:id-oglasa ad_id})}
       [:h3 "Oglas " ad_id]]
@@ -250,7 +250,7 @@
 (defn moj-oglas [css]
   (fn [{:ad/keys [ad_id send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha
                   broj_telefona imejl created_on quantity]}]
-    [:div.col-8.card.mb-4.p-4 {:key (random-uuid)
+    [:div.col-8.card.mb-4.p-4 {:key ad_id
                                   :className (css {:line-height 2})}
 
      [:div.row
@@ -367,7 +367,8 @@
      [:h3 "Broj oglasa: " broj-oglasa]
      (cond
        ;; iz nekog razloga ne mozemo koristiti css direktno unutar komponenata
-       (seq oglasi) [:div.col-8 (doall (map (oglas-u-listi css) oglasi))
+       (seq oglasi) [:div.col-8 (for [podaci-oglasa oglasi]
+                                  ^{:key (:ad/ad_id podaci-oglasa)} [oglas css podaci-oglasa])
                      (pagination/pagination
                        {:change-page-redirect-url-fn (fn [page-number page-size]
                                                        (rfe/href :route/trazim {} (merge
@@ -738,7 +739,7 @@
         "treba pomoć sa izmenom, brisanjem ili dodavanjem oglasa ili ako ne možete da pristupite svom nalogu.") [:br]
       (str "Ako želite da dobijete zrnca kefira, kontaktirajte nekoga od ljudi koji dele zrnca. Sve oglase "
         "možete pogledati na stranici ")
-      [:a {:href "/tražim"} "tražim"] "." [:br]
+      [:a {:href "/trazim"} "tražim"] "." [:br]
       "Ako, pak, imate pitanja u vezi sa spremanjem kefira i slično, posetite naš "
       [:a {:href "https://blog.kefirnadar.rs/"} "blog"] "."]
      [inputs/imejl {:vrednost imejl
@@ -761,7 +762,7 @@
   (let [[css] (styles/use-styletron)
         moji-oglasi @(subscribe [::subs/moji-oglasi])]
     (if (seq moji-oglasi)
-      [:div.col-12.d-flex.flex-column.min-vh-100.align-items-center
+      [:div.col-12.d-flex.flex-column.min-vh-100.align-items-center.mt-5
        (doall (map (moj-oglas css) moji-oglasi))]
       [:div
        [:h1 "Nemate nijedan postavljen oglas. Zašto ne postavite jedan sada?"]
@@ -850,4 +851,4 @@
       (if authentication-required?
         [stranica-za-prijavu]
         [panels panel-name path-params])]
-     [:p.copyright-text.mt-5.d-flex.justify-content-center "Copyright © 2022-2026 All Rights Reserved by Do Brave Plus Software"]]))
+     [:p.copyright-text.mt-5.d-flex.justify-content-center "Autorska prava © 2022-2026 Sva prava zadržava Do Brave Plus Software"]]))

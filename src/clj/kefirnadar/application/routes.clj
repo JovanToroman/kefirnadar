@@ -18,7 +18,8 @@
                                                                :expiresIn number?
                                                                :signedRequest string?
                                                                :userID string?
-                                                               :name string?}}}}]
+                                                               :name string?
+                                                               (ds/opt :email) string?}}}}]
      ["/dodaj-korisnika" {:post {:handler h/dodaj-korisnika
                                  :parameters {:body {:imejl string?
                                                      :lozinka string?

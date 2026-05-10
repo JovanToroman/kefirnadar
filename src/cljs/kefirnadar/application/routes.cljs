@@ -1,20 +1,20 @@
 (ns kefirnadar.application.routes
   (:require
-    [kefirnadar.application.db :as db]
-    [kefirnadar.application.subscriptions :as subs]
     [kefirnadar.application.auth :as auth]
+    [kefirnadar.application.db :as db]
     [kefirnadar.application.events :as events]
+    [kefirnadar.application.subscriptions :as subs]
     [kefirnadar.common.coercion :as coerce-common]
-    [kefirnadar.common.utils :refer-macros [-m]]
     [kefirnadar.common.specs :as specs-common]
+    [kefirnadar.common.utils :refer-macros [-m]]
     [re-frame.core :refer [dispatch subscribe]]
     [reitit.coercion :as coercion]
     [reitit.coercion.schema]
     [reitit.coercion.spec]
-    [spec-tools.data-spec :as ds]
     [reitit.frontend :as rf]
     [reitit.frontend.controllers :as rfc]
-    [reitit.frontend.easy :as rfe]))
+    [reitit.frontend.easy :as rfe]
+    [spec-tools.data-spec :as ds]))
 
 ; region routes
 (def routes
@@ -30,7 +30,7 @@
                                         :start (fn [{{:keys [id-oglasa]} :path-params}]
                                                  (dispatch [::events/dohvati-oglas id-oglasa]))}]}]
    ["delim" {:name :route/delim}]
-   ["tražim"
+   ["trazim"
     {:name :route/trazim
      :parameters {:query {(ds/opt :page-number) int?
                           (ds/opt :page-size) int?
@@ -48,6 +48,25 @@
                                (dispatch [::events/dohvati-oglase filters (-m page-number page-size)])
                                (dispatch [::events/update-filters filters])
                                (dispatch [::events/store-ads-pagination-info :seeking (-m page-number page-size)])))}]}]
+   ;; stara putanja koja sad preusmerava na novu
+   ["tražim"
+    {:name :route/trazim-stara
+     :parameters {:query {(ds/opt :page-number) int?
+                          (ds/opt :page-size) int?
+                          (ds/opt :regions) ::specs-common/regions
+                          (ds/opt :seeking-milk-type?) boolean?
+                          (ds/opt :seeking-water-type?) boolean?
+                          (ds/opt :seeking-kombucha?) boolean?
+                          (ds/opt :receive-by-post?) boolean?
+                          (ds/opt :receive-in-person?) boolean?}}
+     :controllers [{:parameters {:query [:page-number :page-size :regions :seeking-milk-type? :seeking-water-type?
+                                         :seeking-kombucha? :receive-by-post? :receive-in-person?]}
+                    :start (fn [{query-params :query path-params :path}]
+                             (dispatch [::events/dispatch-load-route!
+                                        {:data {:name :route/trazim}
+                                         :query-params query-params
+                                         :path-params path-params
+                                         :replace true}]))}]}]
    ["moji-oglasi"
     {:name :route/moji-oglasi
      :controllers [{:start (fn []

@@ -30,8 +30,7 @@
   (get-login-status [this] "Checks whether the current user is logged in with this auth method")
   (handle-login-response [this response] "Finish logging the user in if they were authenticated by the auth provider")
   (log-user-in [this] "Logs the user in using the auth method")
-  (log-user-out [this] "Logs the user out using the auth method")
-  (dodaj-korisnika [this podaci-korisnika] "Dodaje novog korisnika"))
+  (log-user-out [this] "Logs the user out using the auth method"))
 
 (defrecord FacebookLogin [] AuthMethod
   (get-login-status [this]
@@ -45,15 +44,18 @@
                            false)
           user-info (js->clj authResponse :keywordize-keys true)]
       (when authenticated?
-        (j/call js/FB :api "/me" (fn [response]
-                                   (let [{:keys [name]} (js->clj response :keywordize-keys true)
-                                         user-info (assoc user-info :name name)]
-                                     (set-user-cookie-info! {:status status
-                                                             :authenticated? authenticated?
-                                                             :method :facebook})
-                                     (dispatch [::potvrdi-fejsbuk-korisnika user-info])))))))
+        (j/call js/FB :api
+          "/me"
+          #js {:fields "name, email, id"}
+          (fn [response]
+            (let [{:keys [name email]} (js->clj response :keywordize-keys true)
+                  user-info (assoc user-info :name name :email email)]
+              (set-user-cookie-info! {:status status
+                                      :authenticated? authenticated?
+                                      :method :facebook})
+              (dispatch [::potvrdi-fejsbuk-korisnika user-info])))))))
   (log-user-in [this]
-    (j/call js/FB :login #(handle-login-response this %) #js {:scope "public_profile"}))
+    (j/call js/FB :login #(handle-login-response this %) #js {:scope "public_profile,email"}))
   (log-user-out [_this]
     ;; we need to call :getLoginStatus because logout will not work if cache is cleared before invoking it.
     (j/call js/FB :getLoginStatus (fn [_]
@@ -68,10 +70,10 @@
     {::fx/api {:uri (route-utils/url-for "/api/auth/potvrdi-fejsbuk-korisnika")
                :method :post
                :params user-info
-               :on-success [::ensure-user-success]
-               :on-error [::ensure-user-fail]}}))
+               :on-success [::potvrdi-fejsbuk-korisnika-uspeh]
+               :on-error [::potvrdi-fejsbuk-korisnika-neuspeh]}}))
 
-(reg-event-fx ::ensure-user-success trim-v
+(reg-event-fx ::potvrdi-fejsbuk-korisnika-uspeh trim-v
   (fn [_ [{:keys [korisnik]}]]
     (let [user-cookie (get-user-cookie-info)
           auth-data (assoc user-cookie :korisnik korisnik)]
@@ -79,11 +81,7 @@
       {:dispatch [::set-auth-data auth-data]
        :kefirnadar.application.events/load-route! {:data {:name :route/pocetna}}})))
 
-(reg-event-db ::ensure-user-fail trim-v (fn [db _] db))
-
-(reg-event-db ::log-user-in trim-v
-  (fn [_db [authentication-provider]]
-    (log-user-in (authentication-provider auth-methods))))
+(reg-event-db ::potvrdi-fejsbuk-korisnika-neuspeh trim-v (fn [db _] db))
 
 (reg-event-db ::set-auth-data trim-v
   (fn [db [auth-data]]

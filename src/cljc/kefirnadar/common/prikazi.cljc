@@ -54,7 +54,7 @@
                   " da podelite neku od kultura, pritisnite dugme '" naslov-dugmeta-delim "'.")]
        [:div.d-grid.gap-2.d-md-flex.justify-content-md-start
         [:a.btn.btn-primary.btn-lg.px-4.me-md-2 {:href "/delim"} naslov-dugmeta-delim]
-        [:a.btn.btn-outline-secondary.btn-lg.px-4 {:href "/tražim"} naslov-dugmeta-trazim]]
+        [:a.btn.btn-outline-secondary.btn-lg.px-4 {:href "/trazim"} naslov-dugmeta-trazim]]
        [:div.mt-3
         [:div "Ako ne znate kako da dobijete zrnca, možete nam se slobodno obratiti putem stranice "
          [:a {:href "/kontakt"} "Kontakt"] "."]

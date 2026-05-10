@@ -22,7 +22,8 @@
   nil (into-string [_]))
 
 (defn form-encode [s]
-  (if (some? s) (str/replace (js/encodeURIComponent s) "%20" "+")))
+  (when (some? s)
+    (str/replace (js/encodeURIComponent s) "%20" "+")))
 
 (defn- query-parameter [k v]
   (str (form-encode (into-string k))

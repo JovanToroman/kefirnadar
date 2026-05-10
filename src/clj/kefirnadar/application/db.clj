@@ -13,8 +13,14 @@
                             :from [:ad]
                             :where [:< :ad.created_on [:raw ["NOW() - INTERVAL '30 days'"]]]}))
 
-(def kolone-oglasa [:created_on :korisnicko_ime :region :send_by_post :share_in_person :quantity :broj_telefona :imejl
-                    :ad_id :sharing_milk_type :sharing_water_type :sharing_kombucha :korisnik.id_korisnika])
+(def kolone-oglasa [:created_on :region :send_by_post :share_in_person :quantity :broj_telefona :imejl
+                    :ad_id :sharing_milk_type :sharing_water_type :sharing_kombucha])
+
+(def kolone-oglasa-sa-korisnikom [:created_on :korisnicko_ime :region :send_by_post :share_in_person :quantity
+                                  :broj_telefona :imejl :ad_id :sharing_milk_type :sharing_water_type :sharing_kombucha
+                                  :korisnik.id_korisnika])
+
+(def kolone-korisnika [:id_korisnika :ime :prezime :phone-number :email :korisnicko_ime :hes_lozinke :aktiviran])
 
 (defn dohvati-oglase
   [{:keys [page-number page-size regions seeking-milk-type? seeking-water-type? seeking-kombucha? receive-by-post?
@@ -41,7 +47,7 @@
     (log/debug "Where klauzula: " (with-out-str (pprint/pprint where-klauzula)))
     (log/spy :debug
       {:ads (postgres/execute-query!
-              (cond-> {:select kolone-oglasa
+              (cond-> {:select kolone-oglasa-sa-korisnikom
                        :from [:ad]
                        :left-join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
                        :order-by [[:ad.created_on :desc]]}
@@ -56,10 +62,22 @@
 (defn dohvati-oglas
   [id-oglasa]
   (postgres/execute-one!
-    {:select kolone-oglasa
+    {:select kolone-oglasa-sa-korisnikom
      :from [:ad]
      :left-join [:korisnik [:= :ad.id_korisnika :korisnik.id_korisnika]]
      :where [:= :ad.ad_id id-oglasa]}))
+
+(defn dohvati-oglase-po-imajlu [imejl]
+  (postgres/execute-query!
+    {:select kolone-oglasa
+     :from [:ad]
+     :where [:= :ad.imejl imejl]}))
+
+(defn dodeli-oglas-korisniku [id-korisnika id-oglasa]
+  (postgres/execute-one!
+    {:update :ad
+     :set {:id_korisnika id-korisnika}
+     :where [:= :ad_id id-oglasa]}))
 
 (defn dohvati-korisnika
   [id-korisnika]
@@ -74,8 +92,6 @@
     {:select [:id_korisnika :facebook_user_id :ime :prezime :phone-number :email]
      :from [:korisnik]
      :where [:= :korisnik.facebook_user_id user-id]}))
-
-(def kolone-korisnika [:id_korisnika :ime :prezime :phone-number :email :korisnicko_ime :hes_lozinke :aktiviran])
 
 (defn dohvati-korisnika-po-imejlu
   [imejl]
@@ -132,15 +148,23 @@
   (postgres/execute-transaction! {:delete-from [:ad]
                                   :where [:in :ad.ad_id ad-ids]}))
 
-(defn dodaj-facebook-korisnika [{:keys [_accessToken _expiresIn _signedRequest userID name]}]
+(defn dodeli-oglase-sirocad-korisniku [id-korisnika imejl-adresa]
+  (when-some [postojeci-oglasi (seq (dohvati-oglase-po-imajlu imejl-adresa))]
+    (mapv (fn [{:keys [ad/ad_id]}]
+            (dodeli-oglas-korisniku id-korisnika ad_id))
+      postojeci-oglasi)))
+
+(defn dodaj-facebook-korisnika [{:keys [_accessToken _expiresIn _signedRequest userID name email]}]
   (let [korisnik (dohvati-facebook-korisnika userID)]
     (when (nil? korisnik)
       (log/debug "Dodajem korisnika: " userID)
       (let [[ime prezime] (str/split name #" " 2)]
         (postgres/execute-transaction! {:insert-into [:korisnik]
-                                        :columns [:facebook_user_id :ime :prezime :datum_registracije]
-                                        :values [[userID ime prezime [:now]]]})))
-    (dohvati-facebook-korisnika userID)))
+                                        :columns [:facebook_user_id :ime :prezime :datum_registracije :email]
+                                        :values [[userID ime prezime [:now] email]]})))
+    (let [{:keys [korisnik/id_korisnika] :as korisnik} (dohvati-facebook-korisnika userID)]
+      (dodeli-oglase-sirocad-korisniku id_korisnika email)
+      korisnik)))
 
 (defn azuriraj-korisnika [[id-kolona id-vrednost] kolona vrednost]
   (postgres/execute-transaction! {:update :korisnik
@@ -153,7 +177,9 @@
     {:insert-into [:korisnik]
      :columns [:email :hes_lozinke :korisnicko_ime :aktivacioni_kod :aktiviran :datum_registracije]
      :values [[imejl (password/encrypt lozinka) korisnicko-ime aktivacioni-kod false [:now]]]})
-  (dohvati-korisnika-po-imejlu imejl))
+  (let [{:keys [korisnik/id_korisnika] :as korisnik} (dohvati-korisnika-po-imejlu imejl)]
+    (dodeli-oglase-sirocad-korisniku id_korisnika imejl)
+    korisnik))
 
 (defn aktiviraj-korisnika
   [aktivacioni-kod]
