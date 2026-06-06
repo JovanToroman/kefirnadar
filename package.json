@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "cljs": "shadow-cljs watch dev"
+  },
   "dependencies": {
     "create-react-class": "^15.7.0",
     "react": "16.8.6",

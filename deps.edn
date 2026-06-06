@@ -14,6 +14,7 @@
         clj-http/clj-http {:mvn/version "3.13.1"}
         ring/ring {:mvn/version "1.12.2"}
         hiccup/hiccup {:mvn/version "2.0.0"}
+        amalloy/ring-gzip-middleware {:mvn/version "0.1.4"}
         ;; bumping closure compiler above certain version creates issues with java version that was used to compile it.
         ;; this effectively prevented me from bumping shadow-cljs and bumping other deps gave different issues as well.
         com.google.javascript/closure-compiler-unshaded {:mvn/version "v20240317"}

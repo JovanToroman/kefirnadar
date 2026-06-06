@@ -7,7 +7,8 @@
             [reitit.ring.coercion :as coercion]
             [reitit.ring.middleware.muuntaja :as muuntaja]
             [reitit.ring.middleware.parameters :as parameters]
-            [ring.middleware.cors :refer [wrap-cors]]))
+            [ring.middleware.cors :refer [wrap-cors]]
+            [ring.middleware.gzip :refer [wrap-gzip]]))
 
 (defn wrap-merge-params
   [handler]
@@ -44,5 +45,6 @@
                            udesi-imejl-adresu
                            [wrap-cors :access-control-allow-origin #".*"
                             :access-control-allow-methods [:delete :get
-                                                           :patch :post :put]]]}})
+                                                           :patch :post :put]]
+                           wrap-gzip]}})
     (ring/create-default-handler)))

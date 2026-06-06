@@ -167,27 +167,41 @@
                                                :trenutno trenutno-polje
                                                :prethodno :nacin-deljenja}])]))
 
-(defn format-grains-kinds [sharing_milk_type sharing_water_type sharing_kombucha]
-  (str/join ", " (cond-> []
-                   sharing_milk_type (conj "mlečni kefir")
-                   sharing_water_type (conj "vodeni kefir")
-                   sharing_kombucha (conj "kombuhu"))))
+(defn kultura-bedzevi [css milk? water? kombucha?]
+  [:div.d-flex.flex-wrap
+   {:className (css {:gap "0.5rem"})}
+   (when milk?
+     [:span.badge.badge-pill
+      {:className (css {:background-color "#f8f9fa" :color "#212529" :border "1px solid #dae0e5" :font-size "1rem" :padding "0.5em 1em"})}
+      "🥛 Mlečni kefir"])
+   (when water?
+     [:span.badge.badge-pill
+      {:className (css {:background-color "#e0f7fa" :color "#006064" :border "1px solid #b2ebf2" :font-size "1rem" :padding "0.5em 1em"})}
+      "💧 Vodeni kefir"])
+   (when kombucha?
+     [:span.badge.badge-pill
+      {:className (css {:background-color "#fff3e0" :color "#e65100" :border "1px solid #ffe0b2" :font-size "1rem" :padding "0.5em 1em"})}
+      "🍄 Kombuha"])])
 
-(defn broj-telefona-prikaz [show-broj-telefona? broj-telefona ad-id]
-  (if show-broj-telefona?
-    [:strong.ml-1.mr-1 broj-telefona]
-    [:button.btn.btn-sm.btn-info.ml-1.mr-1.mb-1
-     {:on-click
-      #(dispatch [::events/set-ads-meta ad-id :show-broj-telefona? true])}
-     "Prikaži broj"]))
+(defn broj-telefona-prikaz [css show? broj ad-id]
+  (if show?
+    [:a {:href (str "tel:" broj)
+         :className (css {:font-weight "bold" :color "#28a745" :text-decoration "none" :font-size "1.1rem"})}
+     "📞 " broj]
+    [:button.btn.btn-sm.btn-outline-primary
+     {:on-click #(dispatch [::events/set-ads-meta ad-id :show-broj-telefona? true])
+      :className (css {:min-width "140px"})}                ; Fiksna širina dugmeta da ne "skače" interfejs
+     "📞 Prikaži broj"]))
 
-(defn imejl-prikaz [show-email? email ad-id]
-  (if show-email?
-    [:strong.ml-1.mr-1 email]
-    [:button.btn.btn-sm.btn-info.ml-1.mr-1
-     {:on-click
-      #(dispatch [::events/set-ads-meta ad-id :show-email? true])}
-     "Prikaži imejl adresu"]))
+(defn imejl-prikaz [css show? email ad-id]
+  (if show?
+    [:a {:href (str "mailto:" email)
+         :className (css {:font-weight "bold" :color "#17a2b8" :text-decoration "none" :font-size "1.1rem"})}
+     "✉️ " email]
+    [:button.btn.btn-sm.btn-outline-info
+     {:on-click #(dispatch [::events/set-ads-meta ad-id :show-email? true])
+      :className (css {:min-width "140px"})}
+     "✉️ Prikaži imejl"]))
 
 (defn oglas
   [css {:ad/keys [send_by_post share_in_person region sharing_milk_type sharing_water_type sharing_kombucha ad_id
@@ -195,35 +209,52 @@
         :korisnik/keys [korisnicko_ime]}]
   (let [show-broj-telefona? @(subscribe [::subs/ads-meta ad_id :show-broj-telefona?])
         show-email? @(subscribe [::subs/ads-meta ad_id :show-email?])]
-    [:div.col-12.card.mb-4.p-4.shadow {:key ad_id
-                                       :className (css {:line-height 2})}
-     [:a {:href (rfe/href :route/oglas {:id-oglasa ad_id})}
-      [:h3 "Oglas " ad_id]]
-     (when (some? korisnicko_ime)
-       [:h5 "Ime korisnika: " korisnicko_ime])
 
-     [:p "Ovaj delilac deli " [:strong.ml-1.mr-1
-                               (format-grains-kinds sharing_milk_type sharing_water_type sharing_kombucha)
-                               (cond
-                                 (and send_by_post share_in_person) " ličnim preuzimanjem i poštom, "
-                                 send_by_post " samo poštom, "
-                                 share_in_person " samo ličnim preuzimanjem, ")]
-      " nalaze se u mestu " [:strong.ml-1.mr-1 region] " i možete ih kontaktirati "
-      (cond
-        (and (not (str/blank? imejl)) (not (str/blank? broj_telefona)))
-        [:<> " telefonom na " [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]
-         " ili elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]]
+    [:div.card.mb-4.shadow-sm
+     {:key ad_id
+      :className (css {:border-radius "8px"
+                       :border "1px solid #e3e6f0"
+                       :background-color "#ffffff"
+                       :width "100%"})}                     ; Osigurava da kartica zauzme punu širinu kontejnera
 
-        (not (str/blank? broj_telefona)) [:<> " telefonom na "
-                                          [broj-telefona-prikaz show-broj-telefona? broj_telefona ad_id]]
-        (not (str/blank? imejl)) [:<> " elektronskom poštom na " [imejl-prikaz show-email? imejl ad_id]])]
-     (when (some? created_on)
-       [:span {:className (css {:font-size "0.9em"
-                                :color "grey"
-                                :font-weight "300"
-                                :text-style "italic"
-                                :margin-left "auto"})}
-        "Datum objave: " (j/call created_on :toLocaleString)])]))
+     [:div.card-body.p-4
+
+      [:div.d-flex.justify-content-between.align-items-start.mb-4
+       [:div
+        [:a {:href (rfe/href :route/oglas {:id-oglasa ad_id})
+             :className (css {:text-decoration "none" :color "#2c3e50"})}
+         [:h4 {:className (css {:font-weight "bold" :margin-bottom "0.2rem"})} "Oglas #" ad_id]]
+        (when (some? korisnicko_ime)
+          [:div {:className (css {:color "#6c757d" :font-size "0.95rem"})} "👤 " korisnicko_ime])]
+       (when (some? created_on)
+         [:div {:className (css {:font-size "0.85rem" :color "#adb5bd"})}
+          (j/call created_on :toLocaleString)])]
+
+      [:div.mb-4
+       [:div {:className (css {:font-size "0.85rem" :text-transform "uppercase" :color "#a0a5ab" :letter-spacing "0.5px" :margin-bottom "0.5rem"})}
+        "Šta se deli:"]
+       [kultura-bedzevi css sharing_milk_type sharing_water_type sharing_kombucha]]
+
+      [:div.row
+       [:div.col-md-7.mb-3.mb-md-0
+        [:div.mb-2
+         [:span {:className (css {:color "#6c757d" :margin-right "0.5rem"})} "📍 Lokacija:"]
+         [:strong {:className (css {:font-size "1.05rem"})} region]]
+        [:div
+         [:span {:className (css {:color "#6c757d" :margin-right "0.5rem"})} "📦 Preuzimanje:"]
+         [:strong {:className (css {:font-size "1.05rem"})}
+          (cond
+            (and send_by_post share_in_person) "Lično i poštom"
+            send_by_post "Samo poštom"
+            share_in_person "Samo lično preuzimanje")]]]
+
+       [:div.col-md-5
+        [:div {:className (css {:color "#6c757d" :margin-bottom "0.5rem"})} "💬 Kontakt:"]
+        [:div.d-flex.flex-column {:className (css {:gap "0.5rem"})}
+         (when-not (str/blank? broj_telefona)
+           [broj-telefona-prikaz css show-broj-telefona? broj_telefona ad_id])
+         (when-not (str/blank? imejl)
+           [imejl-prikaz css show-email? imejl ad_id])]]]]]))
 
 (defn oglas-u-listi
   [css]
@@ -367,7 +398,7 @@
      [:h3 "Broj oglasa: " broj-oglasa]
      (cond
        ;; iz nekog razloga ne mozemo koristiti css direktno unutar komponenata
-       (seq oglasi) [:div.col-8 (for [podaci-oglasa oglasi]
+       (seq oglasi) [:div (for [podaci-oglasa oglasi]
                                   ^{:key (:ad/ad_id podaci-oglasa)} [oglas css podaci-oglasa])
                      (pagination/pagination
                        {:change-page-redirect-url-fn (fn [page-number page-size]
@@ -851,4 +882,4 @@
       (if authentication-required?
         [stranica-za-prijavu]
         [panels panel-name path-params])]
-     [:p.copyright-text.mt-5.d-flex.justify-content-center "Autorska prava © 2022-2026 Sva prava zadržava Do Brave Plus Software"]]))
+     [:p.copyright-text.mt-5.d-flex.justify-content-center "Autorska prava © 2022-2026 Sva prava zadržava Kefir na dar Srbija"]]))
